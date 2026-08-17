@@ -1,25 +1,14 @@
 import sqlite3
 
-DATABASE_NAME = "enrolment.db"
+DATABASE_NAME = "card_management_db.db"
 
-students = [
+card_information_parts = [
     (1, "John Smith", "ASD101"),
     (2, "Sarah Jones", "ASD101"),
-    (3, "Michael Lee", "WEB201"),
-    (4, "Emma Brown", "WEB201"),
-    (5, "James Wilson", "DBS101"),
-    (6, "Olivia White", "DBS101"),
-    (7, "Daniel Green", "NET201"),
-    (8, "Sophia Hall", "NET201"),
-    (9, "Liam King", "SEC301"),
-    (10, "Chloe Young", "SEC301")
 ]
 
 conn = sqlite3.connect(DATABASE_NAME)
 cursor = conn.cursor()
-
-# - **Validation**: Ensure the `student_id` field is unique and cannot be empty when creating a student record.
-#  CHECK (student_id(something)), UNQUIE(student_id)
 
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS students (
@@ -33,7 +22,7 @@ cursor.execute("DELETE FROM students")
 
 cursor.executemany(
     "INSERT INTO students (student_id, student_name, subject_code) VALUES (?, ?, ?)",
-    students
+    card_information_parts
 )
 
 conn.commit()
