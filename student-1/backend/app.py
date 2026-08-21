@@ -30,7 +30,7 @@ def get_db_connection():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("cm_main.html")
 
 
 @app.route("/css/<path:filename>")
