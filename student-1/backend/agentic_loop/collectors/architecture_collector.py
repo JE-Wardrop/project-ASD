@@ -1,16 +1,17 @@
 from pathlib import Path
 
 
-REQUIRED_SERVICES = ["frontend-service", "enrolment-service", "database-service"]
+REQUIRED_SERVICES = ["frontend", "backend", "database"]
 
 
 def collect(app_dir: Path, repo_root: Path) -> tuple[bool, str]:
     required_paths = [
-        app_dir / "frontend-service" / "templates" / "index.html",
-        app_dir / "frontend-service" / "css" / "styles.css",
-        app_dir / "enrolment-service" / "app.py",
-        app_dir / "database-service" / "app.py",
-        app_dir / "database-service" / "init_db.py",
+        app_dir / "frontend" / "cm_main.html",
+        app_dir / "frontend" / "cm_details.html",
+        app_dir / "frontend" / "css" / "styles.css",
+        app_dir / "backend" / "app.py",
+        app_dir / "database" / "app.py",
+        app_dir / "database" / "init_db.py",
         app_dir / "docker-compose.yml",
     ]
 
