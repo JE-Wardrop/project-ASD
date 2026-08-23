@@ -4,6 +4,8 @@ DATABASE_NAME = "cm.db"
 
 #card number, name, card type, expiry date
 
+
+
 cards = [
     ("1234567890123456", "John Smith", "Debit", "2025-12-31"),
     ("2345678901234567", "Sarah Jones", "Credit", "2024-12-31"),

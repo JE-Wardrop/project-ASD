@@ -48,6 +48,11 @@ def about_page():
 
 
 @app.route('/ai_model', methods=['GET'])
+def freeze_fet_card():
+    return render_template('cm_freeze.html')
+
+
+@app.route('/ai_model', methods=['GET'])
 def render_ai_model():
     return render_template('cm_model.html')
 
