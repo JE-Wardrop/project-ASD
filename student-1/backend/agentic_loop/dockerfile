@@ -1,0 +1,20 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY student-1/requirments.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+
+COPY prompts/service ./service
+# COPY prompts/service ./service
+# COPY prompts/service ./service
+# COPY prompts/service ./service
+
+
+EXPOSE 5001
+
+CMD ["python", "backend/app.py"]
+
+

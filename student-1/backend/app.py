@@ -26,10 +26,14 @@ app = Flask(__name__, template_folder=template_dir)
 
 #app = Flask(__name__, template_folder=template_dir, static_folder=template_dir)
 
+
 client = OpenAI(
     base_url=OLLAMA_BASE_URL,
     api_key="ollama"
 )
+
+# from routes.ai_mode import ai_model_routes
+# fromt routes.normal_ui import normal_ui_routes
 
 
 def get_db_connection():
@@ -96,6 +100,7 @@ def ai_model():
             f"<pre>{exc}</pre>",
             503,
         )
+
 
 
 if __name__ == "__main__":

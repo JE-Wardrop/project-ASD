@@ -8,39 +8,50 @@
 </head>
 <body>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talk to Model</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
     <div class="card">
-        <h1>You can talk to model here</h1>
+    <h1>You can talk to model here</h1>
 
 
 
-        <form id="ask-form">
-            <label for="question">Question</label>
-            <textarea id="question" name="question" rows="5">Explain what this Card Management App does in one short paragraph.</textarea>
-            <button type="submit">Ask Local Agent</button>
-        </form>
+    <form id="ask-form">
+        <label for="question">Question</label>
+        <textarea id="question" name="question" rows="5">Explain what this Card Management App does in one short paragraph.</textarea>
+        <button type="submit">Ask Local Agent</button>
+    </form>
 
-        <div id="agent-result" class="panel"></div>
+    <div id="agent-result" class="panel"></div>
 
-        <h2>Ask With Context</h2>
+    <h2>Ask With Context</h2>
 
-        <form id="ask-with-context-form">
-            <label for="context-question">Question</label>
-            <textarea id="context-question" name="question" rows="4">Explain the Card Management App.</textarea>
-            <button type="submit">Ask With Context</button>
-        </form>
+    <form id="ask-with-context-form">
+        <label for="context-question">Question</label>
+        <textarea id="context-question" name="question" rows="4">Explain the Card Management App.</textarea>
+        <button type="submit">Ask With Context</button>
+    </form>
 
-        <div id="context-result" class="panel"></div>
+    <div id="context-result" class="panel"></div>
 
-        <h2>Architecture Review</h2>
+    <!-- <h2>Architecture Review</h2> -->
 
-        <form id="architecture-review-form">
-            <label for="architecture_request">Request</label>
-            <textarea id="architecture_request" name="architecture_request" rows="4">Review service boundaries for frontend, backend, and database-service.</textarea>
-            <button type="submit">Run Architecture Review</button>
-        </form>
-        
+    <!-- <form id="architecture-review-form">
+        <label for="architecture_request">Request</label>
+        <textarea id="architecture_request" name="architecture_request" rows="4">Review service boundaries for frontend, backend, and database-service.</textarea>
+        <button type="submit">Run Architecture Review</button>
+    </form>
 
-    </div>
+    <div id="architecture-result" class="panel"></div>
+
+    </div> -->
 
     <script src="index.js"></script>
 </body>

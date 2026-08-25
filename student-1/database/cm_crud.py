@@ -17,6 +17,7 @@ def create_card(card_number, account_holder, card_type, expiry_date):
     cursor = conn.cursor()
 
     
+    
     cursor.execute("INSERT INTO cards (card_number, account_holder, card_type, expiry_date) VALUES (?, ?, ?, ?)", 
                    (card_number, account_holder, card_type, expiry_date))
     conn.commit()
@@ -24,19 +25,24 @@ def create_card(card_number, account_holder, card_type, expiry_date):
 
 
 def read_card(card_number, account_holder, card_type, expiry_date):
-    pass
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
 
 def update_card(card_number, account_holder, card_type, expiry_date):
-    pass
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
 
 def delete_card(card_number, account_holder, card_type, expiry_date):
-    pass
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
 
 def freeze_card (card_number, account_holder, card_type, expiry_date):
-    pass
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
 def unfreeze_card (card_number, account_holder, card_type, expiry_date):
-    pass
+    conn = get_db_connection()
+    cursor = conn.cursor()

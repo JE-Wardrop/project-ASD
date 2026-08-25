@@ -7,6 +7,14 @@ DATABASE_NAME = "cm.db"
 
 #have to make this match the database schema
 
+
+def _validate_card():
+    pass
+
+def collect():
+    pass
+
+
 # def _validate_student(student: tuple[int, str, str]) -> tuple[bool, str]:
 #     student_id, student_name, subject_code = student
 #     if not isinstance(student_id, int):

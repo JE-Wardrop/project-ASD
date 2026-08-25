@@ -1,0 +1,157 @@
+services:
+
+#Student 1
+  database:
+    build: ./student-1/database
+    container_name: database
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./student-1/database:/app
+    networks:
+      - mynetwork
+
+  frontend:
+    build: ./student-1/frontend
+    container_name: frontend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./student-1/frontend:/app
+    networks:
+      - mynetwork
+
+    backend:
+      build: ./student-1/backend
+      container_name: backend
+      ports:
+        - "8080:8080"
+      volumes:
+        - ./student-1/backend:/app
+      networks:
+        - mynetwork
+
+#Student 2
+  # database2:
+  #   build: ./student-2/database
+  #   container_name: database2
+  #   ports:
+  #     - "5001:5000"
+  #   volumes:
+  #     - ./student-2/database:/app
+  #   networks:
+  #     - mynetwork
+
+  # frontend2:
+  #   build: ./student-2/frontend
+  #   container_name: frontend2
+  #   ports:
+  #     - "8001:8000"
+  #   volumes:
+  #     - ./student-2/frontend:/app
+  #   networks:
+  #     - mynetwork
+
+  #   backend2:
+  #     build: ./student-2/backend
+  #     container_name: backend2
+  #     ports:
+  #       - "8081:8080"
+  #     volumes:
+  #       - ./student-2/backend:/app
+  #     networks:
+  #       - mynetwork
+
+#Student 3
+  # database3:
+  #   build: ./student-3/database
+  #   container_name: database3
+  #   ports:
+  #     - "5002:5000"
+  #   volumes:
+  #     - ./student-3/database:/app
+  #   networks:
+  #     - mynetwork
+
+  # frontend3:
+  #   build: ./student-3/frontend
+  #   container_name: frontend3
+  #   ports:
+  #     - "8002:8000"
+  #   volumes:
+  #     - ./student-3/frontend:/app
+  #   networks:
+  #     - mynetwork
+
+  #   backend3:
+  #     build: ./student-3/backend
+  #     container_name: backend3
+  #     ports:
+  #       - "8082:8080"
+  #     volumes:
+  #       - ./student-3/backend:/app
+  #     networks:
+  #       - mynetwork
+
+
+#Student 4 
+# database:
+#     build: ./student-1/database
+#     container_name: database
+#     ports:
+#       - "5000:5000"
+#     volumes:
+#       - ./student-1/database:/app
+#     networks:
+#       - mynetwork
+
+#   frontend:
+#     build: ./MSD-FOUR/frontend
+#     container_name: frontend
+#     ports:
+#       - "8000:8000"
+#     volumes:
+#       - ./student-1/frontend:/app
+#     networks:
+#       - mynetwork
+
+#     backend:
+#       build: ./student-1/backend
+#       container_name: backend
+#       ports:
+#         - "8080:8080"
+#       volumes:
+#         - ./student-1/backend:/app
+#       networks:
+#         - mynetwork
+
+#Studnet 5
+# database:
+#     build: ./student-5/database
+#     container_name: database
+#     ports:
+#       - "5000:5000"
+#     volumes:
+#       - ./student-1/database:/app
+#     networks:
+#       - mynetwork
+
+#   frontend:
+#     build: ./student-15frontend
+#     container_name: frontend
+#     ports:
+#       - "8000:8000"
+#     volumes:
+#       - ./student-1/frontend:/app
+#     networks:
+#       - mynetwork
+
+#     backend:
+#       build: ./student-5/backend
+#       container_name: backend
+#       ports:
+#         - "8080:8080"
+#       volumes:
+#         - ./student-1/backend:/app
+#       networks:
+#         - mynetwork
