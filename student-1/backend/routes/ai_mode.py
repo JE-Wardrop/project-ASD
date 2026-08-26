@@ -3,7 +3,6 @@ from flask import Blueprint, request
 from services.llm_client import OLLAMA_MODEL, call_architecture_agent, create_chat_completion
 from services.prompt_loader import load_prompt
 
-
 ai_mode_bp = Blueprint("ai_mode", __name__)
 
 
@@ -102,45 +101,45 @@ def pattern_selection():
         )
 
 
-@ai_mode_bp.post("/architecture-review")
-def architecture_review():
-    architecture_request = request.form.get("architecture_request", "").strip()
+# @ai_mode_bp.post("/architecture-review")
+# def architecture_review():
+#     architecture_request = request.form.get("architecture_request", "").strip()
 
-    if not architecture_request:
-        return "<p>Architecture request is required.</p>", 400
+#     if not architecture_request:
+#         return "<p>Architecture request is required.</p>", 400
 
-    try:
-        answer = call_architecture_agent(
-            "architecture_system_prompt.txt",
-            "architecture_task_prompt.txt",
-            architecture_request,
-        )
-        return f"<pre>{answer}</pre>", 200
-    except Exception as exc:
-        return (
-            "<p>Architecture review request failed.</p>"
-            f"<pre>{exc}</pre>",
-            503,
-        )
+#     try:
+#         answer = call_architecture_agent(
+#             "architecture_system_prompt.txt",
+#             "architecture_task_prompt.txt",
+#             architecture_request,
+#         )
+#         return f"<pre>{answer}</pre>", 200
+#     except Exception as exc:
+#         return (
+#             "<p>Architecture review request failed.</p>"
+#             f"<pre>{exc}</pre>",
+#             503,
+#         )
 
 
-@ai_mode_bp.post("/adr-review")
-def adr_review():
-    architecture_request = request.form.get("architecture_request", "").strip()
+# @ai_mode_bp.post("/adr-review")
+# def adr_review():
+#     architecture_request = request.form.get("architecture_request", "").strip()
 
-    if not architecture_request:
-        return "<p>ADR text is required.</p>", 400
+#     if not architecture_request:
+#         return "<p>ADR text is required.</p>", 400
 
-    try:
-        answer = call_architecture_agent(
-            "architecture_system_prompt.txt",
-            "adr_review_prompt.txt",
-            architecture_request,
-        )
-        return f"<pre>{answer}</pre>", 200
-    except Exception as exc:
-        return (
-            "<p>ADR review request failed.</p>"
-            f"<pre>{exc}</pre>",
-            503,
-        )
+#     try:
+#         answer = call_architecture_agent(
+#             "architecture_system_prompt.txt",
+#             "adr_review_prompt.txt",
+#             architecture_request,
+#         )
+#         return f"<pre>{answer}</pre>", 200
+#     except Exception as exc:
+#         return (
+#             "<p>ADR review request failed.</p>"
+#             f"<pre>{exc}</pre>",
+#             503,
+#         )

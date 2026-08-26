@@ -4,10 +4,8 @@ DATABASE_NAME = "cm.db"
 users = [
     ("John Smith", "john.smith@example.com", "password123", "123 Main St, Anytown, USA", "555-1234")
 ]
-
-
 cards = [
-    (1, "1234567890123456", "Debit", "2025-12-31", "Active"),
+    (1, "1234567890123456", "Debit", "2025-12-31", "Unfrozen"),
     (1, "4567890123456789", "Credit", "2025-12-31", "Frozen"),
 ]
 
@@ -33,7 +31,7 @@ cursor.execute('''
         card_number TEXT UNIQUE NOT NULL,
         card_type TEXT CHECK(card_type IN ('Debit', 'Credit')) NOT NULL,
         expiry_date TEXT NOT NULL,
-        status TEXT CHECK(status IN ('Active', 'Frozen', 'Expired')) DEFAULT 'Active',
+        status TEXT CHECK(status IN ('Unfrozen', 'Frozen')) DEFAULT 'Unfrozen',
         balance REAL DEFAULT 0.0,
         FOREIGN KEY (user_id) REFERENCES users(user_id)
     )
