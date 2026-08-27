@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-import requests
+import requests 
 
 from services.database_api import (
     create_card_response,
@@ -12,15 +12,15 @@ from services.database_api import (
 )
 from views.html_formatters import format_card_html, format_cards_html
 
-normal_ui_bp = Blueprint("normal_ui", __name__)
+normal_mode_bp = Blueprint("normal_mode", __name__)
 
 
-@normal_ui_bp.get("/")
+@normal_mode_bp.get("/")
 def health():
     return "<p>card-service running</p>", 200
 
 
-@normal_ui_bp.get("/cards")
+@normal_mode_bp.get("/cards")
 def get_cards_route():
     try:
         return format_cards_html(get_cards()), 200
@@ -32,7 +32,7 @@ def get_cards_route():
         )
 
 
-@normal_ui_bp.get("/cards/by-id")
+@normal_mode_bp.get("/cards/by-id")
 def get_card_by_id():
     card_id = request.args.get("card_id", "").strip()
 
@@ -57,7 +57,7 @@ def get_card_by_id():
         )
 
 
-@normal_ui_bp.get("/cards/by-type")
+@normal_mode_bp.get("/cards/by-type")
 def get_cards_by_type():
     card_type = request.args.get("card_type", "").strip()
 
@@ -80,7 +80,7 @@ def get_cards_by_type():
         )
 
 
-@normal_ui_bp.get("/cards/by-status")
+@normal_mode_bp.get("/cards/by-status")
 def get_cards_by_status():
     status = request.args.get("status", "").strip()
 
@@ -103,7 +103,7 @@ def get_cards_by_status():
         )
 
 
-@normal_ui_bp.post("/cards/create")
+@normal_mode_bp.post("/cards/create")
 def create_card():
     payload = {
         "card_holder_name": request.form.get("card_holder_name", "").strip(),
@@ -130,7 +130,7 @@ def create_card():
         )
 
 
-@normal_ui_bp.post("/cards/update")
+@normal_mode_bp.post("/cards/update")
 def update_card():
     card_id = request.form.get("card_id", "").strip()
 
@@ -144,7 +144,7 @@ def update_card():
             payload[field] = value
 
     try:
-        response = update_card_response(card_id, payload)
+        responsnormal_ui_bpe = update_card_response(card_id, payload)
 
         if response.status_code == 404:
             return "<p>Card not found.</p>", 404
@@ -161,7 +161,7 @@ def update_card():
         )
 
 
-@normal_ui_bp.post("/cards/delete")
+@normal_mode_bp.post("/cards/delete")
 def delete_card():
     card_id = request.form.get("card_id", "").strip()
 

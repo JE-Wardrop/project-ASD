@@ -1,35 +1,58 @@
-services:
+
 
 #Student 1
-  database:
-    build: ./student-1/database
-    container_name: database
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./student-1/database:/app
-    networks:
-      - mynetwork
-
-  frontend:
-    build: ./student-1/frontend
-    container_name: frontend
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./student-1/frontend:/app
-    networks:
-      - mynetwork
+services:
+    frontend-service:
+        build:
+            context: ./student-1/frontend
+        container_name: frontend
+        ports:
+            - "8080:80"
+        depends_on:
+            - backend
+        # networks:
+        #     - card-network
+        restart: unless-stopped
 
     backend:
-      build: ./student-1/backend
-      container_name: backend
-      ports:
-        - "8080:8080"
-      volumes:
-        - ./student-1/backend:/app
-      networks:
-        - mynetwork
+        build:
+            context: .
+            dockerfile: backend/Dockerfile
+        container_name: backend
+        ports:
+            - "5001:5001"
+        environment:
+            DATABASE_SERVICE_URL: http://database:5002
+            OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+            OLLAMA_MODEL: qwen2.5:0.5b
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+        depends_on:
+            - database
+        # networks:
+        #     - card-network
+        # restart: unless-stopped
+
+    database:
+        build:
+            context: ./student-1/database
+        container_name: database
+        ports:
+            - "5002:5002"
+        volumes:
+            - database_data:/app/data
+        networks:
+            card-network:
+                aliases:
+                    - database
+        restart: unless-stopped
+
+volumes:
+    database_data:
+
+networks:
+    card-network:
+        driver: bridge
 
 #Student 2
   # database2:

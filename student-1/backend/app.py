@@ -11,7 +11,10 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import sqlite3
 import os
+
 from pathlib import Path
+from flask_cors import CORS
+
 
 load_dotenv()
 
@@ -24,7 +27,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 template_dir = os.path.join(BASE_DIR, "..", "frontend")
 app = Flask(__name__, template_folder=template_dir)
 
-#app = Flask(__name__, template_folder=template_dir, static_folder=template_dir)
 
 
 client = OpenAI(
@@ -32,8 +34,8 @@ client = OpenAI(
     api_key="ollama"
 )
 
-# from routes.ai_mode import ai_model_routes
-# fromt routes.normal_ui import normal_ui_routes
+from routes.ai_mode import ai_mode_bp
+from routes.normal_mode import normal_mode_bp
 
 
 def get_db_connection():
@@ -42,66 +44,16 @@ def get_db_connection():
     return conn
 
 
-@app.route('/')
-def home():
-    return render_template('cm_main.html')
+def create_app():
+    app = Flask(__name__)
+    CORS(app)
 
-@app.route('/about')
-def about_page():
-    return render_template('cm_details.html')
+    app.register_blueprint(normal_mode_bp)
+    app.register_blueprint(ai_mode_bp)
 
+    return app
 
-@app.route('/ai_model', methods=['GET'])
-def freeze_fet_card():
-    return render_template('cm_freeze.html')
-
-
-@app.route('/ai_model', methods=['GET'])
-def render_ai_model():
-    return render_template('cm_model.html')
-
-
-
-@app.route('/ai_model', methods=['POST'])
-def ai_model():
-    question = request.form.get("question", "").strip()
-
-    if not question:
-        return "<p>Question is required.</p>", 400
-
-    try:
-        response = client.chat.completions.create(
-            model=OLLAMA_MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a concise software engineering assistant. "
-                        "Answer in one short paragraph unless asked otherwise."
-                    )
-                },
-                {
-                    "role": "user",
-                    "content": question
-                }
-            ],
-            max_tokens=200,
-            temperature=0.2,
-        )
-
-        answer = response.choices[0].message.content
-
-        return f"<p>{answer}</p>"
-
-    except Exception as exc:
-        return (
-            "<p>Local AI agent request failed. "
-            "Check that Ollama is running and that qwen2.5:0.5b is installed.</p>"
-            f"<pre>{exc}</pre>",
-            503,
-        )
-
-
+app = create_app()
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000,debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)
