@@ -37,9 +37,9 @@ cursor.execute('''
     )
 ''')
 
-cursor.execute("DELETE FROM cards")
+# cursor.execute("DELETE FROM cards")
 
-cursor.execute("DELETE FROM users")
+# cursor.execute("DELETE FROM users")
 
 cursor.executemany(
     "INSERT INTO users (name, email, password, address, phone) VALUES (?, ?, ?, ?, ?)",
