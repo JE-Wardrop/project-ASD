@@ -10,8 +10,8 @@ services:
             - "8080:80"
         depends_on:
             - backend
-        # networks:
-        #     - card-network
+        networks:
+            - card-network
         restart: unless-stopped
 
     backend:
@@ -29,9 +29,9 @@ services:
             - "host.docker.internal:host-gateway"
         depends_on:
             - database
-        # networks:
-        #     - card-network
-        # restart: unless-stopped
+        networks:
+            - card-network
+        restart: unless-stopped
 
     database:
         build:
@@ -40,7 +40,7 @@ services:
         ports:
             - "5002:5002"
         volumes:
-            - database_data:/app/data
+            - database_data:/student-1/database/data/__init__.py
         networks:
             card-network:
                 aliases:
