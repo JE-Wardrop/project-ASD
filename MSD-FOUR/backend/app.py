@@ -23,13 +23,11 @@ client = OpenAI(
     api_key="ollama"
 )
 
-PROMPT_DIR = Path(__file__).with_name("prompts")
-
+PROMPT_DIR = Path(__file__).resolve().parent.parent / "prompts"
 
 def load_prompt(filename):
     prompt_path = PROMPT_DIR / filename
     return prompt_path.read_text(encoding="utf-8").strip()
-
 
 
 def get_db_connection():

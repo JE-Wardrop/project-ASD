@@ -974,19 +974,18 @@ async function askAI() {
             })
         });
 
-        if (!response.ok) {
-            throw new Error("AI request failed");
-        }
+    const html = await response.text();
 
-        const data = await response.json();
+    if (!response.ok) {
+        throw new Error(stripTags(html) || "AI request failed");
+    }
 
-        document.getElementById("aiResponse").textContent =
-            data.response || data.answer || "The AI did not return a response.";
+    document.getElementById("aiResponse").textContent = stripTags(html) || "The AI did not return a response.";
 
     }
     catch (error) {
         document.getElementById("aiResponse").textContent =
-            "Unable to connect to the AI service. (Backend needs a /users/help route.)";
+        error.message || "Unable to connect to the AI service.";
         console.error(error);
     }
 
