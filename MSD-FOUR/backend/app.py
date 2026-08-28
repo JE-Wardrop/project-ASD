@@ -1,11 +1,35 @@
 from flask import Flask, render_template, request
 import sqlite3
+import os
 from pathlib import Path
-from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv
+from openai import OpenAI
+
+# from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__, template_folder="../templates")
 
 DATABASE_NAME = Path(__file__).parent.parent / "database" / "users.db"
+
+
+# =========================
+# AI-Mode configuration (Ollama via the OpenAI-compatible API)
+# =========================
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:0.5b")
+
+client = OpenAI(
+    base_url=OLLAMA_BASE_URL,
+    api_key="ollama"
+)
+
+PROMPT_DIR = Path(__file__).with_name("prompts")
+
+
+def load_prompt(filename):
+    prompt_path = PROMPT_DIR / filename
+    return prompt_path.read_text(encoding="utf-8").strip()
+
 
 
 def get_db_connection():
@@ -99,19 +123,19 @@ def register_user():
     if not username or not email or not password:
         return "<p>Username, email and password are required.</p>", 400
 
-    password_hash = generate_password_hash(password)
+    # password_hash = generate_password_hash(password)
 
     conn = get_db_connection()
 
     try:
         conn.execute("""
             INSERT INTO users
-            (username, email, password_hash, first_name, last_name, phone)
+            (username, email, password, first_name, last_name, phone)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (
             username,
             email,
-            password_hash,
+            password,
             first_name,
             last_name,
             phone
@@ -154,7 +178,7 @@ def login_user():
     if user is None:
         return "<p>Invalid username or password.</p>", 401
 
-    if not check_password_hash(user["password_hash"], password):
+    if user["password"] != password:
         return "<p>Invalid username or password.</p>", 401
 
     return (
@@ -241,6 +265,47 @@ def delete_user(user_id):
     conn.close()
 
     return "<p>User deleted successfully.</p>"
+
+# =========================
+# AI HELP (Ollama, OpenAI-compatible API)
+# =========================
+
+@app.route("/users/help", methods=["POST"])
+def ask_user_help():
+
+    question = request.form.get("question", "").strip()
+
+    if not question:
+        return "<p>Question is required.</p>", 400
+
+    system_prompt = load_prompt("user_management_sys_prompt.txt")
+    task_prompt = load_prompt("user_help_task_prompt.txt")
+
+    final_prompt = f"{task_prompt}\n\nUser question: {question}"
+
+    try:
+        response = client.chat.completions.create(
+            model=OLLAMA_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": final_prompt}
+            ],
+            max_tokens=300,
+            temperature=0.2,
+        )
+
+        answer = response.choices[0].message.content
+
+        return f"<p>{answer}</p>"
+
+    except Exception as exc:
+        return (
+            "<p>Local AI agent request failed. "
+            f"Check that Ollama is running and that {OLLAMA_MODEL} is installed.</p>"
+            f"<pre>{exc}</pre>",
+            503,
+        )
+
 
 
 if __name__ == "__main__":
