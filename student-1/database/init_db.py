@@ -10,7 +10,6 @@ cards = [
 ]
 
 conn = sqlite3.connect(DATABASE_NAME)
-conn.execute()
 cursor = conn.cursor()
 
 cursor.execute('''

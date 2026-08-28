@@ -16,8 +16,8 @@ services:
 
     backend:
         build:
-            context: .
-            dockerfile: backend/Dockerfile
+            context: ./student-1/backend
+            dockerfile: dockerfile
         container_name: backend
         ports:
             - "5001:5001"
