@@ -1,5 +1,0 @@
-The user is currently working in the User Management screen of the
-application. They may be asking about a specific user record, a field on the
-form (username, email, password, role, phone), or general questions about
-how account creation, login, updating, or deletion works in this system.
-Explain clearly and simply, as if to someone new to the app.
