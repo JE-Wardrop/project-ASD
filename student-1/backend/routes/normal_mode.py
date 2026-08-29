@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 import requests 
 
-from services.database_api import (
+from backend.services.database_api import (
     create_card_response,
     delete_card_response,
     get_card_by_id_response,
@@ -10,7 +10,7 @@ from services.database_api import (
     get_cards_by_type_response,
     update_card_response,
 )
-from views.html_formatters import format_card_html, format_cards_html
+from backend.views.html_formatters import format_card_html, format_cards_html
 
 normal_mode_bp = Blueprint("normal_mode", __name__)
 
