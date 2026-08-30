@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Card Details</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="edit-card">
+        <h1>You can edit your details here</h1>
+        <p></p>
+    </div>
+
+
+    
+
+    <div class="create-card">
+        <form method="POST" action="/add-card-details">
+            <label for="name">Enter Name:</label>
+            <input type="text" id="name" name="name" required>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+
+    <script src="index.js"></script>
+</body>
+</html>

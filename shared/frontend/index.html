@@ -1,20 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Frontend Template</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Digital Banking</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="home.css" />
+  </head>
+  <body class="app-body">
+    <!-- Navbar -->
+    <nav class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Digital Banking
+      </a>
 
-    <div class="card">
-        <h1>Hello, World!</h1>
-        <p>This is a simple, free-to-use frontend boilerplate built with vanilla HTML, CSS, and JavaScript.</p>
-        <button id="actionBtn">Click Me!</button>
-        <p id="message" class="hidden">If you see this the javascript is working correctly</p>
-    </div>
+      <ul class="nav-links">
+        <!-- Each go to a different services -->
+        <li><a href="/" class="is-current">Dashboard</a></li>
+        <li><a href="http://localhost:8102/">Accounts</a></li>
+        <li><a href="http://localhost:8105/">Transactions</a></li>
+        <li><a href="http://localhost:8101/">Cards</a></li>
+        <li><a href="http://localhost:8103/">Notifications</a></li>
+        <li><a href="http://localhost:8104/">Profile</a></li>
+      </ul>
+
+      <div class="user-chip">
+        <span class="avatar" aria-hidden="true">DC</span>
+        <span class="user-meta">
+          <strong>Demo Customer</strong>
+          <small>Customer #1001</small>
+        </span>
+      </div>
+    </nav>
+
+    <main class="dash">
+      <header class="dash-head">
+        <h1 id="greeting">Welcome back</h1>
+        <p class="muted">
+          Here is what has been happening across your accounts.
+        </p>
+      </header>
+
+      <!-- Overall summary -->
+      <section class="tiles" aria-label="Account summary">
+        <article class="tile tile-primary">
+          <p class="tile-label">Total balance</p>
+          <p class="tile-value" data-tile="balance">&mdash;</p>
+          <p class="tile-note" data-note="balance">Across all accounts</p>
+        </article>
+
+        <article class="tile">
+          <p class="tile-label">Money in this month</p>
+          <p class="tile-value" data-tile="in">&mdash;</p>
+          <p class="tile-note">Deposits and incoming transfers</p>
+        </article>
+
+        <article class="tile">
+          <p class="tile-label">Money out this month</p>
+          <p class="tile-value" data-tile="out">&mdash;</p>
+          <p class="tile-note">Withdrawals and outgoing transfers</p>
+        </article>
+
+        <article class="tile">
+          <p class="tile-label">Pending</p>
+          <p class="tile-value" data-tile="pending">&mdash;</p>
+          <p class="tile-note">Transactions awaiting settlement</p>
+        </article>
+      </section>
+
+      <!-- Feature shortcut -->
+      <section class="quick" aria-label="Quick actions">
+        <a class="action" href="http://localhost:8105/">
+          <span class="action-icon" aria-hidden="true">&#8644;</span>
+          <span
+            ><strong>Transfer money</strong
+            ><small>Move funds between accounts</small></span
+          >
+        </a>
+        <a class="action" href="http://localhost:8105/">
+          <span class="action-icon" aria-hidden="true">&#43;</span>
+          <span
+            ><strong>Deposit</strong
+            ><small>Add money to an account</small></span
+          >
+        </a>
+        <a class="action" href="http://localhost:8101/">
+          <span class="action-icon" aria-hidden="true">&#9632;</span>
+          <span
+            ><strong>Freeze a card</strong
+            ><small>Block a lost or stolen card</small></span
+          >
+        </a>
+        <a class="action" href="http://localhost:8102/">
+          <span class="action-icon" aria-hidden="true">&#43;</span>
+          <span
+            ><strong>Open an account</strong
+            ><small>Everyday or savings</small></span
+          >
+        </a>
+      </section>
+
+      <div class="columns">
+        <!-- History Column -->
+        <section class="card panel-list">
+          <header class="panel-head">
+            <h2>Recent transactions</h2>
+            <a href="http://localhost:8105/">View all</a>
+          </header>
+          <div id="recent-transactions">
+            <p class="muted">Loading&hellip;</p>
+          </div>
+        </section>
+
+        <!-- Notificaiton Column -->
+        <section class="card panel-list">
+          <header class="panel-head">
+            <h2>Notifications</h2>
+            <a href="http://localhost:8103/">View all</a>
+          </header>
+          <div id="recent-notifications">
+            <p class="muted">Loading&hellip;</p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- System status -->
+    <footer class="app-footer">
+      <div class="status-strip" aria-label="Service status">
+        <span class="status-title">System status</span>
+        <span class="svc" data-health="http://localhost:8204/health"
+          >Users</span
+        >
+        <span class="svc" data-health="http://localhost:8202/health"
+          >Accounts</span
+        >
+        <span class="svc" data-health="http://localhost:8205/health"
+          >Transactions</span
+        >
+        <span class="svc" data-health="http://localhost:8201/health"
+          >Cards</span
+        >
+        <span class="svc" data-health="http://localhost:8203/health"
+          >Notifications</span
+        >
+        <span class="svc" data-health="http://localhost:8090/health"
+          >AI-Mode</span
+        >
+        <button id="refreshBtn" class="secondary" type="button">Refresh</button>
+      </div>
+    </footer>
 
     <script src="index.js"></script>
-</body>
+  </body>
 </html>

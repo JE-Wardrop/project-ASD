@@ -1,25 +1,21 @@
-# this app is currently defunked however I don't know if im meant to store app in backend or outside. 
-# currently it is using the one outside 
+from pickle import GET
 
-# source .venv/bin/activate
-# cd "/home/juno/Desktop/ASD 2026/project-ASD/student-1/backend"
+from flask import Flask, jsonify, request,render_template, send_from_directory 
+from flask_cors import CORS
 
-# python3 -m venv .venv
-
-from flask import Flask, render_template, request, send_from_directory
-from dotenv import load_dotenv
-from openai import OpenAI
 import sqlite3
 import os
+
+from dotenv import load_dotenv
+from openai import OpenAI
+
 
 from pathlib import Path
 from flask_cors import CORS
 
+app = Flask(__name__)
 
-load_dotenv()
-
-
-DATABASE_NAME = "cm.db"
+DATABASE_NAME = "database/cm.db"
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:0.5b")
 
@@ -27,15 +23,18 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 template_dir = os.path.join(BASE_DIR, "..", "frontend")
 app = Flask(__name__, template_folder=template_dir)
 
-
-
 client = OpenAI(
     base_url=OLLAMA_BASE_URL,
     api_key="ollama"
 )
 
-from routes.ai_mode import ai_mode_bp
-from routes.normal_mode import normal_mode_bp
+#add routes for connecting to the backend
+#this is so i can run the app and bedug its workings
+
+
+
+from backend.routes.ai_mode import ai_mode_bp
+from backend.routes.normal_mode import normal_mode_bp
 
 
 def get_db_connection():
@@ -55,5 +54,7 @@ def create_app():
 
 app = create_app()
 
+
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=True)
