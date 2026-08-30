@@ -1,72 +1,188 @@
-/* Reset basic styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* ============================================================
+   Digital Banking System - SHARED CSS THEME
+   Group 44 - ASD 2026 Release 0
+
+   Every one of the 5 students' frontends loads this file so the
+   UI stays consistent (mandatory requirement of spec section 2.3).
+
+   How to use it in your page:
+     <link rel="stylesheet" href="http://localhost:8080/styles.css">
+     <link rel="stylesheet" href="css/styles.css">   <- your own styles, loaded AFTER
+
+   To re-theme the whole system: only edit the :root block below.
+   ============================================================ */
+
+:root {
+  /* Primary colors */
+  --brand:        #0a6a4f;
+  --brand-dark:   #085740;
+  --brand-soft:   #dcefe7;
+
+  /* Background and borders */
+  --bg:           #f4f6f5;
+  --surface:      #ffffff;
+  --surface-2:    #eef2f0;
+  --line:         #d8ddda;
+  --line-soft:    #e8ecea;
+
+  /* Text */
+  --text:         #12191c;
+  --muted:        #6b7a75;
+
+  /* Status colors */
+  --ok:           #0a6a4f;   --ok-soft:   #dcefe7;
+  --warn:         #8a5a0b;   --warn-soft: #f6ecd6;
+  --bad:          #9c2b25;   --bad-soft:  #f7e2e0;
+  --info:         #33505f;   --info-soft: #e8eef2;
+
+  /* Font */
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  --radius: 5px;
 }
 
-/* Center everything on the screen */
+* { box-sizing: border-box; }
+
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #f0f2f5;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Style the central card container */
+a { color: var(--brand); }
+a:focus-visible, button:focus-visible,
+input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ---------- page shell ---------- */
+.app-shell { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+
+.app-header h1 { margin: 0; font-size: 1.6rem; letter-spacing: -.01em; }
+.app-header p  { margin: .25rem 0 1.25rem; color: var(--muted); font-size: .9rem; }
+
 .card {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    max-width: 400px;
-    width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.35rem;
+  margin-bottom: 1.1rem;
+}
+.card h2 { margin: 0 0 .9rem; font-size: 1.1rem; }
+
+/* ---------- tabs (Normal UI / AI Mode) ---------- */
+.tab-shell { padding: 0; overflow: hidden; }
+.tab-nav {
+  display: flex; gap: .25rem;
+  padding: .5rem .5rem 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.tab-btn {
+  padding: .55rem 1.1rem;
+  font: inherit; font-size: .9rem; font-weight: 600;
+  border: 1px solid transparent; border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: transparent; color: var(--muted); cursor: pointer;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.is-active {
+  background: var(--surface); border-color: var(--line); color: var(--brand);
+}
+.tab-content { background: var(--surface); }
+.tab-frame { display: none; width: 100%; height: 78vh; border: 0; }
+.tab-frame.is-active { display: block; }
+.tab-body { background: var(--surface); padding: 1rem; }
+
+/* ---------- forms ---------- */
+label { display: grid; gap: .2rem; font-size: .8rem; color: var(--muted); }
+
+input, select, textarea {
+  padding: .42rem .55rem;
+  font: inherit; font-size: .88rem;
+  border: 1px solid #c9d2ce;
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text);
 }
 
-h1 {
-    color: #333;
-    margin-bottom: 15px;
-}
-
-p {
-    color: #666;
-    font-size: 16px;
-    line-height: 1.5;
-    margin-bottom: 20px;
-}
-
-/* Button layout and hover effects */
 button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    font-size: 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+  padding: .48rem .9rem;
+  font: inherit; font-size: .87rem; font-weight: 600;
+  border: 1px solid transparent; border-radius: 3px;
+  background: var(--brand); color: #fff; cursor: pointer;
+}
+button:hover { background: var(--brand-dark); }
+
+button.secondary {
+  background: var(--surface); color: var(--text); border-color: var(--line);
+}
+button.secondary:hover { background: var(--surface-2); }
+
+.form-grid {
+  display: grid; gap: .9rem;
+  grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+}
+.filter-bar {
+  display: flex; gap: .8rem; align-items: flex-end; flex-wrap: wrap;
+  margin-bottom: .9rem;
 }
 
-button:hover {
-    background-color: #0056b3;
+/* ---------- tables ---------- */
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { padding: .48rem .65rem; border-bottom: 1px solid var(--line-soft);
+         text-align: left; }
+thead th {
+  font-size: .69rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); background: var(--surface-2);
 }
+tbody tr:hover { background: #f8fbfa; }
+td.num { font-variant-numeric: tabular-nums; }
+td button { padding: .22rem .5rem; font-size: .76rem; margin-right: .25rem; }
 
-/* Helper classes for JS interactivity */
-.hidden {
-    display: none;
+/* ---------- status pill ---------- */
+.pill {
+  display: inline-block; padding: .13rem .5rem; border-radius: 10px;
+  font-size: .71rem; font-weight: 600;
+  background: var(--surface-2); color: var(--muted);
 }
+.pill-ok    { background: var(--ok-soft);   color: var(--ok); }
+.pill-wait  { background: var(--warn-soft); color: var(--warn); }
+.pill-bad   { background: var(--bad-soft);  color: var(--bad); }
+.pill-muted { background: var(--surface-2); color: var(--muted); }
 
-#message {
-    margin-top: 20px;
-    color: #28a745;
-    font-weight: bold;
-    animation: fadeIn 0.5s ease;
-}
+/* ---------- alerts ---------- */
+.alert { padding: .65rem .85rem; border-radius: 3px; margin: .55rem 0;
+         font-size: .87rem; }
+.alert-error { background: var(--bad-soft);  color: var(--bad); }
+.alert-warn  { background: var(--warn-soft); color: var(--warn); }
+.alert-info  { background: var(--info-soft); color: var(--info); }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+/* ---------- AI answer block ---------- */
+.ai-answer {
+  border-left: 3px solid var(--brand);
+  background: #f4f8f6;
+  padding: .75rem .95rem;
+  border-radius: 0 3px 3px 0;
+  margin-top: .6rem;
 }
+.ai-answer h4 {
+  margin: 0 0 .3rem; font-size: .74rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--brand);
+}
+.ai-answer p { margin: 0; white-space: pre-wrap; }
+
+.muted { color: var(--muted); font-size: .87rem; }
+.mono  { font-family: var(--mono); font-size: .82rem; }
+
+/* HTMX: show spinner while waiting */
+.htmx-indicator { display: none; font-size: .84rem; color: var(--muted); }
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator { display: inline; }
