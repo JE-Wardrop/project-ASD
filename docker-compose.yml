@@ -1,60 +1,55 @@
-
-
-#Student 1
-
+# Student 1
 
 services:
-    frontend-service:
-        build:
-            context: ./student-1/frontend
-        container_name: frontend
-        ports:
-            - "8080:80"
-        depends_on:
-            - backend
-        networks:
-            - card-network
-        restart: unless-stopped
+  frontend-service:
+    build:
+      context: ./student-1/frontend
+    container_name: frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - card-network
+    restart: unless-stopped
 
-    backend:
-        build:
-            context: ./student-1/backend
-            dockerfile: dockerfile
-        container_name: backend
-        ports:
-            - "5001:5001"
-        environment:
-            DATABASE_SERVICE_URL: http://database:5002
-            OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
-            OLLAMA_MODEL: qwen2.5:0.5b
-        extra_hosts:
-            - "host.docker.internal:host-gateway"
-        depends_on:
-            - database
-        networks:
-            - card-network
-        restart: unless-stopped
+  backend:
+    build:
+      context: ./student-1/backend
+      dockerfile: dockerfile
+    container_name: backend
+    ports:
+      - "5001:5001"
+    environment:
+      DATABASE_SERVICE_URL: http://database:5002
+      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+      OLLAMA_MODEL: qwen2.5:0.5b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - database
+    networks:
+      - card-network
+    restart: unless-stopped
 
-    database:
-        build:
-            context: ./student-1/database
-        container_name: database
-        ports:
-            - "5002:5002"
-        volumes:
-            - database_data:/student-1/database/data/__init__.py
-        networks:
-            card-network:
-                aliases:
-                    - database
-        restart: unless-stopped
+  database:
+    build:
+      context: ./student-1/database
+    container_name: database
+    ports:
+      - "5002:5002"
+    volumes:
+      - database_data:/student-1/database/data
+    networks:
+      - card-network
+    restart: unless-stopped
 
 volumes:
-    database_data:
+  database_data:
 
 networks:
-    card-network:
-        driver: bridge
+  card-network:
+    driver: bridge
 
 #Student 2
   # database2:

@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 
-from backend.services.llm_client import OLLAMA_MODEL, call_architecture_agent, create_chat_completion
-from backend.services.prompt_loader import load_prompt
+from services.llm_client import OLLAMA_MODEL, call_architecture_agent, create_chat_completion
+from services.prompt_loader import load_prompt
 
 ai_mode_bp = Blueprint("ai_mode", __name__)
 

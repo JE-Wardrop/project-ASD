@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 import requests 
 
-from backend.services.database_api import (
+from services.database_api import (
     create_card_response,
     delete_card_response,
     get_card_by_id_response,
@@ -10,7 +10,7 @@ from backend.services.database_api import (
     get_cards_by_type_response,
     update_card_response,
 )
-from backend.views.html_formatters import format_card_html, format_cards_html
+from views.html_formatters import format_card_html, format_cards_html
 
 normal_mode_bp = Blueprint("normal_mode", __name__)
 
@@ -155,7 +155,7 @@ def update_card():
         return format_card_html(response.json()), 200
     except requests.RequestException as exc:
         return (
-            "<p>Failed to update card in database-service.</p>"
+            "<p>Failed to update card in database.</p>"
             f"<pre>{exc}</pre>",
             503,
         )
