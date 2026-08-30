@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="http://localhost:8080/styles.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.12/htmx.min.js"></script>
+</head>
+<body class="tab-body">
+
+  <!-- Backend cua Student 5 o cong 8205.
+       Day la cong tren MAY THAT, nen dia chi nay dung ca khi chay
+       local lan khi chay bang Docker (compose publish 8205 ra host). -->
+
+  <section class="card">
+    <h2>Create a transaction</h2>
+    <div class="form-grid">
+
+      <form class="txn-form"
+            hx-post="http://localhost:8205/ui/transactions/deposit"
+            hx-target="#table-area" hx-swap="innerHTML">
+        <h3>Deposit</h3>
+        <label>To account
+          <input type="number" name="receiver_account_id" value="1001" required>
+        </label>
+        <label>Amount (AUD)
+          <input type="number" name="amount" step="0.01" min="0.01" value="500.00" required>
+        </label>
+        <label>Description
+          <input type="text" name="description" placeholder="Salary deposit">
+        </label>
+        <button type="submit">Deposit</button>
+      </form>
+
+      <form class="txn-form"
+            hx-post="http://localhost:8205/ui/transactions/withdraw"
+            hx-target="#table-area" hx-swap="innerHTML">
+        <h3>Withdrawal</h3>
+        <label>From account
+          <input type="number" name="sender_account_id" value="1001" required>
+        </label>
+        <label>Amount (AUD)
+          <input type="number" name="amount" step="0.01" min="0.01" value="120.00" required>
+        </label>
+        <label>Description
+          <input type="text" name="description" placeholder="ATM withdrawal">
+        </label>
+        <button type="submit">Withdraw</button>
+      </form>
+
+      <form class="txn-form"
+            hx-post="http://localhost:8205/ui/transactions/transfer"
+            hx-target="#table-area" hx-swap="innerHTML">
+        <h3>Transfer</h3>
+        <label>From account
+          <input type="number" name="sender_account_id" value="1001" required>
+        </label>
+        <label>To account
+          <input type="number" name="receiver_account_id" value="1002" required>
+        </label>
+        <label>Amount (AUD)
+          <input type="number" name="amount" step="0.01" min="0.01" value="250.00" required>
+        </label>
+        <label>Description
+          <input type="text" name="description" placeholder="Rent share">
+        </label>
+        <button type="submit">Transfer</button>
+      </form>
+
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Transaction history</h2>
+
+    <form class="filter-bar"
+          hx-get="http://localhost:8205/ui/transactions"
+          hx-target="#table-area" hx-swap="innerHTML"
+          hx-trigger="change, submit">
+      <label>Account
+        <input type="number" name="account_id" placeholder="all">
+      </label>
+      <label>Type
+        <select name="type">
+          <option value="">All types</option>
+          <option value="DEPOSIT">Deposit</option>
+          <option value="WITHDRAWAL">Withdrawal</option>
+          <option value="TRANSFER">Transfer</option>
+        </select>
+      </label>
+      <label>Status
+        <select name="status">
+          <option value="">All statuses</option>
+          <option value="PENDING">Pending</option>
+          <option value="COMPLETED">Completed</option>
+          <option value="FAILED">Failed</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+      </label>
+      <button type="submit">Apply filter</button>
+    </form>
+
+    <!-- Tu tai bang ngay khi tab mo -->
+    <div id="table-area"
+         hx-get="http://localhost:8205/ui/transactions?limit=100"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+      <p class="muted">Loading transactions&hellip;</p>
+    </div>
+
+    <!-- Nut Explain trong tung dong se do ket qua vao day -->
+    <div id="ai-output"></div>
+  </section>
+
+</body>
+</html>

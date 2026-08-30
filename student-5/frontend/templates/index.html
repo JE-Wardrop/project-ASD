@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transaction Management &middot; Digital Banking System</title>
+    <link rel="stylesheet" href="{{ shared_css }}" />
+    <link rel="stylesheet" href="/static/transactions.css" />
+    <script src="/static/htmx.min.js" defer></script>
+  </head>
+  <body>
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Student 5 &middot; Gia Tran</p>
+        <h1>Transaction Management</h1>
+      </div>
+      <a class="btn-link" href="{{ shared_index }}">&larr; Back to Dashboard</a>
+    </header>
+
+    <main>
+      <!-- ============ Tao giao dich ============ -->
+      <section class="panel">
+        <h2>Create a transaction</h2>
+
+        <div class="form-grid">
+          <form
+            class="txn-form"
+            hx-post="/ui/transactions/deposit"
+            hx-target="#table-area"
+            hx-swap="innerHTML"
+          >
+            <h3>Deposit</h3>
+            <label
+              >To account
+              <input
+                type="number"
+                name="receiver_account_id"
+                value="1001"
+                required
+              />
+            </label>
+            <label
+              >Amount (AUD)
+              <input
+                type="number"
+                name="amount"
+                step="0.01"
+                min="0.01"
+                value="500.00"
+                required
+              />
+            </label>
+            <label
+              >Description
+              <input
+                type="text"
+                name="description"
+                placeholder="Salary deposit"
+              />
+            </label>
+            <button type="submit">Deposit</button>
+          </form>
+
+          <form
+            class="txn-form"
+            hx-post="/ui/transactions/withdraw"
+            hx-target="#table-area"
+            hx-swap="innerHTML"
+          >
+            <h3>Withdrawal</h3>
+            <label
+              >From account
+              <input
+                type="number"
+                name="sender_account_id"
+                value="1001"
+                required
+              />
+            </label>
+            <label
+              >Amount (AUD)
+              <input
+                type="number"
+                name="amount"
+                step="0.01"
+                min="0.01"
+                value="120.00"
+                required
+              />
+            </label>
+            <label
+              >Description
+              <input
+                type="text"
+                name="description"
+                placeholder="ATM withdrawal"
+              />
+            </label>
+            <button type="submit">Withdraw</button>
+          </form>
+
+          <form
+            class="txn-form"
+            hx-post="/ui/transactions/transfer"
+            hx-target="#table-area"
+            hx-swap="innerHTML"
+          >
+            <h3>Transfer</h3>
+            <label
+              >From account
+              <input
+                type="number"
+                name="sender_account_id"
+                value="1001"
+                required
+              />
+            </label>
+            <label
+              >To account
+              <input
+                type="number"
+                name="receiver_account_id"
+                value="1002"
+                required
+              />
+            </label>
+            <label
+              >Amount (AUD)
+              <input
+                type="number"
+                name="amount"
+                step="0.01"
+                min="0.01"
+                value="250.00"
+                required
+              />
+            </label>
+            <label
+              >Description
+              <input type="text" name="description" placeholder="Rent share" />
+            </label>
+            <button type="submit">Transfer</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============ Bo loc ============ -->
+      <section class="panel">
+        <h2>Transaction history</h2>
+
+        <form
+          class="filter-bar"
+          hx-get="/ui/transactions"
+          hx-target="#table-area"
+          hx-swap="innerHTML"
+          hx-trigger="change, submit"
+        >
+          <label
+            >Account
+            <input type="number" name="account_id" placeholder="all" />
+          </label>
+          <label
+            >Type
+            <select name="type">
+              <option value="">All types</option>
+              <option value="DEPOSIT">Deposit</option>
+              <option value="WITHDRAWAL">Withdrawal</option>
+              <option value="TRANSFER">Transfer</option>
+            </select>
+          </label>
+          <label
+            >Status
+            <select name="status">
+              <option value="">All statuses</option>
+              <option value="PENDING">Pending</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="FAILED">Failed</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </label>
+          <button type="submit">Apply filter</button>
+        </form>
+
+        <!-- Tai bang ngay khi trang mo -->
+        <div
+          id="table-area"
+          hx-get="/ui/transactions?limit=100"
+          hx-trigger="load"
+          hx-swap="innerHTML"
+        >
+          <p class="muted">Loading transactions&hellip;</p>
+        </div>
+      </section>
+
+      <!-- ============ AI-Mode ============ -->
+      <section class="panel">
+        <h2>AI-Mode</h2>
+        <p class="muted">
+          Powered by Ollama and an approved open-source LLM. Click
+          <strong>Explain</strong> on any row, or analyse the money flow of one
+          account.
+        </p>
+
+        <form
+          class="filter-bar"
+          hx-post="/ui/transactions/ai/analyse"
+          hx-target="#ai-output"
+          hx-swap="innerHTML"
+          hx-indicator="#ai-spinner"
+        >
+          <label
+            >Account
+            <input type="number" name="account_id" value="1001" />
+          </label>
+          <button type="submit">Analyse money flow</button>
+          <span id="ai-spinner" class="htmx-indicator">Thinking&hellip;</span>
+        </form>
+
+        <div id="ai-output"></div>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      Transaction Management microservice &middot; Group 44 &middot; Release 0
+    </footer>
+  </body>
+</html>
