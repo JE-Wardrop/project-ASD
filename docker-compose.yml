@@ -1,0 +1,79 @@
+services:
+
+  # ===========================================================================
+  # Shared unified home page (index.html) + shared CSS theme.
+  # Every student's frontend links to http://localhost:8080/styles.css.
+  # ===========================================================================
+  shared-frontend:
+    build:
+      context: ./shared/frontend
+    container_name: shared-frontend
+    ports:
+      - "8080:8000"
+    networks:
+      - banking-network
+    restart: unless-stopped
+
+  # ===========================================================================
+  # Student 2 - Feature 2: Bank Account Management
+  # ===========================================================================
+  student2-frontend:
+    build:
+      context: ./student-2/frontend
+    container_name: student2-frontend
+    ports:
+      - "8102:80"
+    depends_on:
+      - student2-backend
+    networks:
+      - banking-network
+    restart: unless-stopped
+
+  student2-backend:
+    build:
+      context: ./student-2
+      dockerfile: backend/dockerfile
+    container_name: student2-backend
+    ports:
+      - "8202:5001"
+    environment:
+      DATABASE_SERVICE_URL: http://student2-database:5002
+      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+      OLLAMA_MODEL: qwen2.5:0.5b
+      OLLAMA_REVIEW_MODEL: llama3.1:8b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - student2-database
+    networks:
+      - banking-network
+    restart: unless-stopped
+
+  student2-database:
+    build:
+      context: ./student-2/database
+    container_name: student2-database
+    ports:
+      - "8302:5002"
+    environment:
+      DB_PATH: /app/data/accounts.db
+    volumes:
+      - student2_db_data:/app/data
+    networks:
+      banking-network:
+        aliases:
+          - student2-database
+    restart: unless-stopped
+
+  # ===========================================================================
+  # Student 1 / 3 / 4 / 5 - add your frontend / backend / database services
+  # below following the same pattern (own container_name, own host ports,
+  # same `banking-network`).
+  # ===========================================================================
+
+volumes:
+  student2_db_data:
+
+networks:
+  banking-network:
+    driver: bridge

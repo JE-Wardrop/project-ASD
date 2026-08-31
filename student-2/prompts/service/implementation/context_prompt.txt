@@ -1,0 +1,41 @@
+Application Name:
+Bank Account Management Service
+
+Database Schema (accounts table):
+- account_id (integer, primary key)
+- user_id (integer, required, NOT unique — a user may hold multiple accounts)
+- account_number (text, required, unique)
+- account_type (text, required, one of: EVERYDAY, SAVINGS)
+- balance (real, required)
+- account_status (text, required, one of: ACTIVE, FROZEN, CLOSED)
+- created_at (text, timestamp)
+
+Important Domain Rules:
+- user_id is NOT unique across accounts.
+- account_number IS unique.
+- Balance can only change while account_status is ACTIVE.
+- Balance can never go negative.
+- An account must be ACTIVE to be frozen, and ACTIVE or FROZEN to be closed.
+
+Endpoints (ONLY these exist):
+
+GET Endpoints (Read-Only):
+- GET /accounts
+- GET /accounts/by-id
+- GET /accounts/by-user
+- GET /accounts/by-status
+- GET /accounts/balance
+
+POST Endpoints (Write / AI Queries):
+- POST /accounts/create
+- POST /accounts/update
+- POST /accounts/adjust-balance
+- POST /accounts/freeze
+- POST /accounts/unfreeze
+- POST /accounts/close
+- POST /accounts/delete
+- POST /ask
+- POST /ask-with-context
+
+Forbidden Operations:
+Do not mention or suggest operations beyond the endpoints listed above — they are not implemented in this application.
