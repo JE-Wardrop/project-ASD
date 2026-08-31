@@ -17,7 +17,7 @@ REQUIRED_FIELDS = [
     "status"
 ]
 
-VALID_STATUSES = {"Freeze", "Unfreeze"}
+VALID_STATUSES = {"Frozen", "Unfrozen"}
 
 
 def get_db_connection():
@@ -30,11 +30,10 @@ def get_db_connection():
 # Health
 # ---------------------------------------------------------------------------
 
+#was originally "database-service" this is what the agentic loop is calling it and I'm not sure why
 @app.get("/")
 def health():
-    return jsonify({"service": "database-service", "status": "running"})
-
-
+    return jsonify({"service": "database", "status": "running"})
 
 
 def _validate_payload(payload, partial=False):
@@ -85,6 +84,7 @@ def create_card():
     )
     conn.commit()
     new_id = cursor.lastrowid
+
     card = conn.execute(
         "SELECT card_id, card_holder_name, card_number, card_type, "
         "expiry_date, status FROM cards WHERE card_id = ?",
@@ -245,12 +245,52 @@ def delete_card(card_id):
     return jsonify({"deleted": card_id}), 200
 
 
-def freeze_card (card_number, account_holder, card_type, expiry_date):
+# ---------------------------------------------------------------------------
+# Freeze and Unfreeze
+# ---------------------------------------------------------------------------
+
+
+
+def freeze_card (card_number, account_holder, card_type, expiry_date,status):
+    payload = request.get_json(silent=True) or {}
+
+    error = _validate_payload(payload, partial=True)
+    if error:
+        return jsonify({"error": error}), 400
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
-def unfreeze_card (card_number, account_holder, card_type, expiry_date):
+    card_to_freeze = (
+        '''SELECT * FROM cards
+            WHERE status = Unfrozen
+        ''')
+
+    conn.execute("UPDATE FROM cards WHERE status = Frozen", (card_to_freeze))
+    conn.commit()
+    conn.close()
+    
+
+
+def unfreeze_card (card_number, account_holder, card_type, expiry_date,status):
+    payload = request.get_json(silent=True) or {}
+
+    error = _validate_payload(payload, partial=True)
+    if error:
+        return jsonify({"error": error}), 400
+
     conn = get_db_connection()
     cursor = conn.cursor()
+
+    card_to_unfreeze = (
+        '''SELECT * FROM cards
+            WHERE status = Frozen
+        ''')
+
+    conn.execute("UPDATE FROM cards WHERE status = Unfrozen", (card_to_unfreeze))
+    conn.commit()
+    conn.close()
+
+
 
 

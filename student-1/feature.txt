@@ -1,0 +1,102 @@
+delete this doucment before final submission
+- database app.py should have all it's routes within itself so that the backend can access it
+- 30:49 in lab 4 is were he starts talking about agentic_loop
+
+
+docker run -d -p 8080:80 nginx
+
+
+docker shit:
+https://medium.com/@azriteb/installing-docker-engine-on-linux-mint-22-1-my-learning-journey-3760515c9888
+
+docker files will have to be changed to use the css file (will have to be at highest root to access that file 
+and not have student-1 at the top file)
+this will also need to be done to access the stuff from Ivan's work
+
+
+Azure will be used for cloud components
+
+look at 
+
+Purpose: Manage customer debit or credit cards linked to bank accounts. 
+
+Main functions: 
+
+    Create/issue card 
+
+    View cards 
+
+    View card details 
+
+    Activate card 
+
+    Freeze card 
+
+    Unfreeze card 
+
+    Cancel card 
+
+Optional extension: 
+
+    Set card spending limit 
+
+Example data: 
+
+    Card ID 
+
+    Account ID 
+
+    Card number 
+
+    Card type 
+
+    Expiry date 
+
+    Card status 
+
+    Spending limit 
+
+    Created date 
+
+Example CRUD operations: 
+
+    Create card 
+
+    Read card 
+
+    Update card 
+
+    Delete/cancel card 
+
+This feature can include the Card Management work that has already been started.  
+
+-------------------------------------------------------------------------
+
+
+architecture_collector.py
+
+db_collector.py
+
+endpoints_collector.py
+- Install requests with docker
+
+
+review_config.py
+- i also don't kanow how this works
+
+
+core:
+
+ai_runner.py
+- looks fine this doesn't need to change
+
+orchesrator.py
+- 
+
+prompt_registry.py
+- 
+
+reporter.py
+- 
+
+
