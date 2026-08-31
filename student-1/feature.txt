@@ -1,4 +1,6 @@
 delete this doucment before final submission
+- database app.py should have all it's routes within itself so that the backend can access it
+- 30:49 in lab 4 is were he starts talking about agentic_loop
 
 
 docker run -d -p 8080:80 nginx

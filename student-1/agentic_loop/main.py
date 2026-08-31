@@ -26,11 +26,12 @@ def _menu_choice_to_key(choice: str) -> str | None:
 
 def _print_mode_mapping(app_dir: Path) -> None:
     prompt_map = {
-        "DB": app_dir / "prompts" / "service" / "system_prompt",
-        "Endpoints": app_dir / "prompts" / "service" / "",
-        "Architecture": app_dir / "prompts" / "service" / "",
-        "Devops" : app_dir / "" / ""
+        "DB": app_dir / "prompts" / "service" / "context_prompt.txt",
+        "Endpoints": app_dir / "prompts" / "service" / "context_prompt.txt",
+        "Architecture": app_dir / "prompts" / "service" / "context_prompt.txt",
+        "Devops" : app_dir / "prompts" / "context_qa_task_prompt.txt"
     }
+
     print_prompt_map({key: str(path) for key, path in prompt_map.items()})
 
 
@@ -53,6 +54,7 @@ def main() -> None:
             print("Loop closed.")
             break
 
+
         if choice == "4":
             for key in ("db", "endpoints", "architecture"):
                 result = run_mode(mode_config[key], app_dir, repo_root, prompts, ai)
@@ -63,6 +65,10 @@ def main() -> None:
         if not mode_key:
             print("Invalid choice. Select 0, 1, 2, 3, or 4.")
             continue
+
+        #The agent will alway put out the result of your selection
+        #it uses the mode_key variable in the orchestor (im guessing bc thats were the import is from)
+        # to do this
 
         result = run_mode(mode_config[mode_key], app_dir, repo_root, prompts, ai)
         print_result(mode_config[mode_key].label, result)

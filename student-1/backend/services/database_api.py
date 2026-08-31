@@ -11,24 +11,24 @@ def get_cards():
     return response.json()
 
 
-def get_card_by_id_response(card_id):
-    return requests.get(f"{DATABASE_SERVICE_URL}/cards/{card_id}", timeout=5)
+# def get_card_by_id_response(card_id):
+#     return requests.get(f"{DATABASE_SERVICE_URL}/cards/{card_id}", timeout=5)
 
 
-def get_cards_by_type_response(card_type):
-    return requests.get(
-        f"{DATABASE_SERVICE_URL}/cards/by-type",
-        params={"card_type": card_type},
-        timeout=5,
-    )
+# def get_cards_by_type_response(card_type):
+#     return requests.get(
+#         f"{DATABASE_SERVICE_URL}/cards/by-type",
+#         params={"card_type": card_type},
+#         timeout=5,
+#     )
 
 
-def get_cards_by_status_response(status):
-    return requests.get(
-        f"{DATABASE_SERVICE_URL}/cards/by-status",
-        params={"status": status},
-        timeout=5,
-    )
+# def get_cards_by_status_response(status):
+#     return requests.get(
+#         f"{DATABASE_SERVICE_URL}/cards/by-status",
+#         params={"status": status},
+#         timeout=5,
+#     )
 
 
 def create_card_response(payload):
