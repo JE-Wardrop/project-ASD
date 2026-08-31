@@ -1,8 +1,3 @@
-"""Sinh HTML fragment cho HTMX.
-
-HTMX khong doi JSON - no nhan HTML roi nhet thang vao DOM.
-Tach viec sinh HTML ra day de routes/ chi lo dieu huong.
-"""
 import os
 from html import escape
 
@@ -37,14 +32,14 @@ def transaction_row(txn):
             hx-target="#ai-output" hx-swap="innerHTML">Explain</button>
     <button hx-delete="{BACKEND}/ui/transactions/{txn['transaction_id']}"
             hx-target="#table-area" hx-swap="innerHTML"
-            hx-confirm="Huy giao dich nay?">Cancel</button>
+            hx-confirm="Cancel this transaction?">Cancel</button>
   </td>
 </tr>"""
 
 
 def transactions_table(rows):
     if not rows:
-        return '<table id="txn-table"><tbody><tr><td>Khong co giao dich nao.</td></tr></tbody></table>'
+        return '<table id="txn-table"><tbody><tr><td>No transactions.</td></tr></tbody></table>'
     body = "".join(transaction_row(r) for r in rows)
     return f"""
 <table id="txn-table">

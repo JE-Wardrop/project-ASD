@@ -1,15 +1,5 @@
-/* ============================================================
-   Student 5 - Transaction Management
-   Style RIENG cua trang nay.
-
-   Theme chung (mau, font, nut, bang, pill, alert) nam o
-   shared/frontend/styles.css va duoc nap TRUOC file nay.
-   O day chi dinh nghia nhung gi rieng cua Transaction Management.
-   Mau lay tu bien --brand, --line... cua theme chung.
-   ============================================================ */
-
-/* Du phong: neu container shared-index chua chay thi theme chung
-   khong nap duoc, cac bien duoi day giu cho trang van doc duoc. */
+/* Fallback: if the shared-index container is not running, the shared theme
+   cannot load, so the variables below keep the page readable. */
 :root {
   --brand:      #0a6a4f;
   --brand-dark: #085740;
@@ -24,7 +14,7 @@
   --radius:     5px;
 }
 
-/* ---------- dau trang ---------- */
+/* ---------- page header ---------- */
 .page-header {
   display: flex;
   align-items: flex-end;
@@ -47,7 +37,7 @@
 }
 .btn-link:hover { background: var(--surface-2); }
 
-/* ---------- form tao giao dich ---------- */
+/* ---------- transaction form  ---------- */
 .txn-form {
   display: grid; gap: .45rem;
   border: 1px solid var(--line-soft);
@@ -57,10 +47,10 @@
 }
 .txn-form h3 { margin: 0 0 .25rem; font-size: .92rem; }
 
-/* ---------- khu vuc bang ---------- */
+
 #table-area { overflow-x: auto; }
 
-/* ---------- chan trang ---------- */
+/* ---------- Footer---------- */
 .page-footer {
   padding: 1rem 1.5rem 2rem;
   border-top: 1px solid var(--line);

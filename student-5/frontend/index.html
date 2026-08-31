@@ -1,72 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Transactions &middot; Digital Banking</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transactions &middot; Digital Banking</title>
 
-  <!-- Theme chung cua nhom - nap TRUOC -->
-  <link rel="stylesheet" href="http://localhost:8080/styles.css">
-  <!-- Style rieng cua trang nay - nap SAU de ghi de duoc -->
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-
-  <header class="page-header">
-    <div>
-      <p class="eyebrow">Digital Banking</p>
-      <h1>Transactions</h1>
-    </div>
-    <a class="btn-link" href="http://localhost:8080/">&larr; Dashboard</a>
-  </header>
-
-  <main class="app-shell">
-    <section class="tab-shell card">
-
-      <nav class="tab-nav" aria-label="Application tabs">
-        <button class="tab-btn is-active" data-tab="normal" type="button">
-          Normal UI
-        </button>
-        <button class="tab-btn" data-tab="ai-mode" type="button">
-          AI Mode
-        </button>
-      </nav>
-
-      <div class="tab-content">
-        <iframe
-          id="tab-frame-normal"
-          class="tab-frame is-active"
-          src="tabs/normal.html"
-          title="Normal UI tab"
-        ></iframe>
-        <iframe
-          id="tab-frame-ai-mode"
-          class="tab-frame"
-          src="tabs/ai-mode.html"
-          title="AI Mode tab"
-        ></iframe>
+    <!-- Group-wide theme - load FIRST -->
+    <link rel="stylesheet" href="http://localhost:8080/styles.css" />
+    <!-- Page-specific style - load AFTER so it can override -->
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Digital Banking</p>
+        <h1>Transactions</h1>
       </div>
+      <a class="btn-link" href="http://localhost:8080/">&larr; Dashboard</a>
+    </header>
 
-    </section>
-  </main>
+    <main class="app-shell">
+      <section class="tab-shell card">
+        <nav class="tab-nav" aria-label="Application tabs">
+          <button class="tab-btn is-active" data-tab="normal" type="button">
+            Normal UI
+          </button>
+          <button class="tab-btn" data-tab="ai-mode" type="button">
+            AI Mode
+          </button>
+        </nav>
 
-  <footer class="page-footer">
-    Transaction Management microservice &middot; Group 44 &middot; Release 0
-  </footer>
+        <div class="tab-content">
+          <!-- noraml.html -->
+          <iframe
+            id="tab-frame-normal"
+            class="tab-frame is-active"
+            src="tabs/normal.html"
+            title="Normal UI tab"
+          ></iframe>
+          <!-- ai-mode.html -->
+          <iframe
+            id="tab-frame-ai-mode"
+            class="tab-frame"
+            src="tabs/ai-mode.html"
+            title="AI Mode tab"
+          ></iframe>
+        </div>
+      </section>
+    </main>
 
-  <script>
-    // Doi tab: bat/tat class is-active tren nut va tren iframe tuong ung
-    document.querySelectorAll(".tab-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var name = btn.dataset.tab;
-        document.querySelectorAll(".tab-btn").forEach(function (b) {
-          b.classList.toggle("is-active", b === btn);
-        });
-        document.querySelectorAll(".tab-frame").forEach(function (f) {
-          f.classList.toggle("is-active", f.id === "tab-frame-" + name);
+    <footer class="page-footer">
+      Transaction Management microservice &middot; Group 44 &middot; Release 0
+    </footer>
+
+    <script>
+      // Switch tab: toggle the is-active class on the button and the matching iframe
+      document.querySelectorAll(".tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var name = btn.dataset.tab;
+          document.querySelectorAll(".tab-btn").forEach(function (b) {
+            b.classList.toggle("is-active", b === btn);
+          });
+          document.querySelectorAll(".tab-frame").forEach(function (f) {
+            f.classList.toggle("is-active", f.id === "tab-frame-" + name);
+          });
         });
       });
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>

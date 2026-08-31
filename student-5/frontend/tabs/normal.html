@@ -8,9 +8,9 @@
 </head>
 <body class="tab-body">
 
-  <!-- Backend cua Student 5 o cong 8205.
-       Day la cong tren MAY THAT, nen dia chi nay dung ca khi chay
-       local lan khi chay bang Docker (compose publish 8205 ra host). -->
+  <!-- Student 5's backend is on port 8205.
+       This is the port on the HOST MACHINE, so this address works both when
+       running locally and when running via Docker (compose publishes 8205 to the host). -->
 
   <section class="card">
     <h2>Create a transaction</h2>
@@ -100,7 +100,7 @@
       <button type="submit">Apply filter</button>
     </form>
 
-    <!-- Tu tai bang ngay khi tab mo -->
+    <!-- Auto-load the table as soon as the tab opens -->
     <div id="table-area"
          hx-get="http://localhost:8205/ui/transactions?limit=100"
          hx-trigger="load"
@@ -108,7 +108,7 @@
       <p class="muted">Loading transactions&hellip;</p>
     </div>
 
-    <!-- Nut Explain trong tung dong se do ket qua vao day -->
+    <!-- The Explain button in each row drops its result here -->
     <div id="ai-output"></div>
   </section>
 

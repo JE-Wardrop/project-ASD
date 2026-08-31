@@ -24,7 +24,7 @@ def create_app():
     
     @app.errorhandler(404)
     def not_found(_):
-        return {"error": "Endpoint khong ton tai"}, 404
+        return {"error": "Endpoint does not exist"}, 404
     
     return app
 
