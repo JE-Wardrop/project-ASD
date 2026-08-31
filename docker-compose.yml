@@ -1,4 +1,8 @@
 # Student 1
+# Edit docker ports 8080:80 -> 8102:80
+#update contexts
+
+
 
 services:
   frontend-service:
