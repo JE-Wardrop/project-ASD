@@ -28,55 +28,55 @@ services:
 
 
   # Student 1
-  frontend-service:
-    build:
-      context: ./student-1/frontend
-    container_name: frontend
-    ports:
-      - "8101:80"
-    depends_on:
-      - backend
-    networks:
-      - card-network
-    restart: unless-stopped
+#   frontend-service:
+#     build:
+#       context: ./student-1/frontend
+#     container_name: frontend
+#     ports:
+#       - "8101:80"
+#     depends_on:
+#       - backend
+#     networks:
+#       - card-network
+#     restart: unless-stopped
 
-  backend:
-    build:
-      context: ./student-1/backend
-      dockerfile: dockerfile
-    container_name: backend
-    ports:
-      - "8201:5001"
-    environment:
-      DATABASE_SERVICE_URL: http://database:5002
-      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
-      OLLAMA_MODEL: qwen2.5:0.5b
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    depends_on:
-      - database
-    networks:
-      - card-network
-    restart: unless-stopped
+#   backend:
+#     build:
+#       context: ./student-1/backend
+#       dockerfile: dockerfile
+#     container_name: backend
+#     ports:
+#       - "8201:5001"
+#     environment:
+#       DATABASE_SERVICE_URL: http://database:5002
+#       OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+#       OLLAMA_MODEL: qwen2.5:0.5b
+#     extra_hosts:
+#       - "host.docker.internal:host-gateway"
+#     depends_on:
+#       - database
+#     networks:
+#       - card-network
+#     restart: unless-stopped
 
-  database:
-    build:
-      context: ./student-1/database
-    container_name: database
-    ports:
-      - "8301:5002"
-    volumes:
-      - database_data:/student-1/database/data
-    networks:
-      - card-network
-    restart: unless-stopped
+#   database:
+#     build:
+#       context: ./student-1/database
+#     container_name: database
+#     ports:
+#       - "8301:5002"
+#     volumes:
+#       - database_data:/student-1/database/data
+#     networks:
+#       - card-network
+#     restart: unless-stopped
 
-volumes:
-  database_data:
+# volumes:
+#   database_data:
 
-networks:
-  card-network:
-    driver: bridge
+# networks:
+#   card-network:
+#     driver: bridge
 
 #Student 2
   # database2:
@@ -139,38 +139,60 @@ networks:
   #       - ./student-3/backend:/app
   #     networks:
   #       - mynetwork
+# Student 4 - Sang (Users) - YOUR SERVICE
+  student4-frontend:
+    build:
+      context: ./student-4/frontend
+      dockerfile: Dockerfile
+    container_name: student4-frontend
+    ports:
+      - "8104:8000"
+    depends_on:
+      - student4-backend
+    networks:
+      - student4-network
+    restart: unless-stopped
 
+  student4-backend:
+    build:
+      context: ./student-4/backend
+      dockerfile: Dockerfile
+    container_name: student4-backend
+    ports:
+      - "8204:5001"
+    environment:
+      DATABASE_SERVICE_URL: http://student4-database:5002
+      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+      OLLAMA_MODEL: qwen2.5:0.5b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - student4-database
+    networks:
+      - student4-network
+    restart: unless-stopped
 
-#Student 4 
-# database:
-#     build: ./student-1/database
-#     container_name: database
-#     ports:
-#       - "5000:5000"
-#     volumes:
-#       - ./student-1/database:/app
-#     networks:
-#       - mynetwork
+  student4-database:
+    build:
+      context: ./student-4/database
+      dockerfile: Dockerfile
+    container_name: student4-database
+    ports:
+      - "8304:5002"
+    volumes:
+      - student4-database-data:/app/data
+    networks:
+      - student4-network
+    restart: unless-stopped
 
-#   frontend:
-#     build: ./MSD-FOUR/frontend
-#     container_name: frontend
-#     ports:
-#       - "8000:8000"
-#     volumes:
-#       - ./student-1/frontend:/app
-#     networks:
-#       - mynetwork
+volumes:
+  student1-database-data:
+  student4-database-data:
 
-#     backend:
-#       build: ./student-1/backend
-#       container_name: backend
-#       ports:
-#         - "8080:8080"
-#       volumes:
-#         - ./student-1/backend:/app
-#       networks:
-#         - mynetwork
+networks:
+  student4-network:
+    driver: bridge
+
 
 #Studnet 5
 # database:
