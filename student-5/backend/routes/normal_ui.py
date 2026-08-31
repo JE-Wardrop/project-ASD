@@ -8,76 +8,89 @@ from views import html_formatters as fmt
 bp = Blueprint("normal_ui", __name__)
 
 def payload():
-    """HTMX gui form-encoded, curl gui JSON. Nhan ca hai."""
+    # Try to read JSON payload first, then form data, then empty dict (since HTMX sends form data, not JSON)
     return request.get_json(silent=True) or request.form.to_dict() or {}
 
+# unify return result from database service, including error handling
 def passthrough(resp):
     try:
         return jsonify(resp.json()), resp.status_code
     except ValueError:
-        return {"error": "Database service tra ve du lieu khong hop le"}, 502
-    
+        return {"error": "Database service returned invalid data"}, 502
+
+# validate amount 
 def read_amount(data):
     try:
         amount = float(data.get("amount"))
     except (TypeError, ValueError):
-        return None, "amount bat buoc va phai la so"
+        return None, "Amount must be a number"
     if amount <= 0:
-        return None, "amount phai lon hon 0"
+        return None, "Amount must be greater than 0"
     return amount, None
 
 def check_account(account_id, label):
-    """(account, loi). account=None + loi=None => bo qua kiem tra."""
+    # call accounts service to get account info
     account = accounts.get_account(account_id)
     if account is None:
         if accounts.REQUIRE_ACCOUNTS:
-            return None, f"Tai khoan {label} ({account_id}) khong ton tai"
-        print("Bo qua kiem tra account %s - Accounts chua san sang", account_id)
+            return None, f"{label} account ({account_id}) does not exist"
+        print("Skipping account check %s - Accounts not ready yet", account_id)
         return None, None
     if accounts.is_frozen(account):
         state = account.get("account_status")
-        return None, f"Tai khoan {label} ({account_id}) dang o trang thai {state}"
+        return None, f"{label} account ({account_id}) is in state {state}"
     return account, None
         
 def announce(account, message):
     if account:
+        # Call notifications service to send a notification to the user
         notify.send(account.get("user_id"), message)
 
 # READ
+
+# Return list of transactions, optionally filtered by query parameters (account_id, status, type)
 @bp.get("/transactions")
 def list_transactions():
     return passthrough(db.list_transactions(request.args.to_dict()))
 
 
+# Return a single transaction by ID
 @bp.get("/transactions/<int:txn_id>")
 def get_transaction(txn_id):
     return passthrough(db.get_transaction(txn_id))
 
-
+# Return list of transactions for a specific account, optionally filtered by query parameters (status, type)
 @bp.get("/accounts/<int:account_id>/transactions")
 def account_transactions(account_id):
     params = request.args.to_dict()
     params["account_id"] = account_id
     return passthrough(db.list_transactions(params))
 
+
 # CREATE 
-def create_transaction():
-    return passthrough(db.create_transaction(request.get_json(silent=True) or {}))
+# @bp.post("/transactions")
+# def create_transaction():
+#     return passthrough(db.create_transaction(request.get_json(silent=True) or {}))
+
+# API endpoint to make a deposit
 @bp.post("/transactions/deposit")
 def deposit():
     data = payload()
     receiver = data.get("receiver_account_id") or data.get("account_id")
     if receiver is None:
-        return {"error": "receiver_account_id bat buoc"}, 400
+        return {"error": "receiver_account_id is required"}, 400
 
+    # validate amount
     amount, err = read_amount(data)
     if err:
         return {"error": err}, 400
-
-    account, err = check_account(receiver, "nhan")
+    # validate account exist
+    account, err = check_account(receiver, "Receiver")
     if err:
         return {"error": err}, 400
 
+    # call database service to create a transaction record with status PENDING]
+    # Deposit -> no need sender account 
     created = db.create_transaction({
         "transaction_type": "DEPOSIT",
         "receiver_account_id": receiver,
@@ -89,10 +102,13 @@ def deposit():
         return passthrough(created)
 
     txn = created.json()
+    #  call accounts service to adjust the balance of the receiver account
     ok = accounts.adjust_balance(receiver, amount) if account else True
+    # update the transaction status to COMPLETED or FAILED based on the result of the balance adjustment
     txn["status"] = "COMPLETED" if ok else "FAILED"
     db.update_transaction(txn["transaction_id"], {"status": txn["status"]})
 
+    # send a notification to the user about the deposit if the balance adjustment was successful
     if ok:
         announce(account, f"Deposit of ${amount:,.2f} AUD completed (txn #{txn['transaction_id']})")
     return jsonify(txn), 201 if ok else 502
@@ -102,20 +118,23 @@ def withdraw():
     data = payload()
     sender = data.get("sender_account_id") or data.get("account_id")
     if sender is None:
-        return {"error": "sender_account_id bat buoc"}, 400
+        return {"error": "sender_account_id is required"}, 400
 
     amount, err = read_amount(data)
     if err:
         return {"error": err}, 400
 
-    account, err = check_account(sender, "gui")
+    account, err = check_account(sender, "Sender")
     if err:
         return {"error": err}, 400
 
+    # check if the sender account has sufficient balance for the withdrawal
     if account is not None and float(account.get("balance", 0)) < amount:
-        return {"error": "Khong du so du",
+        return {"error": "Insufficient balance",
                 "balance": account.get("balance"), "requested": amount}, 400
 
+    # call database service to create a transaction record with status PENDING'
+    # Withdrawal -> no need receiver account
     created = db.create_transaction({
         "transaction_type": "WITHDRAWAL",
         "sender_account_id": sender,
@@ -127,10 +146,13 @@ def withdraw():
         return passthrough(created)
 
     txn = created.json()
+    # call accounts service to adjust the balance of the sender account
     ok = accounts.adjust_balance(sender, -amount) if account else True
+    # update the transaction status to COMPLETED or FAILED based on the result of the balance adjustment
     txn["status"] = "COMPLETED" if ok else "FAILED"
     db.update_transaction(txn["transaction_id"], {"status": txn["status"]})
 
+    # send a notification to the user about the withdrawal if the balance adjustment was successful
     if ok:
         announce(account, f"Withdrawal of ${amount:,.2f} AUD completed (txn #{txn['transaction_id']})")
     return jsonify(txn), 201 if ok else 502
@@ -138,35 +160,35 @@ def withdraw():
 
 @bp.post("/transactions/transfer")
 def transfer():
-    """Luong quan trong nhat - thuyet minh dung 7 buoc nay trong video."""
+    """The most important flow - walk through these 7 steps in the video."""
     data = payload()
     sender = data.get("sender_account_id")
     receiver = data.get("receiver_account_id")
 
     # 1. Validate payload
     if sender is None or receiver is None:
-        return {"error": "sender_account_id va receiver_account_id deu bat buoc"}, 400
+        return {"error": "sender_account_id and receiver_account_id are both required"}, 400
     if sender == receiver:
-        return {"error": "Khong the chuyen tien cho chinh tai khoan do"}, 400
+        return {"error": "Cannot transfer money to the same account"}, 400
 
     amount, err = read_amount(data)
     if err:
         return {"error": err}, 400
 
-    # 2. Kiem tra hai tai khoan qua API cua Binh
-    src, err = check_account(sender, "gui")
+    # 2. Check both accounts via the Accounts service API
+    src, err = check_account(sender, "Sender")
     if err:
         return {"error": err}, 400
-    dst, err = check_account(receiver, "nhan")
+    dst, err = check_account(receiver, "Receiver")
     if err:
         return {"error": err}, 400
 
-    # 3. Kiem tra du so du
+    # 3. Check sufficient balance
     if src is not None and float(src.get("balance", 0)) < amount:
-        return {"error": "Khong du so du de chuyen",
+        return {"error": "Insufficient balance to transfer",
                 "balance": src.get("balance"), "requested": amount}, 400
 
-    # 4. Ghi giao dich PENDING
+    # 4. Record the transaction as PENDING
     created = db.create_transaction({
         "transaction_type": "TRANSFER",
         "sender_account_id": sender,
@@ -181,28 +203,33 @@ def transfer():
     txn = created.json()
     txn_id = txn["transaction_id"]
 
-    # 5. Cap nhat balance hai ben
+    # 5. Update both account balances
     if src is not None:
+        # Case update balance of sender faild
         if not accounts.adjust_balance(sender, -amount):
+            # call database service to update the transaction status to FAILED
             db.update_transaction(txn_id, {"status": "FAILED"})
             txn["status"] = "FAILED"
-            return jsonify({"error": "Khong tru duoc tien tai khoan nguon",
+            return jsonify({"error": "Could not debit the source account",
                             "transaction": txn}), 502
-
+        # Case update balance of receiver faild, need to rollback the sender's balance
         if not accounts.adjust_balance(receiver, amount):
-            # Hoan tac thu cong: hai SQLite o hai service khac nhau
-            # khong the nam trong mot transaction chung.
+            # Manual rollback: the two SQLite databases live in separate
+            # services and cannot share a single transaction.
+            
+            # call accounts service to rollback the sender's balance
             accounts.adjust_balance(sender, amount)
+            # call database service to update the transaction status to FAILED
             db.update_transaction(txn_id, {"status": "FAILED"})
             txn["status"] = "FAILED"
-            return jsonify({"error": "Khong cong duoc tien tai khoan dich - da hoan tac",
+            return jsonify({"error": "Could not credit the destination account - rolled back",
                             "transaction": txn}), 502
 
-    # 6. Chot COMPLETED
+    # 6. Finalize as COMPLETED
     db.update_transaction(txn_id, {"status": "COMPLETED"})
     txn["status"] = "COMPLETED"
 
-    # 7. Thong bao - best effort, khong bao gio chan
+    # 7. Notifications - best effort, never blocking
     announce(src, f"You sent ${amount:,.2f} AUD to account {receiver} (txn #{txn_id})")
     announce(dst, f"You received ${amount:,.2f} AUD from account {sender} (txn #{txn_id})")
 
@@ -218,34 +245,35 @@ def update_transaction(txn_id):
 def delete_transaction(txn_id):
     return passthrough(db.delete_transaction(txn_id, request.args.to_dict()))
 
-# dont know what this is for, maybe for testing purposes
+# UI endpoint for listing transactions via HTMX
 @bp.get("/ui/transactions")
 def ui_transactions():
     resp = db.list_transactions(request.args.to_dict())
     if resp.status_code >= 400:
-        return fmt.alert("Khong tai duoc danh sach giao dich"), 200
+        return fmt.alert("Could not load the transaction list"), 200
     return fmt.transactions_table(resp.json().get("transactions", [])), 200
 
-
+# UI endpoint for deleting a transaction via HTMX
 @bp.delete("/ui/transactions/<int:txn_id>")
 def ui_delete(txn_id):
     db.delete_transaction(txn_id)
     resp = db.list_transactions({"limit": 100})
     return fmt.transactions_table(resp.json().get("transactions", [])), 200
 
+# UI endpoints for creating transactions via HTMX
 @bp.post("/ui/transactions/<string:kind>")
 def ui_create(kind):
-    """Nhan form tu HTMX, tra ve bang da lam moi hoac thong bao loi."""
     handlers = {"deposit": deposit, "withdraw": withdraw, "transfer": transfer}
     if kind not in handlers:
-        return fmt.alert("Loai giao dich khong hop le"), 200
+        return fmt.alert("Invalid transaction type"), 200
 
     result = handlers[kind]()
     body, code = result if isinstance(result, tuple) else (result, 200)
 
     if code >= 400:
+        # ensure data is a dictionary, whether body is a Response or a dict
         data = body.get_json() if hasattr(body, "get_json") else body
-        return fmt.alert(data.get("error", "Giao dich that bai")), 200
+        return fmt.alert(data.get("error", "Transaction failed")), 200
 
     rows = db.list_transactions({"limit": 100}).json().get("transactions", [])
     return fmt.transactions_table(rows), 200

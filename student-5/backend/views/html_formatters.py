@@ -1,10 +1,7 @@
-"""Sinh HTML fragment cho HTMX.
-
-HTMX khong doi JSON - no nhan HTML roi nhet thang vao DOM.
-Tach viec sinh HTML ra day de routes/ chi lo dieu huong.
-"""
-
+import os
 from html import escape
+
+BACKEND = os.environ.get("BACKEND_URL", "http://localhost:8205")
 
 STATUS_CLASS = {
     "COMPLETED": "pill pill-ok",
@@ -31,18 +28,18 @@ def transaction_row(txn):
   <td>{_cell(txn.get('description'))}</td>
   <td class="num">{_cell(txn.get('created_at'))}</td>
   <td>
-    <button hx-post="/ui/transactions/{txn['transaction_id']}/ai/explain"
+        <button hx-post="{BACKEND}/ui/transactions/{txn['transaction_id']}/ai/explain"
             hx-target="#ai-output" hx-swap="innerHTML">Explain</button>
-    <button hx-delete="/ui/transactions/{txn['transaction_id']}"
-            hx-target="#txn-table" hx-swap="outerHTML"
-            hx-confirm="Huy giao dich nay?">Cancel</button>
+    <button hx-delete="{BACKEND}/ui/transactions/{txn['transaction_id']}"
+            hx-target="#table-area" hx-swap="innerHTML"
+            hx-confirm="Cancel this transaction?">Cancel</button>
   </td>
 </tr>"""
 
 
 def transactions_table(rows):
     if not rows:
-        return '<table id="txn-table"><tbody><tr><td>Khong co giao dich nao.</td></tr></tbody></table>'
+        return '<table id="txn-table"><tbody><tr><td>No transactions.</td></tr></tbody></table>'
     body = "".join(transaction_row(r) for r in rows)
     return f"""
 <table id="txn-table">

@@ -15,7 +15,7 @@ SCHEMA_PATH = os.path.join(BASE_DIR, "schema.sql")
 # .../student-5/database/seed.sql
 SEED_PATH = os.path.join(BASE_DIR, "seed.sql")
 
-SERVICE_NAME = "student5-db"
+SERVICE_NAME = "Transaction database service"
 
 app = Flask(__name__)
 
@@ -33,7 +33,7 @@ def init_db():
     print("Init database from schema.sql and seed.sql")
     
     # ensure the directory exists
-    os.makedirs(os.path.dirname(DB_PATH) or ".", exist_ok=True)
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     con = sqlite3.connect(DB_PATH)
     
     try:
@@ -44,10 +44,11 @@ def init_db():
             con.executescript(f.read())
         con.commit()
         n = con.execute("SELECT COUNT(*) FROM transactions").fetchone()[0]
-        app.logger.info("Da tao database voi %d ban ghi", n)
+        app.logger.info("Created database with %d records", n)
     finally:
         con.close()
 
+# create a new connection to the database
 def get_conn():
     con = sqlite3.connect(DB_PATH)
     con.row_factory = sqlite3.Row
@@ -57,6 +58,7 @@ def get_conn():
 def row_to_dict(row):
     return dict(row) if row is not None else None
 
+# Check connection 
 @app.get("/health")
 def health():
     try:
@@ -68,6 +70,8 @@ def health():
         return {"status": "error", "service": SERVICE_NAME, "detail": str(exc)}, 500
 
 # READ
+
+# Get all transactions with given query parameters: account_id, type, status, limit
 @app.get("/transactions")
 def list_transactions():
     account_id = request.args.get("account_id", type=int)
@@ -110,7 +114,8 @@ def list_transactions():
         "transactions": [row_to_dict(r) for r in rows],
     }), 200
     
-    
+
+# Get a single transaction by ID
 @app.get("/transactions/<int:txn_id>")
 def get_transaction(txn_id):
     con = get_conn()
@@ -124,6 +129,8 @@ def get_transaction(txn_id):
     return jsonify(row_to_dict(row)), 200
 
 # CREATE
+
+# Create transation record
 @app.post("/transactions")
 def create_transaction():
 #   Data validation, no backend logic
@@ -131,19 +138,19 @@ def create_transaction():
 
     txn_type = str(data.get("transaction_type", "")).upper()
     if txn_type not in VALID_TYPES:
-        return {"error": f"transaction_type bat buoc, chi nhan: {sorted(VALID_TYPES)}"}, 400
+        return {"error": f"transaction_type is required, only accepts: {sorted(VALID_TYPES)}"}, 400
 
     try:
         amount = float(data.get("amount"))
     except (TypeError, ValueError):
-        return {"error": "amount bat buoc va phai la so"}, 400
+        return {"error": "amount is required and must be a number"}, 400
 
     if amount <= 0:
-        return {"error": "amount phai lon hon 0"}, 400
+        return {"error": "amount must be greater than 0"}, 400
 
     status = str(data.get("status", "PENDING")).upper()
     if status not in VALID_STATUSES:
-        return {"error": f"status khong hop le. Chi nhan: {sorted(VALID_STATUSES)}"}, 400
+        return {"error": f"Invalid status. Only accepts: {sorted(VALID_STATUSES)}"}, 400
 
     sender = data.get("sender_account_id")
     receiver = data.get("receiver_account_id")
@@ -167,7 +174,7 @@ def create_transaction():
         ).fetchone()
     except sqlite3.IntegrityError as exc:
         con.close()
-        return {"error": "Vi pham rang buoc du lieu", "detail": str(exc)}, 400
+        return {"error": "Data constraint violation", "detail": str(exc)}, 400
     con.close()
 
     # 201 Created - standard REST status for creation
@@ -176,15 +183,9 @@ def create_transaction():
 # Update
 @app.put("/transactions/<int:txn_id>")
 def update_transaction(txn_id):
-    """Partial update.
-
-    Only description and status can be edited. The amount and accounts
-    of a recorded transaction cannot be changed - that's an accounting
-    principle: to correct an amount, create a new adjustment
-    transaction instead of editing history.
-
-    updated_at is updated automatically via the TRIGGER in schema.sql.
-    """
+    #  Only description and status can be edited.
+    # updated_at is updated automatically via the TRIGGER in schema.sql.
+   
     data = request.get_json(silent=True) or {}
 
     fields, params = [], []
@@ -196,12 +197,12 @@ def update_transaction(txn_id):
     if "status" in data:
         status = str(data["status"]).upper()
         if status not in VALID_STATUSES:
-            return {"error": f"status khong hop le. Chi nhan: {sorted(VALID_STATUSES)}"}, 400
+            return {"error": f"Invalid status. Only accepts: {sorted(VALID_STATUSES)}"}, 400
         fields.append("status = ?")
         params.append(status)
 
     if not fields:
-        return {"error": "Khong co truong nao de cap nhat (chi nhan: description, status)"}, 400
+        return {"error": "No fields to update (only accepts: description, status)"}, 400
 
     con = get_conn()
     exists = con.execute(
@@ -209,7 +210,7 @@ def update_transaction(txn_id):
     ).fetchone()
     if exists is None:
         con.close()
-        return {"error": f"Khong tim thay transaction {txn_id}"}, 404
+        return {"error": f"Transaction {txn_id} not found"}, 404
 
     params.append(txn_id)
     con.execute(
@@ -227,15 +228,8 @@ def update_transaction(txn_id):
 
 @app.delete("/transactions/<int:txn_id>")
 def delete_transaction(txn_id):
-    """Default is SOFT DELETE: change status to CANCELLED.
-
-    Reason: in banking, nobody permanently deletes financial records -
-    an audit trail must be kept for reconciliation. Matches the term
-    'Cancel Transaction' in the feature registration form.
-
-    Add ?hard=true for a permanent delete (used to demonstrate the D
-    in CRUD in the demo video).
-    """
+    # SOFT DELETE: change status to CANCELLED
+    # Add ?hard=true for a permanent delete
     hard = request.args.get("hard", "false").lower() == "true"
 
     con = get_conn()
@@ -244,17 +238,17 @@ def delete_transaction(txn_id):
     ).fetchone()
     if row is None:
         con.close()
-        return {"error": f"Khong tim thay transaction {txn_id}"}, 404
+        return {"error": f"Transaction {txn_id} not found"}, 404
 
     if hard:
         con.execute("DELETE FROM transactions WHERE transaction_id = ?", (txn_id,))
         con.commit()
         con.close()
-        return {"message": f"Da xoa han transaction {txn_id}", "mode": "hard"}, 200
+        return {"message": f"Permanently deleted transaction {txn_id}", "mode": "hard"}, 200
 
     if row["status"] == "COMPLETED":
         con.close()
-        return {"error": "Khong the huy giao dich da COMPLETED"}, 409
+        return {"error": "Cannot cancel a COMPLETED transaction"}, 409
 
     con.execute(
         "UPDATE transactions SET status = 'CANCELLED' WHERE transaction_id = ?",
@@ -266,7 +260,7 @@ def delete_transaction(txn_id):
     ).fetchone()
     con.close()
 
-    return jsonify({"message": f"Da huy transaction {txn_id}",
+    return jsonify({"message": f"Cancelled transaction {txn_id}",
                     "mode": "soft",
                     "transaction": row_to_dict(updated)}), 200
 
