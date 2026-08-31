@@ -14,19 +14,31 @@ COLLECTORS = {
 }
 
 
+#just prints out mode label, step and message
 def _stage(mode_label: str, step: str, message: str) -> None:
     print(f"[{mode_label}][{step}] {message}")
 
 
+
+# 31:51 lab 4: this organises how the scripts are going to run, 
+# you will target an app, agent or model within the group to execute
 def run_mode(mode: ModeConfig, app_dir: Path, repo_root: Path, prompts: PromptRegistry, ai: AIRunner) -> str:
     _stage(mode.label, "START", "Starting review flow")
     _stage(mode.label, "OBSERVE", "Collecting evidence")
+
     collector = COLLECTORS[mode.key]
     ok, evidence = collector(app_dir, repo_root)
     if not ok:
         _stage(mode.label, "OBSERVE", "Failed")
         return f"OBSERVE FAILED: {evidence}"
     _stage(mode.label, "OBSERVE", "Complete")
+
+
+    #selection 1 or 2 (key = 1 or 2)
+    #maybe I will seperate these 
+    # in lab 4 they are the same so I might just leave them like this 
+
+    #There is an error happneing either here or in main/py of the agentic loop
 
     if mode.key in {"db", "endpoints"}:
         _stage(mode.label, "PROMPTS", f"Loading prompt family: {mode.prompt_family}")
@@ -42,6 +54,8 @@ def run_mode(mode: ModeConfig, app_dir: Path, repo_root: Path, prompts: PromptRe
 
         _stage(mode.label, "LLM", "Running implementation model")
         output, err = ai.call(system_prompt, user_prompt, review=False)
+
+        
         if err:
             _stage(mode.label, "LLM", "Failed")
             return f"MODEL FAILED: {err}"
@@ -49,6 +63,9 @@ def run_mode(mode: ModeConfig, app_dir: Path, repo_root: Path, prompts: PromptRe
         _stage(mode.label, "DONE", "Review complete")
         return f"OBSERVE: {evidence}\n\nREVIEW: {output}"
 
+
+    
+    #selection 3: (architecture obviously)
     if mode.key == "architecture":
         _stage(mode.label, "PROMPTS", f"Loading prompt family: {mode.prompt_family}")
         system_prompt = prompts.read(mode.prompt_family, mode.implementation_prompts[0])

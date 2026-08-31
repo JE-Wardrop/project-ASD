@@ -1,22 +1,23 @@
 
 
 Application Name:
-Student Enrolment App
+Card Management App
 
 Database Fields:
-- student_id
-- student_name
-- subject_code
+- card_id 
+- user_id 
+- card_number 
+- card_type 
+- expiry_date 
+- status 
+- balance 
 
 Endpoints:
-- GET /students
-- GET /students/{student_id}
-- GET /students/by-id
-- GET /students/by-subject
-- POST /ask
-- POST /ask-with-context
+- GET /freeze
+- GET /freeze/{card_id}
+- GET /by-card-id
 
 These are the ONLY features that exist. Do not mention create, add, update, delete, or edit operations for students — they are not implemented.
 
 Task:
-Explain the Student Enrolment App using only the supplied context above. Maximum 60 words.
+Explain the Card Management App using only the supplied context above. Maximum 60 words.

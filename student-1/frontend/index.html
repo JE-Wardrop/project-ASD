@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Card Management Center</title>
+    <!-- <link rel="stylesheet" href="shared/frontend/styles.css"> -->
+
+    <!-- run at http://127.0.0.1:8101/ -->
+
+    <!-- go to project-ASD -->
+    <!-- docker-compose build
+    docker compose up -d
+    docker compose down -->
+
+    <!-- go to shared/frontend and then run:  -->
+    <!-- python -m http.server 8080  -->
+
+    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+    <link rel="stylesheet" href="shared/styles.css"> 
+</head>
+
+
+<body>
+<main class="app-shell">
+    <header class="app-header">
+        <h1>Card Management Center</h1>
+    </header>
+
+    <section class="sec-add-class">
+        <nav class="nav-add-class" aria-label="Application tabs">
+        </nav>
+
+
+        <div class="load">
+            <button hx-get="/cm_main.html" hx-target="#some-container">
+                Load
+            </button>
+        </div>
+        
+
+        <div class="tab-add-content">
+
+            <div class="tab-add-content">
+                <iframe src="/cm_details.html" width=1000px height=1000px title="Edit Your Card Details here"></iframe>
+                <iframe src="/cm_freeze.html" title="Freeze or Unfreeze your card here"></iframe>
+                <iframe src="/cm_model.html" title="Ask About Your Card Details"></iframe>
+            </div>
+
+        </div>
+    </section>
+
+
+
+</main>
+
+<script>
+
+</script>
+
+</body>
+</html>
