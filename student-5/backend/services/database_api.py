@@ -4,11 +4,11 @@ DB_URL = os.environ.get("DB_URL", "http://localhost:8305")
 
 TIMEOUT = 5
 def _request(method, path, **kwargs):
-    """Database la phu thuoc CUNG - khong co no thi khong lam gi duoc."""
+    """The Database is a HARD dependency - nothing works without it."""
     try:
         return requests.request(method, f"{DB_URL}{path}", timeout=TIMEOUT, **kwargs)
     except requests.RequestException as exc:
-        print("Database service khong phan hoi: %s", exc)
+        print("Database service did not respond: %s", exc)
         
 def health():
     return _request("GET", "/health")

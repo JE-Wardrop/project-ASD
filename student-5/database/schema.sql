@@ -2,22 +2,22 @@ DROP TABLE IF EXISTS transactions;
 
 CREATE TABLE transactions (
     transaction_id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    sender_account_id    INTEGER,          -- NULL khi DEPOSIT  (tien tu ngoai vao)
-    receiver_account_id  INTEGER,          -- NULL khi WITHDRAWAL (tien ra ngoai)
+    sender_account_id    INTEGER,          -- NULL for DEPOSIT  (money coming in from outside)
+    receiver_account_id  INTEGER,          -- NULL for WITHDRAWAL (money going out)
 
     transaction_type     TEXT    NOT NULL
         CHECK (transaction_type IN ('DEPOSIT', 'WITHDRAWAL', 'TRANSFER')),
 
-    -- Luon la so duong. Chieu tien suy ra tu transaction_type,
-    -- khong bao gio luu so am.
+    -- Always a positive number. The direction of money is derived from
+    -- transaction_type; a negative amount is never stored.
     amount               REAL    NOT NULL CHECK (amount > 0),
 
     currency             TEXT    NOT NULL DEFAULT 'AUD',
 
-    -- PENDING   : vua tao, chua cham vao balance
-    -- COMPLETED : balance ben Accounts da cap nhat xong
-    -- FAILED    : khong du tien / account bi freeze / Accounts service loi
-    -- CANCELLED : nguoi dung huy (DELETE = soft delete)
+    -- PENDING   : just created, balance not touched yet
+    -- COMPLETED : balance on the Accounts side has been updated
+    -- FAILED    : insufficient funds / account frozen / Accounts service error
+    -- CANCELLED : cancelled by the user (DELETE = soft delete)
     status               TEXT    NOT NULL DEFAULT 'PENDING'
         CHECK (status IN ('PENDING', 'COMPLETED', 'FAILED', 'CANCELLED')),
 
@@ -26,7 +26,7 @@ CREATE TABLE transactions (
     created_at           TEXT    NOT NULL DEFAULT (datetime('now')),
     updated_at           TEXT    NOT NULL DEFAULT (datetime('now')),
 
-    -- Rang buoc theo loai giao dich: dam bao du lieu khong bao gio vo nghia
+    -- Constraint by transaction type: ensures the data is never meaningless
     CHECK (
         (transaction_type = 'DEPOSIT'
              AND sender_account_id IS NULL
@@ -41,15 +41,15 @@ CREATE TABLE transactions (
     )
 );
 
--- Index cho cac truy van thuong dung nhat cua frontend:
--- lich su theo tai khoan, va bo loc theo type/status.
+-- Indexes for the frontend's most common queries:
+-- history by account, and filtering by type/status.
 CREATE INDEX idx_txn_sender    ON transactions (sender_account_id);
 CREATE INDEX idx_txn_receiver  ON transactions (receiver_account_id);
 CREATE INDEX idx_txn_type      ON transactions (transaction_type);
 CREATE INDEX idx_txn_status    ON transactions (status);
 CREATE INDEX idx_txn_created   ON transactions (created_at DESC);
 
--- Tu dong cap nhat updated_at moi khi co UPDATE
+-- Automatically update updated_at on every UPDATE
 CREATE TRIGGER trg_txn_updated_at
 AFTER UPDATE ON transactions
 FOR EACH ROW

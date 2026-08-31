@@ -1,12 +1,3 @@
--- ============================================================
--- Student 5 — Transaction Management
--- Du lieu mau. Spec yeu cau toi thieu 10 ban ghi; o day co 14
--- de phu du 3 transaction_type va ca 4 gia tri status.
---
--- LUU Y: account_id 1001-1006 phai KHOP voi seed data cua
--- student-2 (Bank Account Management). Neu Binh dung day so
--- khac, sua lai o day truoc khi demo.
--- ============================================================
 
 INSERT INTO transactions
     (sender_account_id, receiver_account_id, transaction_type, amount, currency, status, description, created_at)
@@ -23,7 +14,7 @@ VALUES
     (1003, NULL, 'WITHDRAWAL', 5000.00, 'AUD', 'FAILED',    'Insufficient funds',             '2026-08-10 08:45:00'),
     (1004, NULL, 'WITHDRAWAL',   80.00, 'AUD', 'CANCELLED', 'Cancelled by customer',          '2026-08-12 19:55:00'),
 
-    -- ---------- TRANSFER (ca hai account) ----------
+    -- ---------- TRANSFER (both accounts set) ----------
     (1001, 1002, 'TRANSFER',    450.00, 'AUD', 'COMPLETED', 'Rent share - August',            '2026-08-14 10:00:00'),
     (1002, 1003, 'TRANSFER',     75.25, 'AUD', 'COMPLETED', 'Dinner split',                   '2026-08-16 20:18:00'),
     (1003, 1004, 'TRANSFER',   1500.00, 'AUD', 'COMPLETED', 'Car deposit payment',            '2026-08-18 13:33:00'),

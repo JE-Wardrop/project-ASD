@@ -1,11 +1,14 @@
 import os
 from flask import Flask
+from flask_cors import CORS
+
 from routes.normal_ui import bp as normal_ui_bp
 from services import database_api as db
 
 SERVICE_NAME = "student5-backend"
 def create_app():
     app = Flask(__name__)
+    CORS(app)
     app.register_blueprint(normal_ui_bp)
     
     @app.get("/health")
@@ -21,7 +24,7 @@ def create_app():
     
     @app.errorhandler(404)
     def not_found(_):
-        return {"error": "Endpoint khong ton tai"}, 404
+        return {"error": "Endpoint does not exist"}, 404
     
     return app
 
