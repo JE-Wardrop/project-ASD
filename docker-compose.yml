@@ -1,26 +1,18 @@
-# ============================================================
-# Digital Banking System - Group 44 - Release 0
-# MOT file compose duy nhat cho ca nhom.
-#
-# Quy uoc:
-#   - Moi container lang nghe cong 8000 BEN TRONG network
-#   - Host port: frontend 810N, backend 820N, database 830N
-#   - Container goi nhau bang TEN service, khong dung localhost
-#
-# Chay:  docker compose up --build
-# ============================================================
-
+#  Conventions:
+#   - Every container listens on port 8000 INSIDE the network
+#   - Host ports: frontend 810N, backend 820N, database 830N (N = student number)
+#   - Containers call each other by SERVICE NAME, not localhost
 services:
 
-  # ---------- Trang chu dung chung ----------
-  shared-index:
+  # Shared landing page 
+  shared-index:   # service name
     build: ./shared/frontend
-    container_name: shared-index
+    container_name: shared-index      # container name
     ports:
       - "8080:8000"
     restart: unless-stopped
 
-  # ================= STUDENT 5 - Gia Tran - Transaction Management =================
+  #  STUDENT 5 - Gia Tran - Transaction Management 
 
   student5-db:
     build: ./student-5/database
@@ -28,7 +20,7 @@ services:
     ports:
       - "8305:8000"
     volumes:
-      - student5-data:/data          # du lieu song sot qua moi lan rebuild
+      - student5-data:/data       
     restart: unless-stopped
 
   student5-backend:
@@ -40,8 +32,8 @@ services:
       DB_URL: http://student5-db:8000
       ACCOUNTS_URL: http://student2-backend:8000
       NOTIFICATIONS_URL: http://student3-backend:8000
-      BACKEND_PUBLIC_URL: http://localhost:8205
-      REQUIRE_ACCOUNTS: "false"      # doi thanh "true" khi service cua Binh chay
+      BACKEND_URL: http://localhost:8205
+      REQUIRE_ACCOUNTS: "false"      # waiting for Binh service to run
     depends_on:
       - student5-db
     restart: unless-stopped
@@ -55,13 +47,13 @@ services:
       - student5-backend
     restart: unless-stopped
 
-  # ================= CAC BAN KHAC THEM SERVICE CUA MINH VAO DAY =================
+  # OTHER MEMBERS ADD YOUR SERVICES BELOW 
+  #                                  Frontend/Backend/Database 
   # student1-*  Juno  - Cards          8101 / 8201 / 8301
   # student2-*  Binh  - Accounts       8102 / 8202 / 8302
   # student3-*  Ivan  - Notifications  8103 / 8203 / 8303
   # student4-*  Sang  - Users          8104 / 8204 / 8304
-  # ai-service                         8090
-  # ollama                             11434
+
 
 volumes:
   student5-data:
