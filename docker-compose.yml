@@ -1,8 +1,14 @@
 # Student 1
 # Edit docker ports 8080:80 -> 8102:80
-#update contexts
+# backend context may not be needed to update; as agentic loop is not in showcase and is run on local machine 
+#
 
-
+  # OTHER MEMBERS ADD YOUR SERVICES BELOW 
+  #                                  Frontend/Backend/Database 
+  # student1-*  Juno  - Cards          8101 / 8201 / 8301
+  # student2-*  Binh  - Accounts       8102 / 8202 / 8302
+  # student3-*  Ivan  - Notifications  8103 / 8203 / 8303
+  # student4-*  Sang  - Users          8104 / 8204 / 8304
 
 services:
   frontend-service:
@@ -10,7 +16,7 @@ services:
       context: ./student-1/frontend
     container_name: frontend
     ports:
-      - "8080:80"
+      - "8101:80"
     depends_on:
       - backend
     networks:
@@ -23,7 +29,7 @@ services:
       dockerfile: dockerfile
     container_name: backend
     ports:
-      - "5001:5001"
+      - "8201:5001"
     environment:
       DATABASE_SERVICE_URL: http://database:5002
       OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
@@ -41,7 +47,7 @@ services:
       context: ./student-1/database
     container_name: database
     ports:
-      - "5002:5002"
+      - "8301:5002"
     volumes:
       - database_data:/student-1/database/data
     networks:
