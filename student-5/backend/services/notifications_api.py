@@ -11,6 +11,7 @@ def send(user_id, message, notification_type="TRANSACTION"):
     if user_id is None:
         return False
     try:
+        # call Notifications service to send notification
         resp = requests.post(
             f"{NOTIFICATIONS_URL}/notifications",
             json={
@@ -23,5 +24,5 @@ def send(user_id, message, notification_type="TRANSACTION"):
         )
         return resp.status_code < 400
     except requests.RequestException as exc:
-        print("Khong gui duoc notification: %s", exc)
+        print("Could not send notification: %s", exc)
         return False

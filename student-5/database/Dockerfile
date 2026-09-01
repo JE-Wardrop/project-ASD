@@ -1,16 +1,18 @@
 FROM python:3.11-slim
 
-
 WORKDIR /app
 
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# COPY app.py .
 COPY . .
 
+RUN mkdir -p /data
 
-EXPOSE 5002
+ENV DB_PATH=/data/transactions.db
 
+ENV PORT=8000
+
+EXPOSE 8000
 CMD ["python", "app.py"]

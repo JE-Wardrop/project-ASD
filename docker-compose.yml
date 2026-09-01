@@ -1,22 +1,77 @@
-services:
+# Edit docker ports 8080:80 -> 8102:80
+# backend context may not be needed to update; as agentic loop is not in showcase and is run on local machine
 
-  # ===========================================================================
-  # Shared unified home page (index.html) + shared CSS theme.
-  # Every student's frontend links to http://localhost:8080/styles.css.
-  # ===========================================================================
-  shared-frontend:
-    build:
-      context: ./shared/frontend
-    container_name: shared-frontend
+
+#  Conventions:
+#   - Every container listens on port 8000 INSIDE the network
+#   - Host ports: frontend 810N, backend 820N, database 830N (N = student number)
+#   - Containers call each other by SERVICE NAME, not localhost
+#
+
+  # OTHER MEMBERS ADD YOUR SERVICES BELOW
+  #                                  Frontend/Backend/Database
+  # student1-*  Juno  - Cards          8101 / 8201 / 8301
+  # student2-*  Binh  - Accounts       8102 / 8202 / 8302
+  # student3-*  Ivan  - Notifications  8103 / 8203 / 8303
+  # student4-*  Sang  - Users          8104 / 8204 / 8304
+
+
+# Student 1
+
+services:
+  shared-index:   # service name
+    build: ./shared/frontend
+    container_name: shared-index      # container name
     ports:
       - "8080:8000"
-    networks:
-      - banking-network
     restart: unless-stopped
 
-  # ===========================================================================
-  # Student 2 - Feature 2: Bank Account Management
-  # ===========================================================================
+
+  # Student 1
+  frontend-service:
+    build:
+      context: ./student-1/frontend
+    container_name: frontend
+    ports:
+      - "8101:80"
+    depends_on:
+      - backend
+    networks:
+      - card-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./student-1/backend
+      dockerfile: dockerfile
+    container_name: backend
+    ports:
+      - "8201:5001"
+    environment:
+      DATABASE_SERVICE_URL: http://database:5002
+      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+      OLLAMA_MODEL: qwen2.5:0.5b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - database
+    networks:
+      - card-network
+    restart: unless-stopped
+
+  database:
+    build:
+      context: ./student-1/database
+    container_name: database
+    ports:
+      - "8301:5002"
+    volumes:
+      - database_data:/student-1/database/data
+    networks:
+      - card-network
+    restart: unless-stopped
+
+  # Student 2 (Binh - Accounts)
   student2-frontend:
     build:
       context: ./student-2/frontend
@@ -65,15 +120,106 @@ services:
           - student2-database
     restart: unless-stopped
 
-  # ===========================================================================
-  # Student 1 / 3 / 4 / 5 - add your frontend / backend / database services
-  # below following the same pattern (own container_name, own host ports,
-  # same `banking-network`).
-  # ===========================================================================
-
 volumes:
+  database_data:
   student2_db_data:
 
 networks:
+  card-network:
+    driver: bridge
   banking-network:
     driver: bridge
+
+#Student 3
+  # database3:
+  #   build: ./student-3/database
+  #   container_name: database3
+  #   ports:
+  #     - "5002:5000"
+  #   volumes:
+  #     - ./student-3/database:/app
+  #   networks:
+  #     - mynetwork
+
+  # frontend3:
+  #   build: ./student-3/frontend
+  #   container_name: frontend3
+  #   ports:
+  #     - "8002:8000"
+  #   volumes:
+  #     - ./student-3/frontend:/app
+  #   networks:
+  #     - mynetwork
+
+  #   backend3:
+  #     build: ./student-3/backend
+  #     container_name: backend3
+  #     ports:
+  #       - "8082:8080"
+  #     volumes:
+  #       - ./student-3/backend:/app
+  #     networks:
+  #       - mynetwork
+
+
+#Student 4
+# database:
+#     build: ./student-1/database
+#     container_name: database
+#     ports:
+#       - "5000:5000"
+#     volumes:
+#       - ./student-1/database:/app
+#     networks:
+#       - mynetwork
+
+#   frontend:
+#     build: ./MSD-FOUR/frontend
+#     container_name: frontend
+#     ports:
+#       - "8000:8000"
+#     volumes:
+#       - ./student-1/frontend:/app
+#     networks:
+#       - mynetwork
+
+#     backend:
+#       build: ./student-1/backend
+#       container_name: backend
+#       ports:
+#         - "8080:8080"
+#       volumes:
+#         - ./student-1/backend:/app
+#       networks:
+#         - mynetwork
+
+#Studnet 5
+# database:
+#     build: ./student-5/database
+#     container_name: database
+#     ports:
+#       - "5000:5000"
+#     volumes:
+#       - ./student-1/database:/app
+#     networks:
+#       - mynetwork
+
+#   frontend:
+#     build: ./student-15frontend
+#     container_name: frontend
+#     ports:
+#       - "8000:8000"
+#     volumes:
+#       - ./student-1/frontend:/app
+#     networks:
+#       - mynetwork
+
+#     backend:
+#       build: ./student-5/backend
+#       container_name: backend
+#       ports:
+#         - "8080:8080"
+#       volumes:
+#         - ./student-1/backend:/app
+#       networks:
+#         - mynetwork
