@@ -1,5 +1,5 @@
 # Edit docker ports 8080:80 -> 8102:80
-# backend context may not be needed to update; as agentic loop is not in showcase and is run on local machine 
+# backend context may not be needed to update; as agentic loop is not in showcase and is run on local machine
 
 
 #  Conventions:
@@ -8,8 +8,8 @@
 #   - Containers call each other by SERVICE NAME, not localhost
 #
 
-  # OTHER MEMBERS ADD YOUR SERVICES BELOW 
-  #                                  Frontend/Backend/Database 
+  # OTHER MEMBERS ADD YOUR SERVICES BELOW
+  #                                  Frontend/Backend/Database
   # student1-*  Juno  - Cards          8101 / 8201 / 8301
   # student2-*  Binh  - Accounts       8102 / 8202 / 8302
   # student3-*  Ivan  - Notifications  8103 / 8203 / 8303
@@ -71,43 +71,64 @@ services:
       - card-network
     restart: unless-stopped
 
+  # Student 2 (Binh - Accounts)
+  student2-frontend:
+    build:
+      context: ./student-2/frontend
+    container_name: student2-frontend
+    ports:
+      - "8102:80"
+    depends_on:
+      - student2-backend
+    networks:
+      - banking-network
+    restart: unless-stopped
+
+  student2-backend:
+    build:
+      context: ./student-2
+      dockerfile: backend/dockerfile
+    container_name: student2-backend
+    ports:
+      - "8202:5001"
+    environment:
+      DATABASE_SERVICE_URL: http://student2-database:5002
+      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+      OLLAMA_MODEL: qwen2.5:0.5b
+      OLLAMA_REVIEW_MODEL: llama3.1:8b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - student2-database
+    networks:
+      - banking-network
+    restart: unless-stopped
+
+  student2-database:
+    build:
+      context: ./student-2/database
+    container_name: student2-database
+    ports:
+      - "8302:5002"
+    environment:
+      DB_PATH: /app/data/accounts.db
+    volumes:
+      - student2_db_data:/app/data
+    networks:
+      banking-network:
+        aliases:
+          - student2-database
+    restart: unless-stopped
+
 volumes:
   database_data:
+  student2_db_data:
 
 networks:
   card-network:
     driver: bridge
-
-#Student 2
-  # database2:
-  #   build: ./student-2/database
-  #   container_name: database2
-  #   ports:
-  #     - "5001:5000"
-  #   volumes:
-  #     - ./student-2/database:/app
-  #   networks:
-  #     - mynetwork
-
-  # frontend2:
-  #   build: ./student-2/frontend
-  #   container_name: frontend2
-  #   ports:
-  #     - "8001:8000"
-  #   volumes:
-  #     - ./student-2/frontend:/app
-  #   networks:
-  #     - mynetwork
-
-  #   backend2:
-  #     build: ./student-2/backend
-  #     container_name: backend2
-  #     ports:
-  #       - "8081:8080"
-  #     volumes:
-  #       - ./student-2/backend:/app
-  #     networks:
-  #       - mynetwork
+  banking-network:
+    driver: bridge
 
 #Student 3
   # database3:
@@ -141,7 +162,7 @@ networks:
   #       - mynetwork
 
 
-#Student 4 
+#Student 4
 # database:
 #     build: ./student-1/database
 #     container_name: database
