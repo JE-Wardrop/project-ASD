@@ -29,6 +29,8 @@ services:
     ports:
       - "8205:8000"
     environment:
+      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+      OLLAMA_MODEL: qwen2.5:0.5b
       DB_URL: http://student5-db:8000
       ACCOUNTS_URL: http://student2-backend:8000
       NOTIFICATIONS_URL: http://student3-backend:8000
@@ -36,6 +38,8 @@ services:
       REQUIRE_ACCOUNTS: "false"      # waiting for Binh service to run
     depends_on:
       - student5-db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
   student5-frontend:

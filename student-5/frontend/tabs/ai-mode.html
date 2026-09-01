@@ -1,35 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="http://localhost:8080/styles.css">
-  <link rel="stylesheet" href="../css/styles.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.12/htmx.min.js"></script>
-</head>
-<body class="tab-body">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="http://localhost:8080/styles.css" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.12/htmx.min.js"></script>
+  </head>
+  <body class="tab-body">
+    <section class="card">
+      <h2>Money flow summary</h2>
+      <p>
+        Enter an account number and our assistant reads that account&rsquo;s
+        completed transactions, then writes you a short summary in plain
+        English: how much came in, how much went out, and the single largest
+        movement.
+      </p>
+      <p class="muted">
+        The figures are calculated by the banking system itself. The assistant
+        only puts them into words &mdash; it never estimates or invents an
+        amount.
+      </p>
 
-  <section class="card">
-    <h2>AI Mode</h2>
-    <p class="muted">
-      Frontend &rarr; Backend/API &rarr; Ollama &rarr; approved LLM.
-      Summarise the money flow of an account in plain English.
-    </p>
+      <form
+        class="filter-bar"
+        hx-post="http://localhost:8205/ai/analyse"
+        hx-target="#ai-output"
+        hx-swap="innerHTML"
+        hx-indicator="#ai-spinner"
+      >
+        <label
+          >Account
+          <input type="number" name="account_id" value="1001" />
+        </label>
+        <button type="submit">Summarise this account</button>
+        <span id="ai-spinner" class="htmx-indicator">Thinking&hellip;</span>
+      </form>
 
-    <form class="filter-bar"
-          hx-post="http://localhost:8205/ui/transactions/ai/analyse"
-          hx-target="#ai-output" hx-swap="innerHTML"
-          hx-indicator="#ai-spinner">
-      <label>Account
-        <input type="number" name="account_id" value="1001">
-      </label>
-      <button type="submit">Analyse money flow</button>
-      <span id="ai-spinner" class="htmx-indicator">Thinking&hellip;</span>
-    </form>
-
-    <div id="ai-output">
-      <p class="muted">No result yet. Use the button above to call AI-Mode.</p>
-    </div>
-  </section>
-
-</body>
+      <div id="ai-output">
+        <p class="muted">
+          No summary yet. Choose an account and select Summarise this account.
+        </p>
+      </div>
+    </section>
+  </body>
 </html>
