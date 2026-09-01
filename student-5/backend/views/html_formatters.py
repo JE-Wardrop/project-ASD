@@ -28,7 +28,7 @@ def transaction_row(txn):
   <td>{_cell(txn.get('description'))}</td>
   <td class="num">{_cell(txn.get('created_at'))}</td>
   <td>
-        <button hx-post="{BACKEND}/ui/transactions/{txn['transaction_id']}/ai/explain"
+        <button hx-post="{BACKEND}/transactions/{txn['transaction_id']}/ai/explain"
             hx-target="#ai-output" hx-swap="innerHTML">Explain</button>
     <button hx-delete="{BACKEND}/ui/transactions/{txn['transaction_id']}"
             hx-target="#table-area" hx-swap="innerHTML"

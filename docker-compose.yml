@@ -120,9 +120,55 @@ services:
           - student2-database
     restart: unless-stopped
 
+  #  STUDENT 5 - Gia Tran - Transaction Management
+
+  student5-db:
+    build: ./student-5/database
+    container_name: student5-db
+    ports:
+      - "8305:8000"
+    volumes:
+      - student5-data:/data
+    networks:
+      - banking-network
+    restart: unless-stopped
+
+  student5-backend:
+    build: ./student-5/backend
+    container_name: student5-backend
+    ports:
+      - "8205:8000"
+    environment:
+      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+      OLLAMA_MODEL: qwen2.5:0.5b
+      DB_URL: http://student5-db:8000
+      ACCOUNTS_URL: http://student2-backend:8000
+      NOTIFICATIONS_URL: http://student3-backend:8000
+      BACKEND_URL: http://localhost:8205
+      REQUIRE_ACCOUNTS: "false"      # waiting for Binh service to run
+    depends_on:
+      - student5-db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - banking-network
+    restart: unless-stopped
+
+  student5-frontend:
+    build: ./student-5/frontend
+    container_name: student5-frontend
+    ports:
+      - "8105:8000"
+    depends_on:
+      - student5-backend
+    networks:
+      - banking-network
+    restart: unless-stopped
+
 volumes:
   database_data:
   student2_db_data:
+  student5-data:
 
 networks:
   card-network:

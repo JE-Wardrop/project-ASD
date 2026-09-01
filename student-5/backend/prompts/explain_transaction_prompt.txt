@@ -1,0 +1,12 @@
+Write 2 to 3 short sentences telling the customer what this transaction was.
+
+Say what happened, how much money was involved, which account or accounts it
+touched, and what its current state means for them right now.
+
+This is the style required:
+
+  You transferred $250.00 to account 1002 on 14 August for a rent share.
+  The transfer completed successfully, so the money has already left your
+  account.
+
+Now write that kind of message for the transaction below.

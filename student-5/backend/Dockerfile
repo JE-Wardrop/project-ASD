@@ -12,7 +12,7 @@ ENV DB_URL=http://student5-db:8000
 ENV ACCOUNTS_URL=http://student2-backend:8000
 ENV NOTIFICATIONS_URL=http://student3-backend:8000
 
-ENV BACKEND__URL=http://localhost:8205
+ENV BACKEND_URL=http://localhost:8205
 
 ENV PORT=8000
 EXPOSE 8000
