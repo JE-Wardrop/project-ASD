@@ -250,7 +250,7 @@ def delete_card(card_id):
 # ---------------------------------------------------------------------------
 
 
-
+@app.get("/cards/freeze")
 def freeze_card (card_number, account_holder, card_type, expiry_date,status):
     payload = request.get_json(silent=True) or {}
 
@@ -271,7 +271,7 @@ def freeze_card (card_number, account_holder, card_type, expiry_date,status):
     conn.close()
     
 
-
+@app.get("/cards/unfreeze")
 def unfreeze_card (card_number, account_holder, card_type, expiry_date,status):
     payload = request.get_json(silent=True) or {}
 
