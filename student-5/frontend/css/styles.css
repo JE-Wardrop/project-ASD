@@ -56,3 +56,19 @@
   border-top: 1px solid var(--line);
   font-size: .78rem; color: var(--muted);
 }
+
+/* ---------- action buttons in the transaction table ---------- */
+/* Flex + gap keeps the spacing even no matter how many buttons a row shows;
+   some rows have Explain + Cancel, completed rows only have Cancel. */
+.row-actions {
+  display: flex;
+  gap: .6rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Keep each label on one line so a narrow column cannot break the words */
+.row-actions button {
+  white-space: nowrap;
+  margin: 0;
+}
