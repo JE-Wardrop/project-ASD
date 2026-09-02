@@ -12,6 +12,8 @@ cards = [
 conn = sqlite3.connect(DATABASE_NAME)
 cursor = conn.cursor()
 
+
+# Should link to the users db
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS users (
         user_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,10 +37,6 @@ cursor.execute('''
         FOREIGN KEY (user_id) REFERENCES users(user_id)
     )
 ''')
-
-# cursor.execute("DELETE FROM cards")
-
-# cursor.execute("DELETE FROM users")
 
 cursor.executemany(
     "INSERT INTO users (name, email, password, address, phone) VALUES (?, ?, ?, ?, ?)",

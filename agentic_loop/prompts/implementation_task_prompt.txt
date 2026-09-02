@@ -1,30 +1,21 @@
 Application Name:
-Card Management App
+Student Enrolment App
 
-User Database Fields (pulled from user_management microservice)
-- name
-- email
-- password
-- address
-- phone
-
-Card Database Fields:
-- user_id
-- card_number
-- card_type
-- expiry_date
-- status
+Database Fields:
+- student_id
+- student_name
+- subject_code
 
 Important domain rule:
-- card_number, card_type, expiry_date and status are all unquie to one card.
-- Multiple users may have multiple cards.
-- Never recommend a unique constraint on user_id.
+- subject_code is NOT unique.
+- Multiple students may enrol in the same subject.
+- Never recommend a unique constraint on subject_code.
 
 Endpoints:
-- GET /card/type
-- GET /card/{card_id}
-- GET /card/freeze
-- GET /card/unfreeze
+- GET /students
+- GET /students/{student_id}
+- GET /students/by-id
+- GET /students/by-subject
 - POST /ask
 - POST /ask-with-context
 
