@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>User Management System — Dashboard</title>
+
+    <!-- HTMX required by the project specification -->
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+
+    <!-- Shared CSS Theme -->
+    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+</head>
+
+<body>
+
+<!-- auth-guard.js runs first and bounces to index.html
+     if there's no active session. -->
+<script src="js/auth-guard.js"></script>
+
+<!-- Shared navbar, pulled in as an htmx partial so it
+     only has to be maintained in one place. -->
+<div hx-get="partials/navbar.html" hx-trigger="load" hx-swap="innerHTML"></div>
+
+<main id="dashboardPage" class="app-shell">
+
+    <div class="card">
+
+        <h1>Welcome</h1>
+
+        <p>
+            Select a feature to continue.
+        </p>
+
+    </div>
+
+    <a
+        class="card"
+        href="users.html"
+        style="cursor:pointer; display:block; text-decoration:none; color:inherit;">
+
+        <h2>👤 User Management</h2>
+
+        <p>
+            Create, view, update and delete
+            application users.
+        </p>
+
+        <button class="primary-button">
+            Open User Management
+        </button>
+
+    </a>
+
+</main>
+
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+
+</body>
+</html>
