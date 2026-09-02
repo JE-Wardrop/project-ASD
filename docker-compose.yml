@@ -149,8 +149,7 @@ services:
       - "8104:80"
     depends_on:
       - student4-backend
-    networks:
-      - student4-network
+
     restart: unless-stopped
 
   student4-backend:
@@ -170,8 +169,7 @@ services:
       - student4-database
     volumes:
       - student4-database-data:/database
-    networks:
-      - student4-network
+
     restart: unless-stopped
 
   student4-database:
@@ -183,8 +181,7 @@ services:
       - "8304:5002"
     volumes:
       - student4-database-data:/database
-    networks:
-      - student4-network
+
     restart: unless-stopped
 
 volumes:
