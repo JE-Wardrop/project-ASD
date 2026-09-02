@@ -28,19 +28,17 @@ services:
 
 
   # Student 1
-  frontend-service:
+  student-1-frontend:
     build:
       context: ./student-1/frontend
     container_name: frontend
     ports:
       - "8101:80"
     depends_on:
-      - backend
-    networks:
-      - card-network
+      - student-1-backend
     restart: unless-stopped
 
-  backend:
+  student-1-backend:
     build:
       context: ./student-1/backend
       dockerfile: dockerfile
@@ -55,8 +53,6 @@ services:
       - "host.docker.internal:host-gateway"
     depends_on:
       - student-1-database
-    networks:
-      - card-network
     restart: unless-stopped
 
 
@@ -70,16 +66,11 @@ services:
       - "8301:5002"
     volumes:
       - database_data:/student-1/database/data
-    networks:
-      - card-network
     restart: unless-stopped
 
 volumes:
   database_data:
 
-networks:
-  card-network:
-    driver: bridge
 
 #Student 2
   # database2:
