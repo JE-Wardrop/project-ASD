@@ -1,7 +1,14 @@
 import os
+from flask.cli import load_dotenv
 import requests
 
-DATABASE_URL = os.getenv("DATABASE_SERVICE_URL", "http://database:5002")
+load_dotenv()
+
+DATABASE_URL = os.getenv(
+    "DATABASE_SERVICE_URL", 
+    "http://student-1-database:5002"
+)
+
 
 
 def get_cards():

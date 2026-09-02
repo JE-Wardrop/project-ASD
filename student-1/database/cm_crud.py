@@ -1,7 +1,7 @@
 import json
 import sqlite3
 from datetime import datetime 
-from database.init_db import DATABASE_NAME
+from init_db import DATABASE_NAME
 from flask import Flask, jsonify, request, Blueprint
 import sqlite3
 import os
@@ -9,7 +9,6 @@ import os
 
 app = Flask(__name__)
 DATABASE_NAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cm.db")
-cm_crud_bp = Blueprint("cm_crud", __name__)
 
 
 REQUIRED_FIELDS = [
@@ -23,16 +22,12 @@ REQUIRED_FIELDS = [
 
 VALID_STATUSES = {"Frozen", "Unfrozen"}
 
-CARD_COLUMNS = ("card_number", "card_type", "expiry_date", "status", "balance")
-
 CARD_SELECT = """
     SELECT cards.card_id, users.name AS card_holder_name, cards.card_number,
            cards.card_type, cards.expiry_date, cards.status, cards.balance
     FROM cards
     JOIN users ON users.user_id = cards.user_id
 """
-
-
 
 
 def get_db_connection():
@@ -117,11 +112,16 @@ def create_card():
 @app.get("/cards")
 def get_cards():
     conn = get_db_connection()
+
+
     cards = conn.execute(
         "SELECT card_id, card_holder_name, card_number, card_type, "
         "expiry_date, status FROM cards"
     ).fetchall()
     conn.close()
+
+
+
     return jsonify([dict(row) for row in cards])
 
 
@@ -265,7 +265,6 @@ def delete_card(card_id):
 # Freeze and Unfreeze
 # ---------------------------------------------------------------------------
 
-
 def _set_status_by_card_number(card_number, new_status):
     conn = get_db_connection()
     existing = conn.execute(
@@ -283,7 +282,7 @@ def _set_status_by_card_number(card_number, new_status):
     return card
 
 
-@cm_crud_bp.post("/cards/freeze")
+@app.post("/cards/freeze")
 def freeze_card():
     payload = request.get_json(silent=True) or request.form
     card_number = (payload.get("card_number") or "").strip()
@@ -299,7 +298,7 @@ def freeze_card():
     return jsonify(dict(card)), 200
 
 
-@cm_crud_bp.post("/cards/unfreeze")
+@app.post("/cards/unfreeze")
 def unfreeze_card():
     payload = request.get_json(silent=True) or request.form
     card_number = (payload.get("card_number") or "").strip()

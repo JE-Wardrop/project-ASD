@@ -11,8 +11,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 
-
-# matches app.py now, when originally working it was 5002 but this shouldnt break the application
 EXPOSE 5001
 
 CMD ["python", "app.py"]

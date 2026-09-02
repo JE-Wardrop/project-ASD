@@ -1,7 +1,8 @@
 from urllib import response
 
-from flask import Blueprint, request
+from flask import Blueprint, jsonify, request
 import requests 
+
 
 from services.database_api import (
     create_card_response,
@@ -26,7 +27,9 @@ def health():
 @normal_mode_bp.get("/cards")
 def get_cards_route():
     try:
-        return format_cards_html(get_cards()), 200
+
+        response = get_cards()
+        return format_card_html(response.json()), response.status_code
     
     except requests.RequestException as exc:
         return (
@@ -92,12 +95,13 @@ def get_cards_by_type():
 @normal_mode_bp.post("/cards/create")
 def create_card():
     payload = {
-        "card_holder_name": request.form.get("card_holder_name", "").strip(),
+        "card_name": request.form.get("card_name", "").strip(),
         "card_type": request.form.get("card_type", "").strip(),
     }
+    
 
     try:
-        response = create_card_response(payload)
+        response = requests.post(CRUD_SERVICE_URL, json=request.json)
 
         if response.status_code == 400:
             return f"<p>{response.json().get('error', 'Invalid card data.')}</p>", 400
@@ -112,6 +116,9 @@ def create_card():
             f"<pre>{exc}</pre>",
             503,
         )
+
+    except requests.exceptions.ConnectionError:
+        return jsonify({"error": "CRUD service unavailable"}), 503
 
 
 @normal_mode_bp.post("/cards/update")
@@ -128,15 +135,15 @@ def update_card():
             payload[field] = value
 
     try:
-        response_normal = update_card_response(card_id, payload)
+        response = update_card_response(card_id, payload)
 
-        if response_normal.status_code == 404:
+        if response.status_code == 404:
             return "<p>Card not found.</p>", 404
-        if response_normal.status_code == 400:
-            return f"<p>{response_normal.json().get('error', 'Invalid update.')}</p>", 400
+        if response.status_code == 400:
+            return f"<p>{response.json().get('error', 'Invalid update.')}</p>", 400
 
-        response_normal.raise_for_status()
-        return format_card_html(response_normal.json()), 200
+        response.raise_for_status()
+        return format_card_html(response.json()), 200
     
     except requests.RequestException as exc:
         return (
