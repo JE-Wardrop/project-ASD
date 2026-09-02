@@ -101,7 +101,7 @@ def create_card():
     
 
     try:
-        response = requests.post(CRUD_SERVICE_URL, json=request.json)
+        response = requests.post(json=request.json)
 
         if response.status_code == 400:
             return f"<p>{response.json().get('error', 'Invalid card data.')}</p>", 400
@@ -194,7 +194,7 @@ def freeze_card():
         response.raise_for_status()
         return format_card_html(response.json()), 200
     except requests.RequestException as exc:
-        return "<p>Failed to freeze card in database-service.</p>" f"<pre>{exc}</pre>", 503
+        return "<p>Failed to freeze card in database.</p>" f"<pre>{exc}</pre>", 503
 
 
 @normal_mode_bp.post("/cards/unfreeze")
@@ -215,4 +215,4 @@ def unfreeze_card():
         response.raise_for_status()
         return format_card_html(response.json()), 200
     except requests.RequestException as exc:
-        return "<p>Failed to unfreeze card in database-service.</p>" f"<pre>{exc}</pre>", 503
+        return "<p>Failed to unfreeze card in database.</p>" f"<pre>{exc}</pre>", 503
