@@ -40,10 +40,10 @@ def test_list_orders_by_created_at_desc(db_client):
 
 
 def test_list_filter_by_account_matches_sender_or_receiver(db_client):
-    rows = db_client.get("/transactions?account_id=1001").get_json()["transactions"]
-    assert rows                                    # seed has activity on 1001
+    rows = db_client.get("/transactions?account_id=1").get_json()["transactions"]
+    assert rows                                    # seed has activity on account 1
     for r in rows:
-        assert 1001 in (r["sender_account_id"], r["receiver_account_id"])
+        assert 1 in (r["sender_account_id"], r["receiver_account_id"])
 
 
 def test_list_filter_by_type_is_case_insensitive(db_client):
