@@ -8,7 +8,7 @@ def _request(method, path, **kwargs):
     try:
         return requests.request(method, f"{DB_URL}{path}", timeout=TIMEOUT, **kwargs)
     except requests.RequestException as exc:
-        print("Database service did not respond: %s", exc)
+        raise RuntimeError(f"Database service did not respond: {exc}") from exc
         
 def health():
     return _request("GET", "/health")

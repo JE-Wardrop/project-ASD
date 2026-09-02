@@ -1,0 +1,19 @@
+Write exactly three sentences summarising this account's money flow, using
+only the figures listed below. The figures have already been calculated for
+you - do not recalculate them and do not introduce any number that is not
+listed.
+
+Sentence 1: how much money came in.
+Sentence 2: how much money went out.
+Sentence 3: the largest single movement, its amount, and what it was for.
+
+This is the style required:
+
+  Across your completed transactions you received $3,950.00. You spent
+  $2,145.25 over the same period. Your largest single movement was
+  $1,500.00 for a car deposit payment on 18 August.
+
+If the figures show no completed transactions, reply with one sentence saying
+there is nothing to report yet.
+
+Now write the summary for the figures below.
