@@ -16,9 +16,9 @@
   # student4-*  Sang  - Users          8104 / 8204 / 8304
 
 
-# Student 1
 
 services:
+  # Home Page
   shared-index:   # service name
     build: ./shared/frontend
     container_name: shared-index      # container name
@@ -36,8 +36,6 @@ services:
       - "8101:80"
     depends_on:
       - backend
-    networks:
-      - card-network
     restart: unless-stopped
 
   backend:
@@ -55,8 +53,6 @@ services:
       - "host.docker.internal:host-gateway"
     depends_on:
       - database
-    networks:
-      - card-network
     restart: unless-stopped
 
   database:
@@ -67,8 +63,6 @@ services:
       - "8301:5002"
     volumes:
       - database_data:/student-1/database/data
-    networks:
-      - card-network
     restart: unless-stopped
 
   # Student 2 (Binh - Accounts)
@@ -80,8 +74,6 @@ services:
       - "8102:80"
     depends_on:
       - student2-backend
-    networks:
-      - banking-network
     restart: unless-stopped
 
   student2-backend:
@@ -100,8 +92,6 @@ services:
       - "host.docker.internal:host-gateway"
     depends_on:
       - student2-database
-    networks:
-      - banking-network
     restart: unless-stopped
 
   student2-database:
@@ -114,10 +104,6 @@ services:
       DB_PATH: /app/data/accounts.db
     volumes:
       - student2_db_data:/app/data
-    networks:
-      banking-network:
-        aliases:
-          - student2-database
     restart: unless-stopped
 
   #  STUDENT 5 - Gia Tran - Transaction Management
@@ -129,8 +115,7 @@ services:
       - "8305:8000"
     volumes:
       - student5-data:/data
-    networks:
-      - banking-network
+  
     restart: unless-stopped
 
   student5-backend:
@@ -142,7 +127,7 @@ services:
       OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
       OLLAMA_MODEL: qwen2.5:0.5b
       DB_URL: http://student5-db:8000
-      ACCOUNTS_URL: http://student2-backend:8000
+      ACCOUNTS_URL: http://student2-database:5002
       NOTIFICATIONS_URL: http://student3-backend:8000
       BACKEND_URL: http://localhost:8205
       REQUIRE_ACCOUNTS: "false"      # waiting for Binh service to run
@@ -150,8 +135,6 @@ services:
       - student5-db
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    networks:
-      - banking-network
     restart: unless-stopped
 
   student5-frontend:
@@ -161,8 +144,6 @@ services:
       - "8105:8000"
     depends_on:
       - student5-backend
-    networks:
-      - banking-network
     restart: unless-stopped
 
 volumes:
@@ -170,11 +151,7 @@ volumes:
   student2_db_data:
   student5-data:
 
-networks:
-  card-network:
-    driver: bridge
-  banking-network:
-    driver: bridge
+
 
 #Student 3
   # database3:

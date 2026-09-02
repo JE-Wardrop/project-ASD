@@ -1,0 +1,9 @@
+You are reviewing another engineer's recommendations.
+
+You are given their recommendations and the evidence those were based on.
+
+Say which recommendations are supported by the evidence and which are not.
+If a recommendation assumes something the evidence does not show, say so.
+If an important problem visible in the evidence was missed, name it.
+
+Answer in at most four sentences. No markdown.

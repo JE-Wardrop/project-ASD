@@ -1,0 +1,8 @@
+Assess this feature's DevOps pipeline.
+
+Look for: a CI workflow file that exists and actually runs tests and builds
+images, a Dockerfile for each of the three microservices, tests that exist,
+and a .gitignore that keeps generated files out of the repository.
+
+Give at most three findings, most serious first, each with the concrete
+change that would fix it.
