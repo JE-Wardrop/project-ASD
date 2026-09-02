@@ -148,45 +148,6 @@ services:
     depends_on:
       - student5-backend
     restart: unless-stopped
-
-volumes:
-  database_data:
-  student2_db_data:
-  student5-data:
-
-
-
-#Student 3
-  # database3:
-  #   build: ./student-3/database
-  #   container_name: database3
-  #   ports:
-  #     - "5002:5000"
-  #   volumes:
-  #     - ./student-3/database:/app
-  #   networks:
-  #     - mynetwork
-
-  # frontend3:
-  #   build: ./student-3/frontend
-  #   container_name: frontend3
-  #   ports:
-  #     - "8002:8000"
-  #   volumes:
-  #     - ./student-3/frontend:/app
-  #   networks:
-  #     - mynetwork
-
-  #   backend3:
-  #     build: ./student-3/backend
-  #     container_name: backend3
-  #     ports:
-  #       - "8082:8080"
-  #     volumes:
-  #       - ./student-3/backend:/app
-  #     networks:
-  #       - mynetwork
-# Student 4 - Sang (Users) - YOUR SERVICE
   student4-frontend:
     build:
       context: ./student-4/frontend
@@ -198,7 +159,6 @@ volumes:
       - student4-backend
 
     restart: unless-stopped
-
   student4-backend:
     build:
       context: ./student-4/backend
@@ -216,9 +176,7 @@ volumes:
       - student4-database
     volumes:
       - student4-database-data:/database
-
     restart: unless-stopped
-
   student4-database:
     build:
       context: ./student-4/database
@@ -228,45 +186,13 @@ volumes:
       - "8304:5002"
     volumes:
       - student4-database-data:/database
-
     restart: unless-stopped
 
+  
+
 volumes:
-  student1-database-data:
+  database_data:
+  student2_db_data:
+  student5-data:
   student4-database-data:
 
-networks:
-  student4-network:
-    driver: bridge
-
-
-#Studnet 5
-# database:
-#     build: ./student-5/database
-#     container_name: database
-#     ports:
-#       - "5000:5000"
-#     volumes:
-#       - ./student-1/database:/app
-#     networks:
-#       - mynetwork
-
-#   frontend:
-#     build: ./student-15frontend
-#     container_name: frontend
-#     ports:
-#       - "8000:8000"
-#     volumes:
-#       - ./student-1/frontend:/app
-#     networks:
-#       - mynetwork
-
-#     backend:
-#       build: ./student-5/backend
-#       container_name: backend
-#       ports:
-#         - "8080:8080"
-#       volumes:
-#         - ./student-1/backend:/app
-#       networks:
-#         - mynetwork
