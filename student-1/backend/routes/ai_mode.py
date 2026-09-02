@@ -12,7 +12,7 @@ from services.prompt_loader import load_prompt
 ai_mode_bp = Blueprint("ai_mode", __name__)
 
 
-@ai_mode_bp.post("/ask", methods=["POST"])
+@ai_mode_bp.route("/ask", methods=["POST"])
 def ask_local_agent():
 
     # Non lab code
@@ -69,7 +69,7 @@ def ask_local_agent():
         )
 
 
-@ai_mode_bp.post("/ask-with-context")
+@ai_mode_bp.route("/ask-with-context", methods=["POST"])
 def ask_with_context():
     question = request.form.get("question", "").strip()
 
