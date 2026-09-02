@@ -1,6 +1,6 @@
 //  Get data from backend services and update the dashboard UI.
 
-const DEMO_ACCOUNT = 1001; // Demo customer
+const DEMO_ACCOUNT = 1; // Demo customer
 
 const API = {
   transactions: "http://localhost:8205",

@@ -15,6 +15,22 @@ def _cell(value):
     return escape(str(value)) if value is not None else "&mdash;"
 
 
+# A COMPLETED transaction needs no explanation - the row already shows the
+# type, amount, accounts and date. The states a customer actually asks about
+# are the ones where the money did not move as expected.
+EXPLAINABLE_STATUSES = {"PENDING", "FAILED", "CANCELLED"}
+
+
+def _explain_button(txn):
+    """Offer AI-Mode only where it answers a real customer question."""
+    if txn.get("status") not in EXPLAINABLE_STATUSES:
+        return ""
+    return (
+        f'<button hx-post="{BACKEND}/transactions/{txn["transaction_id"]}/ai/explain"\n'
+        f'            hx-target="#ai-output" hx-swap="innerHTML">Explain</button>'
+    )
+
+
 def transaction_row(txn):
     status = txn.get("status", "")
     return f"""
@@ -28,11 +44,12 @@ def transaction_row(txn):
   <td>{_cell(txn.get('description'))}</td>
   <td class="num">{_cell(txn.get('created_at'))}</td>
   <td>
-        <button hx-post="{BACKEND}/ui/transactions/{txn['transaction_id']}/ai/explain"
-            hx-target="#ai-output" hx-swap="innerHTML">Explain</button>
-    <button hx-delete="{BACKEND}/ui/transactions/{txn['transaction_id']}"
-            hx-target="#table-area" hx-swap="innerHTML"
-            hx-confirm="Cancel this transaction?">Cancel</button>
+    <div class="row-actions">
+      {_explain_button(txn)}
+      <button hx-delete="{BACKEND}/ui/transactions/{txn['transaction_id']}"
+              hx-target="#table-area" hx-swap="innerHTML"
+              hx-confirm="Cancel this transaction?">Cancel</button>
+    </div>
   </td>
 </tr>"""
 

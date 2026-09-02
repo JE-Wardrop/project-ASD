@@ -1,0 +1,8 @@
+Assess whether this feature follows a correct microservices architecture.
+
+Look for: the three tiers being present and containerised, whether the
+backend reaches other features through their APIs rather than their database
+files, and whether the services are declared in the shared compose file.
+
+Give at most three findings, most serious first, each with the concrete
+change that would fix it.

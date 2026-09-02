@@ -1,0 +1,22 @@
+This transaction did not complete normally. Tell the customer, in 2 to 3 short
+sentences, what state it is in and what that means for their money.
+
+Cover:
+1. What was attempted and for how much.
+2. Why it is in that state. The reason is given in the description - use it,
+   and do not guess a different reason.
+3. Whether the money has moved, and what happens next.
+
+Use these rules about the states:
+- Pending means the transaction has been accepted but has not settled yet, so
+  the money has not moved.
+- Failed means the transaction was rejected and no money moved.
+- Cancelled means it was stopped before it settled and no money moved.
+
+This is the style required:
+
+  Your withdrawal of $5,000.00 from account 1003 was rejected because there
+  was not enough money in the account. Nothing has been taken from your
+  balance. You can try again for a smaller amount.
+
+Now write that kind of message for the transaction below.

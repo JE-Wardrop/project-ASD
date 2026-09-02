@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>AI Mode</title>
+    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        body { margin: 0; min-height: auto; background: transparent; }
+        .app-shell { max-width: none; padding: 0; }
+    </style>
+</head>
+<body>
+<main class="app-shell">
+    <section class="card">
+        <h2>Ask Local AI Agent</h2>
+
+        <form id="ask-form">
+            <label for="question">Question</label>
+            <textarea id="question" name="question" rows="4">Explain what the Bank Account Management service does in one short paragraph.</textarea>
+            <button type="submit">Ask Local Agent</button>
+        </form>
+
+        <div id="agent-result" class="panel"></div>
+
+        <h2>Ask With Context</h2>
+
+        <form id="ask-with-context-form">
+            <label for="context-question">Question</label>
+            <textarea id="context-question" name="question" rows="4">What account statuses exist and when can balance change?</textarea>
+            <button type="submit">Ask With Context</button>
+        </form>
+
+        <div id="context-result" class="panel"></div>
+
+        <h2>Account Review</h2>
+
+        <form id="account-review-form">
+            <label for="review_request">Request</label>
+            <textarea id="review_request" name="review_request" rows="4">Review error handling for freezing an already-frozen account.</textarea>
+            <button type="submit">Run Account Review</button>
+        </form>
+
+        <div id="review-result" class="panel"></div>
+    </section>
+</main>
+
+<script>
+const API = "http://localhost:8202";
+
+async function renderIntoPanel(panelId, url, options = {}) {
+    const panel = document.getElementById(panelId);
+    try {
+        const response = await fetch(url, options);
+        const body = await response.text();
+        panel.innerHTML = body;
+    } catch (error) {
+        panel.innerHTML = `<p>Request failed.</p><pre>${error}</pre>`;
+    }
+}
+
+document.getElementById("ask-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const formData = new URLSearchParams(new FormData(event.target));
+    renderIntoPanel("agent-result", `${API}/ask`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData,
+    });
+});
+
+document.getElementById("ask-with-context-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const formData = new URLSearchParams(new FormData(event.target));
+    renderIntoPanel("context-result", `${API}/ask-with-context`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData,
+    });
+});
+
+document.getElementById("account-review-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const formData = new URLSearchParams(new FormData(event.target));
+    renderIntoPanel("review-result", `${API}/accounts/ai-review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData,
+    });
+});
+</script>
+</body>
+</html>

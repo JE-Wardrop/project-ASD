@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Normal UI</title>
+    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        body { margin: 0; min-height: auto; background: transparent; }
+        .app-shell { max-width: none; padding: 0; }
+    </style>
+</head>
+<body>
+<main class="app-shell">
+    <section class="card">
+        <h2>Accounts</h2>
+
+        <button id="toggle-accounts-btn" type="button">Show All Accounts</button>
+
+        <div id="accounts-result" class="panel is-hidden"></div>
+    </section>
+
+    <section class="card">
+        <h2>Find Account</h2>
+
+        <div class="form-grid">
+            <form id="find-by-id-form">
+                <label for="find_account_id">Account ID</label>
+                <input id="find_account_id" name="account_id" type="number" min="1" placeholder="Example: 1">
+                <button type="submit">Get Account</button>
+            </form>
+
+            <form id="find-by-user-form">
+                <label for="find_user_id">User ID</label>
+                <input id="find_user_id" name="user_id" type="number" min="1" placeholder="Example: 1">
+                <button type="submit">Find by User</button>
+            </form>
+
+            <form id="find-by-status-form">
+                <label for="find_status">Account Status</label>
+                <select id="find_status" name="status">
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="FROZEN">FROZEN</option>
+                    <option value="CLOSED">CLOSED</option>
+                </select>
+                <button type="submit">Find by Status</button>
+            </form>
+
+            <form id="find-balance-form">
+                <label for="balance_account_id">Account ID</label>
+                <input id="balance_account_id" name="account_id" type="number" min="1" placeholder="Example: 1">
+                <button type="submit">View Balance</button>
+            </form>
+        </div>
+
+        <div id="find-result" class="panel"></div>
+    </section>
+
+    <section class="card">
+        <h2>Create Account</h2>
+
+        <form id="create-account-form" class="form-grid">
+            <div>
+                <label for="create_user_id">User ID</label>
+                <input id="create_user_id" name="user_id" type="number" min="1" required>
+            </div>
+            <div>
+                <label for="create_account_number">Account Number</label>
+                <input id="create_account_number" name="account_number" type="text" required placeholder="Example: 10000011">
+            </div>
+            <div>
+                <label for="create_account_type">Account Type</label>
+                <select id="create_account_type" name="account_type">
+                    <option value="EVERYDAY">EVERYDAY</option>
+                    <option value="SAVINGS">SAVINGS</option>
+                </select>
+            </div>
+            <div>
+                <label for="create_balance">Opening Balance</label>
+                <input id="create_balance" name="balance" type="number" step="0.01" min="0" value="0">
+            </div>
+            <button type="submit" class="rag-action">Create Account</button>
+        </form>
+
+        <div id="create-result" class="panel"></div>
+    </section>
+
+    <section class="card">
+        <h2>Update Account Information</h2>
+
+        <form id="update-account-form" class="form-grid">
+            <div>
+                <label for="update_account_id">Account ID</label>
+                <input id="update_account_id" name="account_id" type="number" min="1" required>
+            </div>
+            <div>
+                <label for="update_account_number">New Account Number</label>
+                <input id="update_account_number" name="account_number" type="text" placeholder="Leave blank to keep">
+            </div>
+            <div>
+                <label for="update_account_type">New Account Type</label>
+                <select id="update_account_type" name="account_type">
+                    <option value="">Leave unchanged</option>
+                    <option value="EVERYDAY">EVERYDAY</option>
+                    <option value="SAVINGS">SAVINGS</option>
+                </select>
+            </div>
+            <button type="submit" class="rag-action">Update Account</button>
+        </form>
+
+        <div id="update-result" class="panel"></div>
+    </section>
+
+    <section class="card">
+        <h2>Deposit / Withdraw</h2>
+
+        <form id="adjust-balance-form" class="form-grid">
+            <div>
+                <label for="adjust_account_id">Account ID</label>
+                <input id="adjust_account_id" name="account_id" type="number" min="1" required>
+            </div>
+            <div>
+                <label for="adjust_delta">Amount (negative to withdraw)</label>
+                <input id="adjust_delta" name="delta" type="number" step="0.01" required placeholder="Example: 50 or -20">
+            </div>
+            <button type="submit" class="rag-action">Adjust Balance</button>
+        </form>
+
+        <div id="adjust-result" class="panel"></div>
+    </section>
+
+    <section class="card">
+        <h2>Freeze / Unfreeze / Close Account</h2>
+
+        <form id="account-status-form" class="form-grid">
+            <div>
+                <label for="status_account_id">Account ID</label>
+                <input id="status_account_id" name="account_id" type="number" min="1" required>
+            </div>
+            <div>
+                <label for="status_action">Action</label>
+                <select id="status_action" name="action">
+                    <option value="freeze">Freeze</option>
+                    <option value="unfreeze">Unfreeze</option>
+                    <option value="close">Close</option>
+                </select>
+            </div>
+            <button type="submit" class="rag-action">Apply</button>
+        </form>
+
+        <div id="status-result" class="panel"></div>
+    </section>
+
+    <section class="card">
+        <h2>Delete Account</h2>
+        <p class="rag-helper">Permanently removes the account record. For closing an account normally, use Close above instead.</p>
+
+        <form id="delete-account-form" class="form-grid">
+            <div>
+                <label for="delete_account_id">Account ID</label>
+                <input id="delete_account_id" name="account_id" type="number" min="1" required>
+            </div>
+            <button type="submit" class="rag-action">Delete Account</button>
+        </form>
+
+        <div id="delete-result" class="panel"></div>
+    </section>
+</main>
+
+<script>
+const API = "http://localhost:8202";
+
+async function renderIntoPanel(panelId, url, options = {}) {
+    const panel = document.getElementById(panelId);
+    try {
+        const response = await fetch(url, options);
+        const body = await response.text();
+        panel.innerHTML = body;
+    } catch (error) {
+        panel.innerHTML = `<p>Request failed.</p><pre>${error}</pre>`;
+    }
+}
+
+function toFormBody(formData) {
+    return new URLSearchParams(formData).toString();
+}
+
+// ---- Show all accounts ----
+const toggleAccountsBtn = document.getElementById("toggle-accounts-btn");
+const accountsPanel = document.getElementById("accounts-result");
+
+toggleAccountsBtn.addEventListener("click", () => {
+    const isHidden = accountsPanel.classList.contains("is-hidden");
+
+    if (isHidden) {
+        accountsPanel.classList.remove("is-hidden");
+        toggleAccountsBtn.textContent = "Hide All Accounts";
+        renderIntoPanel("accounts-result", `${API}/accounts`);
+    } else {
+        accountsPanel.classList.add("is-hidden");
+        toggleAccountsBtn.textContent = "Show All Accounts";
+    }
+});
+
+// ---- Find forms ----
+document.getElementById("find-by-id-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const query = toFormBody(new FormData(event.target));
+    renderIntoPanel("find-result", `${API}/accounts/by-id?${query}`);
+});
+
+document.getElementById("find-by-user-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const query = toFormBody(new FormData(event.target));
+    renderIntoPanel("find-result", `${API}/accounts/by-user?${query}`);
+});
+
+document.getElementById("find-by-status-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const query = toFormBody(new FormData(event.target));
+    renderIntoPanel("find-result", `${API}/accounts/by-status?${query}`);
+});
+
+document.getElementById("find-balance-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const query = toFormBody(new FormData(event.target));
+    renderIntoPanel("find-result", `${API}/accounts/balance?${query}`);
+});
+
+// ---- Create ----
+document.getElementById("create-account-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const body = toFormBody(new FormData(event.target));
+    renderIntoPanel("create-result", `${API}/accounts/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body,
+    });
+});
+
+// ---- Update ----
+document.getElementById("update-account-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const body = toFormBody(new FormData(event.target));
+    renderIntoPanel("update-result", `${API}/accounts/update`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body,
+    });
+});
+
+// ---- Adjust balance ----
+document.getElementById("adjust-balance-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const body = toFormBody(new FormData(event.target));
+    renderIntoPanel("adjust-result", `${API}/accounts/adjust-balance`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body,
+    });
+});
+
+// ---- Freeze / unfreeze / close ----
+document.getElementById("account-status-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const action = formData.get("action");
+    formData.delete("action");
+    const body = toFormBody(formData);
+    renderIntoPanel("status-result", `${API}/accounts/${action}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body,
+    });
+});
+
+// ---- Delete ----
+document.getElementById("delete-account-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const body = toFormBody(new FormData(event.target));
+    renderIntoPanel("delete-result", `${API}/accounts/delete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body,
+    });
+});
+</script>
+</body>
+</html>

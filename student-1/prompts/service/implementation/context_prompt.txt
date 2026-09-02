@@ -18,9 +18,10 @@ Important Domain Rule:
 Endpoints (ONLY these exist):
 
 GET Endpoints (Read-Only):
-- GET /freeze
-- GET /freeze/{card_id}
-- GET /by-card-id
+- GET /card/type
+- GET /card/{card_id}
+- GET /card/freeze
+- GET /card/unfreeze
 
 POST Endpoints (AI Queries):
 - POST /ask

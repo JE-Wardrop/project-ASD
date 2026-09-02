@@ -1,0 +1,132 @@
+name: student-2-ci
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["**"]
+    paths:
+      - "student-2/**"
+      - "shared/frontend/**"
+      - "docker-compose.yml"
+      - ".github/workflows/student-2.yml"
+  pull_request:
+    paths:
+      - "student-2/**"
+      - "shared/frontend/**"
+      - "docker-compose.yml"
+      - ".github/workflows/student-2.yml"
+
+jobs:
+
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r student-2/database/requirements.txt
+          pip install -r student-2/tests/requirements.txt
+
+      - name: Run database unit tests
+        run: pytest student-2/tests/test_database_unit.py -v
+
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build student-2 images
+        run: docker compose build shared-frontend student2-frontend student2-backend student2-database
+
+      - name: Start student-2 services
+        run: docker compose up -d shared-frontend student2-frontend student2-backend student2-database
+
+      - name: Smoke checks
+        run: |
+          check_url() {
+            local url="$1"
+            local attempts=8
+            local code=""
+
+            for i in $(seq 1 "$attempts"); do
+              code=$(curl -sS -o /dev/null -w "%{http_code}" --connect-timeout 5 --max-time 20 "$url" || true)
+              if [ "$code" = "200" ]; then
+                echo "PASS $url -> $code"
+                return 0
+              fi
+              echo "Retry $i/$attempts for $url (got: ${code:-none})"
+              sleep 2
+            done
+
+            echo "FAIL $url after $attempts attempts"
+            return 1
+          }
+
+          check_url "http://localhost:8080/"
+          check_url "http://localhost:8102/"
+          check_url "http://localhost:8202/"
+          check_url "http://localhost:8302/"
+
+      - name: Run backend e2e tests
+        run: |
+          pip install -r student-2/tests/requirements.txt
+          FLASK_BASE_URL=http://localhost:8202 pytest student-2/tests/test_backend_e2e.py -v
+
+      - name: Stop services
+        if: always()
+        run: docker compose down -v
+
+  evidence-pack:
+    runs-on: ubuntu-latest
+    needs: [build-and-smoke]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create reports directory
+        run: mkdir -p student-2/reports
+
+      - name: Generate report.json
+        run: |
+          cat > student-2/reports/report.json << EOF
+          {
+            "workflow_name": "student-2-ci",
+            "run_id": "${{ github.run_id }}",
+            "commit_sha": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "feature": "Bank Account Management"
+          }
+          EOF
+
+      - name: Generate report.md
+        run: |
+          cat > student-2/reports/report.md << EOF
+          ## Student 2 - Bank Account Management CI Report
+
+          - Workflow: student-2-ci
+          - Run ID: ${{ github.run_id }}
+          - Commit SHA: ${{ github.sha }}
+          - Branch: ${{ github.ref_name }}
+          - Services: student2-frontend (8102), student2-backend (8202), student2-database (8302)
+          EOF
+
+      - name: Generate run-view.md
+        run: |
+          cat > student-2/reports/run-view.md << EOF
+          Run URL:
+          https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          EOF
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: student2-report
+          path: student-2/reports
