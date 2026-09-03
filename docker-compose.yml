@@ -55,9 +55,6 @@ services:
       - student-1-database
     restart: unless-stopped
 
-
-    # maybe need to change the database so that everyone can have their own 
-    # db with their own name; my db isnt working so this wont effect me too much
   student-1-database:
     build:
       context: ./student-1/database
