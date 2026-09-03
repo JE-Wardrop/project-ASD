@@ -1,19 +1,3 @@
-"""
-============================================================
-AI-MODE SERVICE - Unified AI service for all students.
-
-Each member's backend calls this service instead of calling Ollama directly, to:
-- declare Ollama's address in ONE place
-- change the model for the whole group via an environment variable
-- share a common request/response format for all users
-Flow:
-  Frontend -> Backend/API -> ai-service -> Ollama -> LLM
-
-Run in local : PORT=8090 python app.py
-Docker     : port 8000 map to host 8090
-============================================================
-"""
-
 import os
 import logging
 
