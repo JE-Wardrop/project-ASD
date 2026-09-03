@@ -86,7 +86,7 @@ def get_cards_by_type():
         return format_cards_html(response.json()), 200
     except requests.RequestException as exc:
         return (
-            "<p>Failed to retrieve card-type results from database-service.</p>"
+            "<p>Failed to retrieve card-type results from database.</p>"
             f"<pre>{exc}</pre>",
             503,
         )
@@ -94,14 +94,23 @@ def get_cards_by_type():
 
 @normal_mode_bp.post("/cards/create")
 def create_card():
+    card_type = request.form.get("card_type", "").strip()
+    user_id = request.form.get("user_id", "").strip()
+
+    if not all([card_type, user_id]):
+        return "<p>All fields are required.</p>", 400
+
     payload = {
-        "card_name": request.form.get("card_name", "").strip(),
-        "card_type": request.form.get("card_type", "").strip(),
+        "user_id": user_id,
+        "card_type": card_type,
+        "card_number": "0000000000000000",
+        "expiry_date": "2099-12-31",
+        "status": "Unfrozen",
+        "balance": 0.0,
     }
-    
 
     try:
-        response = requests.post(json=request.json)
+        response = create_card_response(payload)
 
         if response.status_code == 400:
             return f"<p>{response.json().get('error', 'Invalid card data.')}</p>", 400
@@ -109,16 +118,12 @@ def create_card():
         response.raise_for_status()
         return f"<p>Card created successfully</p>{format_card_html(response.json())}", 201
 
-    
     except requests.RequestException as exc:
         return (
             "<p>Failed to create card in database</p>"
             f"<pre>{exc}</pre>",
             503,
         )
-
-    except requests.exceptions.ConnectionError:
-        return jsonify({"error": "CRUD service unavailable"}), 503
 
 
 @normal_mode_bp.post("/cards/update")
@@ -129,7 +134,7 @@ def update_card():
         return "<p>Card ID is required.</p>", 400
 
     payload = {}
-    for field in ("card_holder_name", "card_number", "card_type", "expiry_date", "status", "balance"):
+    for field in ("user_id", "card_number", "card_type", "expiry_date", "status", "balance"):
         value = request.form.get(field, "").strip()
         if value:
             payload[field] = value
@@ -144,7 +149,7 @@ def update_card():
 
         response.raise_for_status()
         return format_card_html(response.json()), 200
-    
+
     except requests.RequestException as exc:
         return (
             "<p>Failed to update card in database.</p>"
@@ -170,7 +175,7 @@ def delete_card():
         return f"<p>Card #{card_id} deleted.</p>", 200
     except requests.RequestException as exc:
         return (
-            "<p>Failed to delete card in database-service.</p>"
+            "<p>Failed to delete card in database.</p>"
             f"<pre>{exc}</pre>",
             503,
         )

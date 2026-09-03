@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Card Details</title>
-    <link rel="stylesheet" href="style.css">
+
+
+    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+    <link rel="stylesheet" href="shared/styles.css"> 
+
+    
+    <!-- <link rel="stylesheet" href="style.css"> -->
 </head>
 <body>
 
@@ -36,12 +42,14 @@
             <p>Create Card</p>
             <label>Enter Name:</label>
             <input type="text" id="name" name="card_holder_name" required>
-            <button type="submit">Submit</button>
 
             <label for="card-type">Enter Type of Card You want (Credit or Debit):</label>
             <input type="text" id="card-type" name="card_type" required>
-            <button type="submit">Submit</button>
 
+            <label for="user-id">Enter User ID:</label>
+            <input type="text" id="user-id" name="user_id" required>
+
+            <button type="submit">Submit</button>
 
             <div id="createCardAuth" class="panel">
             </div>

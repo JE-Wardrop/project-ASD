@@ -34,7 +34,7 @@ def get_cards_by_status_response(status):
 
 
 def create_card_response(payload):
-    return requests.post(f"{DATABASE_URL}/cards", json=payload, timeout=5)
+    return requests.post(f"{DATABASE_URL}/cards/create", json=payload, timeout=5)
 
 
 def update_card_response(card_id, payload):

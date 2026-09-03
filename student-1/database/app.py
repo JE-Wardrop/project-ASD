@@ -9,9 +9,34 @@ app = Flask(__name__)
 CORS(app)
 
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'cm.db')
+
+def get_db_connection():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+# # debug
+# def get_db_connection():
+#     conn = sqlite3.connect('cm.db')
+#     conn.row_factory = sqlite3.Row 
+#     return conn
+
+
+
 @app.get("/")
 def health():
-    return jsonify({"service": "database", "status": "running"})
+
+    #debug
+    conn = get_db_connection()
+    cards = conn.execute('SELECT * FROM cards').fetchall()
+    conn.close()
+    return jsonify([dict(card) for card in cards]), 200
+    
+    #normal
+    # return jsonify({"service": "database", "status": "running"})
 
 
 if __name__ == "__main__":

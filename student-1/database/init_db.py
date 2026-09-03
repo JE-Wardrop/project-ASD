@@ -1,13 +1,24 @@
 import sqlite3
+import os
 
 DATABASE_NAME = "cm.db"
 users = [
-    ("John Smith", "john.smith@example.com", "password123", "123 Main St, Anytown, USA", "555-1234")
+    (1, "John Smith", "john.smith@example.com", "password123", "123 Main St, Anytown, AU", "0423456789"),
+    (2, "Jane Doe", "jane.doe@example.com", "password456", "456 Oak Ave, Somewhere, AU", "04567891232"),
 ]
 cards = [
-    (1, "1234567890123456", "Debit", "2025-12-31", "Unfrozen"),
-    (1, "4567890123456789", "Credit", "2025-12-31", "Frozen"),
+    (1, 1, "1234567890123456", "Debit", "2025-12-31", "Unfrozen", 0.0),
+    (2, 1, "4567890123456789", "Credit", "2025-12-31", "Frozen", 0.0),
+    (3, 2, "0987654321098765", "Debit", "2025-11-30", "Frozen", 0.0),
+    (4,2, "8901234567890123", "Credit", "2025-12-31", "Frozen", 0.0),
 ]
+
+
+#debug
+# if os.path.exists(DATABASE_NAME):
+#     os.remove(DATABASE_NAME)
+#     print(f"Removed old {DATABASE_NAME} file.")
+
 
 conn = sqlite3.connect(DATABASE_NAME)
 cursor = conn.cursor()
@@ -39,16 +50,16 @@ cursor.execute('''
 ''')
 
 cursor.executemany(
-    "INSERT INTO users (name, email, password, address, phone) VALUES (?, ?, ?, ?, ?)",
+    "INSERT INTO users (user_id, name, email, password, address, phone) VALUES (?, ?, ?, ?, ?, ?)",
     users
 )
 
 cursor.executemany(
-    "INSERT INTO cards (user_id, card_number, card_type, expiry_date, status) VALUES (?, ?, ?, ?, ?)",
+    "INSERT INTO cards (card_id, user_id, card_number, card_type, expiry_date, status, balance) VALUES (?, ?, ?, ?, ?, ?, ?)",
     cards
 )
 
 conn.commit()
 conn.close()
 
-print("database initalised with example")
+print("database initialised with examples")
