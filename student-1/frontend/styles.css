@@ -37,18 +37,27 @@
 }
 .btn-link:hover { background: var(--surface-2); }
 
-/* ---------- transaction form  ---------- */
-.txn-form {
+/* ---------- forms  ---------- */
+.card-form {
   display: grid; gap: .45rem;
   border: 1px solid var(--line-soft);
   border-radius: 4px;
   padding: .9rem;
   background: var(--surface);
 }
-.txn-form h3 { margin: 0 0 .25rem; font-size: .92rem; }
 
+/* tab content */
+.div-inner-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
-#table-area { overflow-x: auto; }
+.sec-outer-tabbed-content{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
 /* ---------- Footer---------- */
 .page-footer {
