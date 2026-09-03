@@ -67,11 +67,8 @@ async function askAI() {
 
     try {
 
-        /*
-         * Change this endpoint to match
-         * your backend implementation.
-         */
-
+        const formData = new FormData();
+        formData.append("question", question);
         const response =
             await fetch(
                 `${API_BASE_URL}/users/help`,
@@ -79,25 +76,14 @@ async function askAI() {
 
                     method: "POST",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-
-                        question: question,
-
-                        context:
-                            "The user is currently using the User Management feature. Explain the requested user-management information clearly and simply."
-
-                    })
+                    
+                    body: formData
 
                 }
             );
 
         if (!response.ok) {
-
+            console.log(response)
             throw new Error(
                 "AI request failed"
             );

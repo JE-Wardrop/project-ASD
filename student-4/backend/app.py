@@ -362,16 +362,18 @@ def ask_user_help():
         )
 
         answer = response.choices[0].message.content
-
-        return f"<p>{answer}</p>"
+        return jsonify({
+            "response": answer
+        })
 
     except Exception as exc:
-        return (
-            "<p>Local AI agent request failed. "
-            f"Check that Ollama is running and that {OLLAMA_MODEL} is installed.</p>"
-            f"<pre>{exc}</pre>",
-            503
-        )
+
+        print("AI ERROR:", exc)
+
+        return jsonify({
+            "error": "Local AI agent request failed.",
+            "details": str(exc)
+        }), 503
 
 
 # =========================
