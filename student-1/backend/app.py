@@ -50,6 +50,8 @@ def create_app():
 
     app.register_blueprint(normal_mode_bp)
     app.register_blueprint(ai_mode_bp)
+    
+    print("blueprints are running.")
 
     return app
 
