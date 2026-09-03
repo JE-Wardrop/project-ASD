@@ -100,10 +100,34 @@ def test_create_account_rejects_invalid_type(client):
     assert response.status_code == 400
 
 
+def test_create_account_rejects_non_8_digit_number(client):
+    for bad_number in ("2", "123", "123456789", "1234567a"):
+        response = client.post(
+            "/accounts",
+            json={"user_id": 1, "account_number": bad_number, "account_type": "EVERYDAY"},
+        )
+        assert response.status_code == 400, f"expected 400 for {bad_number!r}"
+
+
 def test_update_account_information(client):
     response = client.put("/accounts/1", json={"account_type": "SAVINGS"})
     assert response.status_code == 200
     assert response.get_json()["account_type"] == "SAVINGS"
+
+
+def test_update_account_rejects_non_8_digit_number(client):
+    response = client.put("/accounts/1", json={"account_number": "2"})
+    assert response.status_code == 400
+
+
+def test_update_account_rejects_existing_account_number(client):
+    # account 2's number ("10000002") must not be assignable to account 1 --
+    # the unique constraint should block it rather than overwriting account 2.
+    response = client.put("/accounts/1", json={"account_number": "10000002"})
+    assert response.status_code == 409
+
+    unchanged = client.get("/accounts/1").get_json()
+    assert unchanged["account_number"] == "10000001"
 
 
 def test_adjust_balance_deposit_and_withdraw(client):

@@ -7,6 +7,7 @@ post-deployment evidence after `docker-compose up`.
 """
 
 import os
+import re
 
 import pytest
 import requests
@@ -39,27 +40,46 @@ def test_list_accounts_returns_html():
 
 
 def test_create_view_freeze_close_cycle():
-    account_number = f"e2e-{os.getpid()}"
+    # 8-digit format required by the database service; "9" prefix keeps it
+    # clear of the seeded 1000000x accounts.
+    account_number = f"9{os.getpid() % 10_000_000:07d}"
+    account_id = None
 
-    create = requests.post(
-        f"{BASE_URL}/accounts/create",
-        data={
-            "user_id": "1",
-            "account_number": account_number,
-            "account_type": "EVERYDAY",
-            "balance": "25",
-        },
-        timeout=5,
+    try:
+        create = requests.post(
+            f"{BASE_URL}/accounts/create",
+            data={
+                "user_id": "1",
+                "account_number": account_number,
+                "account_type": "EVERYDAY",
+                "balance": "25",
+            },
+            timeout=5,
+        )
+        assert create.status_code == 201
+
+        listing = requests.get(f"{BASE_URL}/accounts", timeout=5)
+        assert account_number in listing.text
+        account_id = _extract_account_id(listing.text, account_number)
+
+        by_status = requests.get(
+            f"{BASE_URL}/accounts/by-status", params={"status": "ACTIVE"}, timeout=5
+        )
+        assert by_status.status_code == 200
+    finally:
+        # Clean up so repeated test runs don't litter the account list.
+        if account_id is not None:
+            requests.post(
+                f"{BASE_URL}/accounts/delete", data={"account_id": account_id}, timeout=5
+            )
+
+
+def _extract_account_id(accounts_html, account_number):
+    match = re.search(
+        r"<tr>\s*<td>(\d+)</td>\s*<td>\d+</td>\s*<td>" + re.escape(account_number),
+        accounts_html,
     )
-    assert create.status_code == 201
-
-    listing = requests.get(f"{BASE_URL}/accounts", timeout=5)
-    assert account_number in listing.text
-
-    by_status = requests.get(
-        f"{BASE_URL}/accounts/by-status", params={"status": "ACTIVE"}, timeout=5
-    )
-    assert by_status.status_code == 200
+    return match.group(1) if match else None
 
 
 def test_find_student_by_id_requires_id():
