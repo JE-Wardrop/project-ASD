@@ -24,7 +24,7 @@ def health():
 def get_users():
     conn = get_db_connection()
     users = conn.execute(
-        "SELECT user_id, username, email, first_name, last_name, phone FROM users"
+        "SELECT user_id, username, email, role, first_name, last_name, phone FROM users"
     ).fetchall()
     conn.close()
     return jsonify([dict(row) for row in users])
