@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+        <main
+        id="userPage"
+        class="app-shell hidden">
+
+        <div class="app-header">
+
+            <h1>User Management</h1>
+
+            <p>
+                Manage users and account information.
+            </p>
+
+        </div>
+
+        <!-- AI HELP -->
+
+        <div style="display:flex; justify-content:flex-end; margin-bottom:1rem;">
+            <button
+                class="ai-button"
+                onclick="openAIHelp()">
+
+                🤖 AI Help
+
+            </button>
+        </div>
+
+        <!-- MESSAGE -->
+
+        <div id="userMessage"></div>
+
+        <!-- SEARCH + CREATE -->
+
+        <div class="filter-bar">
+
+            <input
+                type="text"
+                id="searchUsers"
+                class="search-input"
+                placeholder="Search users..."
+                onkeyup="filterUsers()">
+
+            <button
+                class="primary-button"
+                onclick="openCreateUser()">
+
+                + Add User
+
+            </button>
+
+        </div>
+
+        <!-- USER TABLE -->
+
+        <div class="card" style="padding:0; overflow:hidden;">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Username</th>
+
+                        <th>Email</th>
+
+                        <th>Role</th>
+
+                        <th>Created</th>
+
+                        <th>Actions</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="userTable">
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            style="text-align:center;">
+
+                            Loading users...
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

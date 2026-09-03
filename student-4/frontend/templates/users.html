@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>User Management System — Users</title>
+
+    <!-- HTMX required by the project specification -->
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+
+    <!-- Shared CSS Theme -->
+    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+</head>
+
+<body>
+
+<!-- auth-guard.js runs first and bounces to index.html
+     if there's no active session. -->
+<script src="js/auth-guard.js"></script>
+
+<!-- Shared navbar, pulled in as an htmx partial so it
+     only has to be maintained in one place. -->
+<div hx-get="partials/navbar.html" hx-trigger="load" hx-swap="innerHTML"></div>
+
+<main id="userPage" class="app-shell">
+
+    <div class="app-header">
+
+        <h1>User Management</h1>
+
+        <p>
+            Manage users and account information.
+        </p>
+
+    </div>
+
+    <!-- AI HELP -->
+
+    <div style="display:flex; justify-content:flex-end; margin-bottom:1rem;">
+        <button
+            class="ai-button"
+            onclick="openAIHelp()">
+
+            🤖 AI Help
+
+        </button>
+    </div>
+
+    <!-- MESSAGE -->
+
+    <div id="userMessage"></div>
+
+    <!-- SEARCH + CREATE -->
+
+    <div class="filter-bar">
+
+        <input
+            type="text"
+            id="searchUsers"
+            class="search-input"
+            placeholder="Search users..."
+            onkeyup="filterUsers()">
+
+        <button
+            class="primary-button"
+            onclick="openCreateUser()">
+
+            + Add User
+
+        </button>
+
+    </div>
+
+    <!-- USER TABLE -->
+
+    <div class="card" style="padding:0; overflow:hidden;">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>Username</th>
+
+                    <th>Email</th>
+
+                    <th>Role</th>
+
+                    <th>Created</th>
+
+                    <th>Actions</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="userTable">
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        style="text-align:center;">
+
+                        Loading users...
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</main>
+
+<!-- =====================================================
+     CREATE / EDIT USER MODAL
+===================================================== -->
+
+<div
+    id="userModal"
+    class="modal hidden">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2 id="userModalTitle">
+                Create User
+            </h2>
+
+            <button
+                class="close-button"
+                onclick="closeUserModal()">
+
+                ×
+
+            </button>
+
+        </div>
+
+        <form id="userForm">
+
+            <input
+                type="hidden"
+                id="editUserId">
+
+            <div class="form-group">
+
+                <label>
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password">
+
+                <small>
+                    Required when creating a new user.
+                </small>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Role
+                </label>
+
+                <select id="role">
+
+                    <option value="Client">
+                        Client
+                    </option>
+
+                    <option value="Admin">
+                        Admin
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="secondary-button"
+                    onclick="closeUserModal()">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="primary-button">
+
+                    Save User
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- =====================================================
+     AI HELP MODAL
+===================================================== -->
+
+<div
+    id="aiModal"
+    class="modal hidden">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>🤖 AI Help</h2>
+
+            <button
+                class="close-button"
+                onclick="closeAIHelp()">
+
+                ×
+
+            </button>
+
+        </div>
+
+        <p>
+            Ask the AI to explain something about
+            User Management.
+        </p>
+
+        <textarea
+            id="aiQuestion"
+            rows="4"
+            placeholder="Example: What is the purpose of the Client role?">
+        </textarea>
+
+        <div class="modal-actions">
+
+            <button
+                class="secondary-button"
+                onclick="closeAIHelp()">
+
+                Close
+
+            </button>
+
+            <button
+                class="primary-button"
+                onclick="askAI()">
+
+                Ask AI
+
+            </button>
+
+        </div>
+
+        <div
+            id="aiResponse"
+            class="ai-answer">
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/users.js"></script>
+<script src="js/ai-help.js"></script>
+
+</body>
+</html>

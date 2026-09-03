@@ -1,0 +1,18 @@
+/* student-2 (Bank Account Management) frontend overrides.
+   Loaded after the shared theme (shared/frontend/styles.css) so it only
+   needs to add what's specific to this service. */
+
+.is-hidden {
+    display: none;
+}
+
+.rag-action {
+    justify-self: start;
+    width: auto;
+}
+
+.rag-helper {
+    margin: -0.2rem 0 0;
+    font-size: 0.86rem;
+    color: var(--muted);
+}
