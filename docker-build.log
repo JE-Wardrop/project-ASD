@@ -1,0 +1,792 @@
+--progress is a global compose flag, better use `docker compose --progress xx build ...
+time="2026-09-03T23:48:20+10:00" level=warning msg="Docker Compose requires buildx plugin to be installed"
+ Image asdass1-student-1-database Building 
+ Image asdass1-student5-db Building 
+ Image asdass1-student2-database Building 
+ Image asdass1-student5-db Building 
+ Image asdass1-shared-index Building 
+ Image asdass1-student4-database Building 
+ Image asdass1-student4-database Building 
+ Image asdass1-shared-index Building 
+ Image asdass1-student-1-database Building 
+ Image asdass1-student2-database Building 
+Sending build context to Docker daemon  4.355kB
+Sending build context to Docker daemon   2.05kB
+Sending build context to Docker daemon  3.028kB
+Sending build context to Docker daemon   4.54kB
+Sending build context to Docker daemon  6.893kB
+Step 1/10 : FROM python:3.11-slim
+Step 1/5 : FROM nginx:1.27-alpine
+Step 1/10 : FROM python:3.11-slim
+Step 1/11 : FROM python:3.11-slim
+Step 1/11 : FROM python:3.11-slim
+ ---> 9534e5a8e315
+Step 2/10 : WORKDIR /app
+ ---> 9534e5a8e315
+Step 2/11 : WORKDIR /student-1/database
+ ---> 9534e5a8e315
+Step 2/11 : WORKDIR /app
+ ---> 9534e5a8e315
+Step 2/10 : WORKDIR /app
+ ---> 65645c7bb6a0
+Step 2/5 : COPY . /usr/share/nginx/html/
+ ---> Running in 1bee57031cfd
+ ---> Running in 41ec666e5ec2
+ ---> Running in b9af45254c8b
+ ---> Running in b641cde0ae4e
+ ---> 31397e0f57c5
+Step 3/5 : RUN sed -i 's/listen       80;/listen       8000;/' /etc/nginx/conf.d/default.conf
+ ---> Running in cff6d3c1f054
+ ---> Removed intermediate container b9af45254c8b
+ ---> 17d50d171538
+Step 3/10 : COPY requirements.txt .
+ ---> Removed intermediate container b641cde0ae4e
+ ---> 449881091d9e
+Step 3/11 : COPY requirements.txt .
+ ---> Removed intermediate container 41ec666e5ec2
+ ---> c56c696b6f6f
+Step 3/11 : COPY requirements.txt .
+ ---> Removed intermediate container 1bee57031cfd
+ ---> 56c88cb3e9bc
+Step 3/10 : COPY requirements.txt .
+ ---> Removed intermediate container cff6d3c1f054
+ ---> a82d0991f651
+Step 4/5 : EXPOSE 8000
+ ---> Running in 1d53fb5f749e
+ ---> 33359db6fab2
+Step 4/11 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> 2102414e6a3b
+Step 4/10 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> 90d5391685ef
+Step 4/10 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> 81525582bbc7
+Step 4/11 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> Running in 475f267a9dbf
+ ---> Running in 9b571e850952
+ ---> Running in 7f49ee0b0ddb
+ ---> Running in 680f715dbd1e
+ ---> Removed intermediate container 1d53fb5f749e
+ ---> 90302f106b50
+Step 5/5 : LABEL com.docker.compose.image.builder=classic
+ ---> Running in b7f6f572e33c
+ ---> Removed intermediate container b7f6f572e33c
+ ---> 5ea26358ee30
+Successfully built 5ea26358ee30
+Successfully tagged asdass1-shared-index:latest
+ Image asdass1-shared-index Built 
+ Image asdass1-shared-index Built 
+Collecting flask (from -r requirements.txt (line 1))
+  Downloading flask-3.1.3-py3-none-any.whl.metadata (3.2 kB)
+Collecting flask==3.0.3 (from -r requirements.txt (line 1))
+Collecting flask-cors (from -r requirements.txt (line 2))
+  Downloading flask_cors-6.0.5-py3-none-any.whl.metadata (5.4 kB)
+  Downloading flask-3.0.3-py3-none-any.whl.metadata (3.2 kB)
+Collecting flask==3.0.3 (from -r requirements.txt (line 1))
+Collecting Flask==3.0.3 (from -r requirements.txt (line 1))
+Collecting flask-cors (from -r requirements.txt (line 2))
+  Downloading flask_cors-6.0.5-py3-none-any.whl.metadata (5.4 kB)
+  Downloading flask-3.0.3-py3-none-any.whl.metadata (3.2 kB)
+  Downloading flask-3.0.3-py3-none-any.whl.metadata (3.2 kB)
+Collecting Werkzeug>=3.0.0 (from flask==3.0.3->-r requirements.txt (line 1))
+Collecting Werkzeug>=3.0.0 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading werkzeug-3.1.8-py3-none-any.whl.metadata (4.0 kB)
+Collecting Werkzeug>=3.0.0 (from Flask==3.0.3->-r requirements.txt (line 1))
+  Downloading werkzeug-3.1.8-py3-none-any.whl.metadata (4.0 kB)
+Collecting openai (from -r requirements.txt (line 3))
+  Downloading werkzeug-3.1.8-py3-none-any.whl.metadata (4.0 kB)
+  Downloading openai-3.7.0-py3-none-any.whl.metadata (41 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 41.7/41.7 kB 9.7 MB/s eta 0:00:00
+Collecting Jinja2>=3.1.2 (from flask==3.0.3->-r requirements.txt (line 1))
+Collecting Jinja2>=3.1.2 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting Jinja2>=3.1.2 (from Flask==3.0.3->-r requirements.txt (line 1))
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting python-dotenv (from -r requirements.txt (line 4))
+Collecting itsdangerous>=2.1.2 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading python_dotenv-1.2.3-py3-none-any.whl.metadata (29 kB)
+  Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Collecting itsdangerous>=2.1.2 (from flask==3.0.3->-r requirements.txt (line 1))
+Collecting itsdangerous>=2.1.2 (from Flask==3.0.3->-r requirements.txt (line 1))
+  Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+  Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Collecting blinker>=1.9.0 (from flask->-r requirements.txt (line 1))
+Collecting click>=8.1.3 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+  Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting click>=8.1.3 (from Flask==3.0.3->-r requirements.txt (line 1))
+Collecting click>=8.1.3 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+  Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting blinker>=1.6.2 (from flask==3.0.3->-r requirements.txt (line 1))
+Collecting click>=8.1.3 (from flask->-r requirements.txt (line 1))
+Collecting blinker>=1.6.2 (from Flask==3.0.3->-r requirements.txt (line 1))
+  Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting blinker>=1.6.2 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+  Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+  Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting itsdangerous>=2.2.0 (from flask->-r requirements.txt (line 1))
+  Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Collecting MarkupSafe>=2.0 (from Jinja2>=3.1.2->flask==3.0.3->-r requirements.txt (line 1))
+Collecting jinja2>=3.1.2 (from flask->-r requirements.txt (line 1))
+  Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting MarkupSafe>=2.0 (from Jinja2>=3.1.2->Flask==3.0.3->-r requirements.txt (line 1))
+Collecting MarkupSafe>=2.0 (from Jinja2>=3.1.2->flask==3.0.3->-r requirements.txt (line 1))
+Downloading flask-3.0.3-py3-none-any.whl (101 kB)
+  Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+  Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 101.7/101.7 kB 3.7 MB/s eta 0:00:00
+Downloading flask-3.0.3-py3-none-any.whl (101 kB)
+Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Downloading flask-3.0.3-py3-none-any.whl (101 kB)
+Downloading click-8.5.0-py3-none-any.whl (125 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 101.7/101.7 kB 2.9 MB/s eta 0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 125.3/125.3 kB 11.4 MB/s eta 0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 101.7/101.7 kB 3.8 MB/s eta 0:00:00
+Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Collecting markupsafe>=2.1.1 (from flask->-r requirements.txt (line 1))
+Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Downloading flask_cors-6.0.5-py3-none-any.whl (16 kB)
+Downloading click-8.5.0-py3-none-any.whl (125 kB)
+  Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 9.7 MB/s eta 0:00:00
+Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 125.3/125.3 kB 3.3 MB/s eta 0:00:00
+Downloading werkzeug-3.1.8-py3-none-any.whl (226 kB)
+Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Downloading click-8.5.0-py3-none-any.whl (125 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 226.5/226.5 kB 7.6 MB/s eta 0:00:00
+Collecting werkzeug>=3.1.0 (from flask->-r requirements.txt (line 1))
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 125.3/125.3 kB 4.9 MB/s eta 0:00:00
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+  Downloading werkzeug-3.1.8-py3-none-any.whl.metadata (4.0 kB)
+Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 8.2 MB/s eta 0:00:00
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 8.7 MB/s eta 0:00:00
+Downloading werkzeug-3.1.8-py3-none-any.whl (226 kB)
+Downloading werkzeug-3.1.8-py3-none-any.whl (226 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 226.5/226.5 kB 6.8 MB/s eta 0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 226.5/226.5 kB 8.0 MB/s eta 0:00:00
+Installing collected packages: MarkupSafe, itsdangerous, click, blinker, Werkzeug, Jinja2, flask
+Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+Collecting anyio<5,>=4.10.0 (from openai->-r requirements.txt (line 3))
+  Downloading anyio-4.15.0-py3-none-any.whl.metadata (4.7 kB)
+Installing collected packages: MarkupSafe, itsdangerous, click, blinker, Werkzeug, Jinja2, Flask
+Collecting httpx2<3,>=2.7.0 (from openai->-r requirements.txt (line 3))
+  Downloading httpx2-2.12.0-py3-none-any.whl.metadata (9.5 kB)
+Installing collected packages: MarkupSafe, itsdangerous, click, blinker, Werkzeug, Jinja2, flask, flask-cors
+Collecting jiter<1,>=0.16.0 (from openai->-r requirements.txt (line 3))
+  Downloading jiter-0.16.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.2 kB)
+Successfully installed Jinja2-3.1.6 MarkupSafe-3.0.3 Werkzeug-3.1.8 blinker-1.9.0 click-8.5.0 flask-3.0.3 itsdangerous-2.2.0
+[91mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+[0mCollecting pydantic!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,<3,>=1.10.13 (from openai->-r requirements.txt (line 3))
+  Downloading pydantic-2.13.5-py3-none-any.whl.metadata (110 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 110.2/110.2 kB 19.7 MB/s eta 0:00:00
+Successfully installed Flask-3.0.3 Jinja2-3.1.6 MarkupSafe-3.0.3 Werkzeug-3.1.8 blinker-1.9.0 click-8.5.0 itsdangerous-2.2.0
+[91mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+[0mCollecting sniffio (from openai->-r requirements.txt (line 3))
+[91m
+[notice] A new release of pip is available: 24.0 -> 26.2.1
+[notice] To update, run: pip install --upgrade pip
+[0mSuccessfully installed Jinja2-3.1.6 MarkupSafe-3.0.3 Werkzeug-3.1.8 blinker-1.9.0 click-8.5.0 flask-3.0.3 flask-cors-6.0.5 itsdangerous-2.2.0
+  Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+[91mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+[0mCollecting typing-extensions<5,>=4.14 (from openai->-r requirements.txt (line 3))
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting idna>=2.8 (from anyio<5,>=4.10.0->openai->-r requirements.txt (line 3))
+[91m
+[notice] A new release of pip is available: 24.0 -> 26.2.1
+[notice] To update, run: pip install --upgrade pip
+[0m  Downloading idna-3.19-py3-none-any.whl.metadata (9.2 kB)
+[91m
+[notice] A new release of pip is available: 24.0 -> 26.2.1
+[notice] To update, run: pip install --upgrade pip
+[0mCollecting httpcore2==2.12.0 (from httpx2<3,>=2.7.0->openai->-r requirements.txt (line 3))
+  Downloading httpcore2-2.12.0-py3-none-any.whl.metadata (25 kB)
+Collecting truststore>=0.10 (from httpx2<3,>=2.7.0->openai->-r requirements.txt (line 3))
+  Downloading truststore-0.10.4-py3-none-any.whl.metadata (4.4 kB)
+Collecting h11>=0.16 (from httpcore2==2.12.0->httpx2<3,>=2.7.0->openai->-r requirements.txt (line 3))
+  Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting annotated-types>=0.6.0 (from pydantic!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,<3,>=1.10.13->openai->-r requirements.txt (line 3))
+  Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.46.5 (from pydantic!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,<3,>=1.10.13->openai->-r requirements.txt (line 3))
+  Downloading pydantic_core-2.46.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+Collecting typing-inspection>=0.4.2 (from pydantic!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,<3,>=1.10.13->openai->-r requirements.txt (line 3))
+  Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+Downloading flask-3.1.3-py3-none-any.whl (103 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 103.4/103.4 kB 23.6 MB/s eta 0:00:00
+Downloading flask_cors-6.0.5-py3-none-any.whl (16 kB)
+Downloading openai-3.7.0-py3-none-any.whl (1.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 26.6 MB/s eta 0:00:00
+Downloading python_dotenv-1.2.3-py3-none-any.whl (22 kB)
+Downloading anyio-4.15.0-py3-none-any.whl (131 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 131.9/131.9 kB 73.4 MB/s eta 0:00:00
+Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Downloading click-8.5.0-py3-none-any.whl (125 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 125.3/125.3 kB 11.0 MB/s eta 0:00:00
+Downloading httpx2-2.12.0-py3-none-any.whl (95 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 95.4/95.4 kB 12.7 MB/s eta 0:00:00
+Downloading httpcore2-2.12.0-py3-none-any.whl (83 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 83.1/83.1 kB 21.1 MB/s eta 0:00:00
+Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 21.2 MB/s eta 0:00:00
+Downloading jiter-0.16.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (347 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 347.1/347.1 kB 21.3 MB/s eta 0:00:00
+Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+Downloading pydantic-2.13.5-py3-none-any.whl (472 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 472.6/472.6 kB 41.4 MB/s eta 0:00:00
+Downloading pydantic_core-2.46.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 6.5 MB/s eta 0:00:00
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45.6/45.6 kB 73.4 MB/s eta 0:00:00
+Downloading werkzeug-3.1.8-py3-none-any.whl (226 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 226.5/226.5 kB 18.4 MB/s eta 0:00:00
+Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Downloading idna-3.19-py3-none-any.whl (68 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 68.5/68.5 kB 27.5 MB/s eta 0:00:00
+Downloading truststore-0.10.4-py3-none-any.whl (18 kB)
+Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Installing collected packages: typing-extensions, truststore, sniffio, python-dotenv, markupsafe, jiter, itsdangerous, idna, h11, click, blinker, annotated-types, werkzeug, typing-inspection, pydantic-core, jinja2, httpcore2, anyio, pydantic, httpx2, flask, openai, flask-cors
+ ---> Removed intermediate container 680f715dbd1e
+ ---> babcf7bd89a2
+Step 5/11 : COPY . .
+ ---> Removed intermediate container 9b571e850952
+ ---> 638bad2cfff9
+Step 5/10 : COPY init_db.py .
+ ---> Removed intermediate container 7f49ee0b0ddb
+ ---> c2d614ede4ab
+Step 5/10 : COPY app.py .
+ ---> 512e16b17a37
+Step 6/11 : RUN mkdir -p /data
+ ---> bee5a35ac3f3
+Step 6/10 : COPY init_db.py .
+ ---> 2ef55eb0ff9e
+Step 6/10 : COPY app.py .
+ ---> Running in 1d75e5d677b4
+ ---> ee4c7079c723
+Step 7/10 : RUN python init_db.py
+ ---> 25c185f1563e
+Step 7/10 : RUN python init_db.py
+ ---> Running in 49ef9e6c9555
+ ---> Running in 3e78f9c0a08d
+ ---> Removed intermediate container 1d75e5d677b4
+ ---> 88102d27f4f5
+Step 7/11 : ENV DB_PATH=/data/transactions.db
+Database initialized with 10 accounts.
+Database initialized with 10 users.
+ ---> Running in 0209490ccb25
+Successfully installed annotated-types-0.8.0 anyio-4.15.0 blinker-1.9.0 click-8.5.0 flask-3.1.3 flask-cors-6.0.5 h11-0.16.0 httpcore2-2.12.0 httpx2-2.12.0 idna-3.19 itsdangerous-2.2.0 jinja2-3.1.6 jiter-0.16.0 markupsafe-3.0.3 openai-3.7.0 pydantic-2.13.5 pydantic-core-2.46.5 python-dotenv-1.2.3 sniffio-1.3.1 truststore-0.10.4 typing-extensions-4.16.0 typing-inspection-0.4.4 werkzeug-3.1.8
+[91mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+[0m[91m
+[notice] A new release of pip is available: 24.0 -> 26.2.1
+[notice] To update, run: pip install --upgrade pip
+[0m ---> Removed intermediate container 0209490ccb25
+ ---> 1638eb0b273d
+Step 8/11 : ENV PORT=8000
+ ---> Removed intermediate container 49ef9e6c9555
+ ---> fa918f8a0a10
+Step 8/10 : EXPOSE 5002
+ ---> Removed intermediate container 3e78f9c0a08d
+ ---> fbe5c3c1c5ef
+Step 8/10 : EXPOSE 5002
+ ---> Running in 51a5a4fc36ea
+ ---> Running in 9394a5aee6e3
+ ---> Running in ed1336ad9b54
+ ---> Removed intermediate container 51a5a4fc36ea
+ ---> 25a314e482a1
+Step 9/11 : EXPOSE 8000
+ ---> Removed intermediate container 9394a5aee6e3
+ ---> c8fcb72378ab
+Step 9/10 : CMD ["python", "app.py"]
+ ---> Removed intermediate container ed1336ad9b54
+ ---> 293e601d8052
+Step 9/10 : CMD ["python", "app.py"]
+ ---> Running in 6e084c683e65
+ ---> Running in 3ade52ec747c
+ ---> Running in 13d99cd292f8
+ ---> Removed intermediate container 6e084c683e65
+ ---> b49d13610c37
+Step 10/11 : CMD ["python", "app.py"]
+ ---> Removed intermediate container 3ade52ec747c
+ ---> b5620ebaa62a
+Step 10/10 : LABEL com.docker.compose.image.builder=classic
+ ---> Removed intermediate container 13d99cd292f8
+ ---> 2c3619497442
+Step 10/10 : LABEL com.docker.compose.image.builder=classic
+ ---> Running in 7c4952800cc8
+ ---> Running in a34cfb8cbf3c
+ ---> Running in e16c893a2de7
+ ---> Removed intermediate container a34cfb8cbf3c
+ ---> 54ddcd40d2f2
+ ---> Removed intermediate container 7c4952800cc8
+ ---> a4d71e5b11d2
+Step 11/11 : LABEL com.docker.compose.image.builder=classic
+Successfully built 54ddcd40d2f2
+ ---> Removed intermediate container e16c893a2de7
+ ---> 6a154613168a
+Successfully tagged asdass1-student2-database:latest
+ Image asdass1-student2-database Built 
+ Image asdass1-student2-database Built 
+Successfully built 6a154613168a
+Successfully tagged asdass1-student4-database:latest
+ Image asdass1-student4-database Built 
+ Image asdass1-student4-database Built 
+ Image asdass1-student2-backend Building 
+ Image asdass1-student2-backend Building 
+Sending build context to Docker daemon  16.18kB
+Step 1/9 : FROM python:3.11-slim
+ Image asdass1-student4-backend Building 
+ Image asdass1-student4-backend Building 
+Sending build context to Docker daemon   2.32kB
+Step 1/9 : FROM python:3.11-slim
+ ---> 9534e5a8e315
+Step 2/9 : WORKDIR /app
+ ---> 9534e5a8e315
+Step 2/9 : WORKDIR /app
+ ---> Running in 0f291e8ca84c
+ ---> Running in 08330334c107
+ ---> Running in df10696d0825
+ ---> Removed intermediate container 0f291e8ca84c
+ ---> c75283848758
+Successfully built c75283848758
+Successfully tagged asdass1-student5-db:latest
+ Image asdass1-student5-db Built 
+ Image asdass1-student5-db Built 
+ ---> Removed intermediate container 08330334c107
+ ---> 107a8ea3552e
+Step 3/9 : COPY backend/requirements.txt ./requirements.txt
+ Image asdass1-student5-backend Building 
+ Image asdass1-student5-backend Building 
+Sending build context to Docker daemon  8.496kB
+ ---> Removed intermediate container df10696d0825
+ ---> 8ee7d70c261f
+Step 3/9 : COPY ./requirements.txt ./requirements.txt
+Step 1/12 : FROM python:3.11-slim
+ ---> 9534e5a8e315
+Step 2/12 : WORKDIR /app
+ ---> Running in 65926a5cb156
+ ---> Removed intermediate container 475f267a9dbf
+ ---> c7c1934d897b
+Step 5/11 : COPY cm_crud.py .
+ ---> ffd67fe6b7a9
+Step 4/9 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> 77e2b81836d9
+Step 4/9 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> Removed intermediate container 65926a5cb156
+ ---> 014fd43db38b
+Step 3/12 : COPY requirements.txt .
+ ---> Running in ab3d93b23313
+ ---> Running in 5c1920df0ffe
+ ---> a3d0c625d075
+Step 6/11 : COPY init_db.py .
+ ---> 3cd6a7307b6b
+Step 4/12 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> Running in 904c32ada78a
+Collecting flask==3.0.3 (from -r requirements.txt (line 1))
+  Downloading flask-3.0.3-py3-none-any.whl.metadata (3.2 kB)
+Collecting flask==3.0.3 (from -r requirements.txt (line 1))
+Collecting flask-cors==4.0.1 (from -r requirements.txt (line 2))
+ ---> 52b07ff9377f
+Step 7/11 : COPY . .
+  Downloading Flask_Cors-4.0.1-py2.py3-none-any.whl.metadata (5.5 kB)
+  Downloading flask-3.0.3-py3-none-any.whl.metadata (3.2 kB)
+Collecting requests==2.32.3 (from -r requirements.txt (line 3))
+Collecting flask-cors==4.0.1 (from -r requirements.txt (line 2))
+  Downloading requests-2.32.3-py3-none-any.whl.metadata (4.6 kB)
+  Downloading Flask_Cors-4.0.1-py2.py3-none-any.whl.metadata (5.5 kB)
+Collecting requests==2.32.3 (from -r requirements.txt (line 3))
+  Downloading requests-2.32.3-py3-none-any.whl.metadata (4.6 kB)
+Collecting openai (from -r requirements.txt (line 4))
+  Downloading openai-3.7.0-py3-none-any.whl.metadata (41 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 41.7/41.7 kB 4.8 MB/s eta 0:00:00
+Collecting openai (from -r requirements.txt (line 4))
+Collecting python-dotenv (from -r requirements.txt (line 5))
+  Downloading openai-3.7.0-py3-none-any.whl.metadata (41 kB)
+  Downloading python_dotenv-1.2.3-py3-none-any.whl.metadata (29 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 41.7/41.7 kB 9.3 MB/s eta 0:00:00
+Collecting python-dotenv (from -r requirements.txt (line 5))
+  Downloading python_dotenv-1.2.3-py3-none-any.whl.metadata (29 kB)
+Collecting Werkzeug>=3.0.0 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading werkzeug-3.1.8-py3-none-any.whl.metadata (4.0 kB)
+Collecting Jinja2>=3.1.2 (from flask==3.0.3->-r requirements.txt (line 1))
+Collecting Werkzeug>=3.0.0 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+  Downloading werkzeug-3.1.8-py3-none-any.whl.metadata (4.0 kB)
+Collecting itsdangerous>=2.1.2 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Collecting Jinja2>=3.1.2 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting click>=8.1.3 (from flask==3.0.3->-r requirements.txt (line 1))
+Collecting itsdangerous>=2.1.2 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+  Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Collecting blinker>=1.6.2 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting click>=8.1.3 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting blinker>=1.6.2 (from flask==3.0.3->-r requirements.txt (line 1))
+  Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting Flask==3.0.3 (from -r requirements.txt (line 1))
+  Downloading flask-3.0.3-py3-none-any.whl.metadata (3.2 kB)
+Collecting charset-normalizer<4,>=2 (from requests==2.32.3->-r requirements.txt (line 3))
+  Downloading charset_normalizer-3.5.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (45 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45.9/45.9 kB 17.7 MB/s eta 0:00:00
+Collecting Flask-Cors==4.0.1 (from -r requirements.txt (line 2))
+  Downloading Flask_Cors-4.0.1-py2.py3-none-any.whl.metadata (5.5 kB)
+Collecting idna<4,>=2.5 (from requests==2.32.3->-r requirements.txt (line 3))
+  Downloading idna-3.19-py3-none-any.whl.metadata (9.2 kB)
+Collecting charset-normalizer<4,>=2 (from requests==2.32.3->-r requirements.txt (line 3))
+  Downloading charset_normalizer-3.5.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (45 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45.9/45.9 kB 17.7 MB/s eta 0:00:00
+Collecting requests==2.32.3 (from -r requirements.txt (line 3))
+  Downloading requests-2.32.3-py3-none-any.whl.metadata (4.6 kB)
+Collecting idna<4,>=2.5 (from requests==2.32.3->-r requirements.txt (line 3))
+  Downloading idna-3.19-py3-none-any.whl.metadata (9.2 kB)
+Collecting urllib3<3,>=1.21.1 (from requests==2.32.3->-r requirements.txt (line 3))
+  Downloading urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+ ---> 2d86b6ff1419
+Step 8/11 : RUN python init_db.py
+Collecting certifi>=2017.4.17 (from requests==2.32.3->-r requirements.txt (line 3))
+Collecting urllib3<3,>=1.21.1 (from requests==2.32.3->-r requirements.txt (line 3))
+  Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+  Downloading urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+Collecting certifi>=2017.4.17 (from requests==2.32.3->-r requirements.txt (line 3))
+Collecting openai==1.34.0 (from -r requirements.txt (line 4))
+  Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+  Downloading openai-1.34.0-py3-none-any.whl.metadata (21 kB)
+Collecting anyio<5,>=4.10.0 (from openai->-r requirements.txt (line 4))
+  Downloading anyio-4.15.0-py3-none-any.whl.metadata (4.7 kB)
+Collecting httpx==0.27.2 (from -r requirements.txt (line 5))
+  Downloading httpx-0.27.2-py3-none-any.whl.metadata (7.1 kB)
+ ---> Running in 9b3eef9d2936
+Collecting httpx2<3,>=2.7.0 (from openai->-r requirements.txt (line 4))
+Collecting anyio<5,>=4.10.0 (from openai->-r requirements.txt (line 4))
+  Downloading anyio-4.15.0-py3-none-any.whl.metadata (4.7 kB)
+  Downloading httpx2-2.12.0-py3-none-any.whl.metadata (9.5 kB)
+Collecting httpx2<3,>=2.7.0 (from openai->-r requirements.txt (line 4))
+  Downloading httpx2-2.12.0-py3-none-any.whl.metadata (9.5 kB)
+Collecting Werkzeug>=3.0.0 (from Flask==3.0.3->-r requirements.txt (line 1))
+  Downloading werkzeug-3.1.8-py3-none-any.whl.metadata (4.0 kB)
+Collecting Jinja2>=3.1.2 (from Flask==3.0.3->-r requirements.txt (line 1))
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting itsdangerous>=2.1.2 (from Flask==3.0.3->-r requirements.txt (line 1))
+  Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Collecting jiter<1,>=0.16.0 (from openai->-r requirements.txt (line 4))
+  Downloading jiter-0.16.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.2 kB)
+Collecting click>=8.1.3 (from Flask==3.0.3->-r requirements.txt (line 1))
+database initialised with examples
+Collecting jiter<1,>=0.16.0 (from openai->-r requirements.txt (line 4))
+  Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+  Downloading jiter-0.16.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.2 kB)
+Collecting blinker>=1.6.2 (from Flask==3.0.3->-r requirements.txt (line 1))
+  Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting pydantic!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,<3,>=1.10.13 (from openai->-r requirements.txt (line 4))
+Collecting pydantic!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,<3,>=1.10.13 (from openai->-r requirements.txt (line 4))
+  Downloading pydantic-2.13.5-py3-none-any.whl.metadata (110 kB)
+  Downloading pydantic-2.13.5-py3-none-any.whl.metadata (110 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 110.2/110.2 kB 20.1 MB/s eta 0:00:00
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 110.2/110.2 kB 10.1 MB/s eta 0:00:00
+Collecting sniffio (from openai->-r requirements.txt (line 4))
+Collecting charset-normalizer<4,>=2 (from requests==2.32.3->-r requirements.txt (line 3))
+  Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+Collecting sniffio (from openai->-r requirements.txt (line 4))
+  Downloading charset_normalizer-3.5.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (45 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45.9/45.9 kB 85.8 MB/s eta 0:00:00
+  Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+Collecting typing-extensions<5,>=4.14 (from openai->-r requirements.txt (line 4))
+Collecting idna<4,>=2.5 (from requests==2.32.3->-r requirements.txt (line 3))
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting typing-extensions<5,>=4.14 (from openai->-r requirements.txt (line 4))
+  Downloading idna-3.19-py3-none-any.whl.metadata (9.2 kB)
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting urllib3<3,>=1.21.1 (from requests==2.32.3->-r requirements.txt (line 3))
+Collecting httpcore2==2.12.0 (from httpx2<3,>=2.7.0->openai->-r requirements.txt (line 4))
+  Downloading urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+  Downloading httpcore2-2.12.0-py3-none-any.whl.metadata (25 kB)
+Collecting httpcore2==2.12.0 (from httpx2<3,>=2.7.0->openai->-r requirements.txt (line 4))
+  Downloading httpcore2-2.12.0-py3-none-any.whl.metadata (25 kB)
+Collecting truststore>=0.10 (from httpx2<3,>=2.7.0->openai->-r requirements.txt (line 4))
+Collecting certifi>=2017.4.17 (from requests==2.32.3->-r requirements.txt (line 3))
+  Downloading truststore-0.10.4-py3-none-any.whl.metadata (4.4 kB)
+Collecting truststore>=0.10 (from httpx2<3,>=2.7.0->openai->-r requirements.txt (line 4))
+  Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+  Downloading truststore-0.10.4-py3-none-any.whl.metadata (4.4 kB)
+Collecting h11>=0.16 (from httpcore2==2.12.0->httpx2<3,>=2.7.0->openai->-r requirements.txt (line 4))
+Collecting h11>=0.16 (from httpcore2==2.12.0->httpx2<3,>=2.7.0->openai->-r requirements.txt (line 4))
+  Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+  Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting anyio<5,>=3.5.0 (from openai==1.34.0->-r requirements.txt (line 4))
+  Downloading anyio-4.15.0-py3-none-any.whl.metadata (4.7 kB)
+Collecting distro<2,>=1.7.0 (from openai==1.34.0->-r requirements.txt (line 4))
+  Downloading distro-1.9.0-py3-none-any.whl.metadata (6.8 kB)
+Collecting MarkupSafe>=2.0 (from Jinja2>=3.1.2->flask==3.0.3->-r requirements.txt (line 1))
+Collecting MarkupSafe>=2.0 (from Jinja2>=3.1.2->flask==3.0.3->-r requirements.txt (line 1))
+  Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+  Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Collecting annotated-types>=0.6.0 (from pydantic!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,<3,>=1.10.13->openai->-r requirements.txt (line 4))
+Collecting annotated-types>=0.6.0 (from pydantic!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,<3,>=1.10.13->openai->-r requirements.txt (line 4))
+  Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+  Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic<3,>=1.9.0 (from openai==1.34.0->-r requirements.txt (line 4))
+  Downloading pydantic-2.13.5-py3-none-any.whl.metadata (110 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 110.2/110.2 kB 105.8 MB/s eta 0:00:00
+Collecting sniffio (from openai==1.34.0->-r requirements.txt (line 4))
+  Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+Collecting tqdm>4 (from openai==1.34.0->-r requirements.txt (line 4))
+  Downloading tqdm-4.70.0-py3-none-any.whl.metadata (57 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 57.3/57.3 kB 11.5 MB/s eta 0:00:00
+Collecting typing-extensions<5,>=4.7 (from openai==1.34.0->-r requirements.txt (line 4))
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting httpcore==1.* (from httpx==0.27.2->-r requirements.txt (line 5))
+  Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Collecting h11>=0.16 (from httpcore==1.*->httpx==0.27.2->-r requirements.txt (line 5))
+  Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting MarkupSafe>=2.0 (from Jinja2>=3.1.2->Flask==3.0.3->-r requirements.txt (line 1))
+  Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Collecting annotated-types>=0.6.0 (from pydantic<3,>=1.9.0->openai==1.34.0->-r requirements.txt (line 4))
+  Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+ ---> Removed intermediate container 9b3eef9d2936
+ ---> 5636a2960e6d
+Step 9/11 : EXPOSE 5002
+ ---> Running in 97f5d60f1882
+Collecting pydantic-core==2.46.5 (from pydantic!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,<3,>=1.10.13->openai->-r requirements.txt (line 4))
+  Downloading pydantic_core-2.46.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+Collecting typing-inspection>=0.4.2 (from pydantic!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,<3,>=1.10.13->openai->-r requirements.txt (line 4))
+  Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+Collecting pydantic-core==2.46.5 (from pydantic!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,<3,>=1.10.13->openai->-r requirements.txt (line 4))
+  Downloading pydantic_core-2.46.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+Collecting typing-inspection>=0.4.2 (from pydantic!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,<3,>=1.10.13->openai->-r requirements.txt (line 4))
+Downloading flask-3.0.3-py3-none-any.whl (101 kB)
+  Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 101.7/101.7 kB 12.0 MB/s eta 0:00:00
+Downloading Flask_Cors-4.0.1-py2.py3-none-any.whl (14 kB)
+Downloading requests-2.32.3-py3-none-any.whl (64 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.9/64.9 kB 69.6 MB/s eta 0:00:00
+Downloading openai-3.7.0-py3-none-any.whl (1.7 MB)
+Downloading flask-3.0.3-py3-none-any.whl (101 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 101.7/101.7 kB 17.8 MB/s eta 0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 4.9 MB/s eta 0:00:00
+Downloading Flask_Cors-4.0.1-py2.py3-none-any.whl (14 kB)
+Downloading python_dotenv-1.2.3-py3-none-any.whl (22 kB)
+Downloading requests-2.32.3-py3-none-any.whl (64 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.9/64.9 kB 72.8 MB/s eta 0:00:00
+Downloading anyio-4.15.0-py3-none-any.whl (131 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 131.9/131.9 kB 41.5 MB/s eta 0:00:00
+Downloading openai-3.7.0-py3-none-any.whl (1.7 MB)
+Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 16.5 MB/s eta 0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 137.0/137.0 kB 86.6 MB/s eta 0:00:00
+Downloading python_dotenv-1.2.3-py3-none-any.whl (22 kB)
+Downloading charset_normalizer-3.5.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (262 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 262.3/262.3 kB 47.5 MB/s eta 0:00:00Downloading anyio-4.15.0-py3-none-any.whl (131 kB)
+
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 131.9/131.9 kB 34.3 MB/s eta 0:00:00
+Downloading click-8.5.0-py3-none-any.whl (125 kB)
+Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 125.3/125.3 kB 47.3 MB/s eta 0:00:00
+Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+Downloading httpx2-2.12.0-py3-none-any.whl (95 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 137.0/137.0 kB 7.9 MB/s eta 0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 95.4/95.4 kB 62.3 MB/s eta 0:00:00
+Downloading httpcore2-2.12.0-py3-none-any.whl (83 kB)
+Downloading charset_normalizer-3.5.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (262 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 83.1/83.1 kB 21.4 MB/s eta 0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 262.3/262.3 kB 11.3 MB/s eta 0:00:00
+Downloading idna-3.19-py3-none-any.whl (68 kB)
+Downloading click-8.5.0-py3-none-any.whl (125 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 68.5/68.5 kB 72.3 MB/s eta 0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 125.3/125.3 kB 89.6 MB/s eta 0:00:00
+Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Downloading httpx2-2.12.0-py3-none-any.whl (95 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 95.4/95.4 kB 86.7 MB/s eta 0:00:00
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+Downloading httpcore2-2.12.0-py3-none-any.whl (83 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 15.8 MB/s eta 0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 83.1/83.1 kB 13.7 MB/s eta 0:00:00
+Downloading jiter-0.16.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (347 kB)
+Downloading idna-3.19-py3-none-any.whl (68 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 347.1/347.1 kB 22.7 MB/s eta 0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 68.5/68.5 kB 10.0 MB/s eta 0:00:00
+Downloading pydantic-2.13.5-py3-none-any.whl (472 kB)
+Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 472.6/472.6 kB 15.5 MB/s eta 0:00:00
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 21.3 MB/s eta 0:00:00
+Downloading pydantic_core-2.46.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+Collecting pydantic-core==2.46.5 (from pydantic<3,>=1.9.0->openai==1.34.0->-r requirements.txt (line 4))
+Downloading jiter-0.16.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (347 kB)
+  Downloading pydantic_core-2.46.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 25.9 MB/s eta 0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 347.1/347.1 kB 30.2 MB/s eta 0:00:00
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading pydantic-2.13.5-py3-none-any.whl (472 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45.6/45.6 kB 19.0 MB/s eta 0:00:00
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 472.6/472.6 kB 34.8 MB/s eta 0:00:00
+Downloading urllib3-2.7.0-py3-none-any.whl (131 kB)
+Collecting typing-inspection>=0.4.2 (from pydantic<3,>=1.9.0->openai==1.34.0->-r requirements.txt (line 4))
+Downloading pydantic_core-2.46.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 131.1/131.1 kB 4.9 MB/s eta 0:00:00
+  Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 36.3 MB/s eta 0:00:00
+Downloading werkzeug-3.1.8-py3-none-any.whl (226 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 226.5/226.5 kB 36.7 MB/s eta 0:00:00
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45.6/45.6 kB 18.3 MB/s eta 0:00:00
+Downloading urllib3-2.7.0-py3-none-any.whl (131 kB)
+Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 131.1/131.1 kB 30.9 MB/s eta 0:00:00
+Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+Downloading werkzeug-3.1.8-py3-none-any.whl (226 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 226.5/226.5 kB 15.8 MB/s eta 0:00:00
+Downloading truststore-0.10.4-py3-none-any.whl (18 kB)
+Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+Downloading flask-3.0.3-py3-none-any.whl (101 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 101.7/101.7 kB 54.2 MB/s eta 0:00:00
+Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading Flask_Cors-4.0.1-py2.py3-none-any.whl (14 kB)
+Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+Downloading requests-2.32.3-py3-none-any.whl (64 kB)
+Downloading truststore-0.10.4-py3-none-any.whl (18 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.9/64.9 kB 80.8 MB/s eta 0:00:00
+Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+Downloading openai-1.34.0-py3-none-any.whl (325 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 325.5/325.5 kB 32.2 MB/s eta 0:00:00
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading httpx-0.27.2-py3-none-any.whl (76 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 76.4/76.4 kB 14.9 MB/s eta 0:00:00
+Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 78.8/78.8 kB 87.7 MB/s eta 0:00:00
+Downloading anyio-4.15.0-py3-none-any.whl (131 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 131.9/131.9 kB 36.0 MB/s eta 0:00:00
+Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 137.0/137.0 kB 10.0 MB/s eta 0:00:00
+Downloading charset_normalizer-3.5.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (262 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 262.3/262.3 kB 17.8 MB/s eta 0:00:00
+Downloading click-8.5.0-py3-none-any.whl (125 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 125.3/125.3 kB 32.0 MB/s eta 0:00:00
+Downloading distro-1.9.0-py3-none-any.whl (20 kB)
+Downloading idna-3.19-py3-none-any.whl (68 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 68.5/68.5 kB 17.1 MB/s eta 0:00:00
+Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Installing collected packages: urllib3, typing-extensions, truststore, sniffio, python-dotenv, MarkupSafe, jiter, itsdangerous, idna, h11, click, charset-normalizer, certifi, blinker, annotated-types, Werkzeug, typing-inspection, requests, pydantic-core, Jinja2, httpcore2, anyio, pydantic, httpx2, flask, openai, flask-cors
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 12.0 MB/s eta 0:00:00
+Downloading pydantic-2.13.5-py3-none-any.whl (472 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 472.6/472.6 kB 25.4 MB/s eta 0:00:00
+Downloading pydantic_core-2.46.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+Installing collected packages: urllib3, typing-extensions, truststore, sniffio, python-dotenv, MarkupSafe, jiter, itsdangerous, idna, h11, click, charset-normalizer, certifi, blinker, annotated-types, Werkzeug, typing-inspection, requests, pydantic-core, Jinja2, httpcore2, anyio, pydantic, httpx2, flask, openai, flask-cors
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 25.9 MB/s eta 0:00:00
+Downloading tqdm-4.70.0-py3-none-any.whl (80 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 80.2/80.2 kB 61.6 MB/s eta 0:00:00
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45.6/45.6 kB 12.8 MB/s eta 0:00:00
+Downloading urllib3-2.7.0-py3-none-any.whl (131 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 131.1/131.1 kB 14.5 MB/s eta 0:00:00
+Downloading werkzeug-3.1.8-py3-none-any.whl (226 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 226.5/226.5 kB 24.7 MB/s eta 0:00:00
+Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+ ---> Removed intermediate container 97f5d60f1882
+ ---> 5faab674fdb5
+Step 10/11 : CMD ["python", "app.py"]
+Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+Installing collected packages: urllib3, typing-extensions, tqdm, sniffio, MarkupSafe, itsdangerous, idna, h11, distro, click, charset-normalizer, certifi, blinker, annotated-types, Werkzeug, typing-inspection, requests, pydantic-core, Jinja2, httpcore, anyio, pydantic, httpx, Flask, openai, Flask-Cors
+ ---> Running in 63d195c41130
+ ---> Removed intermediate container 63d195c41130
+ ---> 56b70a63a003
+Step 11/11 : LABEL com.docker.compose.image.builder=classic
+ ---> Running in 432ce01c8c45
+Successfully installed Flask-3.0.3 Flask-Cors-4.0.1 Jinja2-3.1.6 MarkupSafe-3.0.3 Werkzeug-3.1.8 annotated-types-0.8.0 anyio-4.15.0 blinker-1.9.0 certifi-2026.7.22 charset-normalizer-3.5.1 click-8.5.0 distro-1.9.0 h11-0.16.0 httpcore-1.0.9 httpx-0.27.2 idna-3.19 itsdangerous-2.2.0 openai-1.34.0 pydantic-2.13.5 pydantic-core-2.46.5 requests-2.32.3 sniffio-1.3.1 tqdm-4.70.0 typing-extensions-4.16.0 typing-inspection-0.4.4 urllib3-2.7.0
+[91mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+[0m[91m
+[notice] A new release of pip is available: 24.0 -> 26.2.1
+[notice] To update, run: pip install --upgrade pip
+[0mSuccessfully installed Jinja2-3.1.6 MarkupSafe-3.0.3 Werkzeug-3.1.8 annotated-types-0.8.0 anyio-4.15.0 blinker-1.9.0 certifi-2026.7.22 charset-normalizer-3.5.1 click-8.5.0 flask-3.0.3 flask-cors-4.0.1 h11-0.16.0 httpcore2-2.12.0 httpx2-2.12.0 idna-3.19 itsdangerous-2.2.0 jiter-0.16.0 openai-3.7.0 pydantic-2.13.5 pydantic-core-2.46.5 python-dotenv-1.2.3 requests-2.32.3 sniffio-1.3.1 truststore-0.10.4 typing-extensions-4.16.0 typing-inspection-0.4.4 urllib3-2.7.0
+[91mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+[0m ---> Removed intermediate container 432ce01c8c45
+ ---> 23edf261f8d4
+Successfully built 23edf261f8d4
+Successfully tagged asdass1-student-1-database:latest
+ Image asdass1-student-1-database Built 
+ Image asdass1-student-1-database Built 
+Successfully installed Jinja2-3.1.6 MarkupSafe-3.0.3 Werkzeug-3.1.8 annotated-types-0.8.0 anyio-4.15.0 blinker-1.9.0 certifi-2026.7.22 charset-normalizer-3.5.1 click-8.5.0 flask-3.0.3 flask-cors-4.0.1 h11-0.16.0 httpcore2-2.12.0 httpx2-2.12.0 idna-3.19 itsdangerous-2.2.0 jiter-0.16.0 openai-3.7.0 pydantic-2.13.5 pydantic-core-2.46.5 python-dotenv-1.2.3 requests-2.32.3 sniffio-1.3.1 truststore-0.10.4 typing-extensions-4.16.0 typing-inspection-0.4.4 urllib3-2.7.0
+[91mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+[0m[91m
+[notice] A new release of pip is available: 24.0 -> 26.2.1
+[notice] To update, run: pip install --upgrade pip
+[0m Image asdass1-student-1-backend Building 
+ Image asdass1-student-1-backend Building 
+Sending build context to Docker daemon  14.21kB
+Step 1/8 : FROM python:3.11-slim
+ ---> 9534e5a8e315
+Step 2/8 : WORKDIR /app
+[91m
+[notice] A new release of pip is available: 24.0 -> 26.2.1
+[notice] To update, run: pip install --upgrade pip
+[0m ---> Running in 03d515b804d8
+ ---> Removed intermediate container 03d515b804d8
+ ---> ebe90a890398
+Step 3/8 : COPY requirements.txt .
+ ---> 2ff31b1fa6dd
+Step 4/8 : RUN pip install --no-cache-dir -r requirements.txt
+ ---> Running in f58ba6594ab0
+ ---> Removed intermediate container 904c32ada78a
+ ---> 9512a8465efe
+Step 5/12 : COPY . .
+Collecting flask (from -r requirements.txt (line 1))
+  Downloading flask-3.1.3-py3-none-any.whl.metadata (3.2 kB)
+Collecting requests (from -r requirements.txt (line 2))
+  Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting flask_cors (from -r requirements.txt (line 3))
+  Downloading flask_cors-6.0.5-py3-none-any.whl.metadata (5.4 kB)
+Collecting openai (from -r requirements.txt (line 4))
+  Downloading openai-3.7.0-py3-none-any.whl.metadata (41 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 41.7/41.7 kB 3.2 MB/s eta 0:00:00
+Collecting python-dotenv (from -r requirements.txt (line 5))
+  Downloading python_dotenv-1.2.3-py3-none-any.whl.metadata (29 kB)
+Collecting blinker>=1.9.0 (from flask->-r requirements.txt (line 1))
+  Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting click>=8.1.3 (from flask->-r requirements.txt (line 1))
+  Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting itsdangerous>=2.2.0 (from flask->-r requirements.txt (line 1))
+  Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Collecting jinja2>=3.1.2 (from flask->-r requirements.txt (line 1))
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting markupsafe>=2.1.1 (from flask->-r requirements.txt (line 1))
+  Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Collecting werkzeug>=3.1.0 (from flask->-r requirements.txt (line 1))
+  Downloading werkzeug-3.1.8-py3-none-any.whl.metadata (4.0 kB)
+Collecting charset_normalizer<4,>=2 (from requests->-r requirements.txt (line 2))
+ ---> 75bd0506b2c4
+Step 6/12 : ENV DB_URL=http://student5-db:8000
+  Downloading charset_normalizer-3.5.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (45 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45.9/45.9 kB 28.9 MB/s eta 0:00:00
+Collecting idna<4,>=2.5 (from requests->-r requirements.txt (line 2))
+  Downloading idna-3.19-py3-none-any.whl.metadata (9.2 kB)
+Collecting urllib3<3,>=1.26 (from requests->-r requirements.txt (line 2))
+  Downloading urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+Collecting certifi>=2023.5.7 (from requests->-r requirements.txt (line 2))
+  Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+ ---> Running in ae316a86c485
+Collecting anyio<5,>=4.10.0 (from openai->-r requirements.txt (line 4))
+  Downloading anyio-4.15.0-py3-none-any.whl.metadata (4.7 kB)
+Collecting httpx2<3,>=2.7.0 (from openai->-r requirements.txt (line 4))
+  Downloading httpx2-2.12.0-py3-none-any.whl.metadata (9.5 kB)
+Collecting jiter<1,>=0.16.0 (from openai->-r requirements.txt (line 4))
+  Downloading jiter-0.16.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.2 kB)

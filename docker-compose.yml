@@ -49,8 +49,7 @@ services:
       DATABASE_SERVICE_URL: http://student-1-database:5002
       OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
       OLLAMA_MODEL: qwen2.5:0.5b
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+
     depends_on:
       - student-1-database
     restart: unless-stopped
@@ -91,8 +90,7 @@ services:
       OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
       OLLAMA_MODEL: qwen2.5:0.5b
       OLLAMA_REVIEW_MODEL: llama3.1:8b
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+
     depends_on:
       - student2-database
     restart: unless-stopped
@@ -136,8 +134,7 @@ services:
       REQUIRE_ACCOUNTS: "true"      # waiting for Binh service to run
     depends_on:
       - student5-db
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+
     restart: unless-stopped
 
   student5-frontend:
@@ -168,10 +165,9 @@ services:
       - "8204:5001"
     environment:
       DATABASE_SERVICE_URL: http://student4-database:5002
-      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+      OLLAMA_BASE_URL: http://ollama:11434/v1
       OLLAMA_MODEL: qwen2.5:0.5b
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+   
     depends_on:
       - student4-database
     volumes:

@@ -273,7 +273,13 @@ document
                 document.getElementById("password").value,
 
             role:
-                document.getElementById("role").value
+                document.getElementById("role").value,
+            phone:
+                document.getElementById("phone").value,
+            fname:
+                document.getElementById("fname").value,
+            lname:
+                document.getElementById("lname").value,
 
         };
 

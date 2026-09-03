@@ -73,23 +73,24 @@ def create_user():
 
     username = (data.get("username") or "").strip()
     email = (data.get("email") or "").strip()
-    password_hash = (data.get("password_hash") or "").strip()
-    first_name = (data.get("first_name") or "").strip()
-    last_name = (data.get("last_name") or "").strip()
+    password = (data.get("password") or "").strip()
+    first_name = (data.get("fname") or "").strip()
+    last_name = (data.get("lname") or "").strip()
     phone = (data.get("phone") or "").strip()
+    role = (data.get("role") or "").strip()
 
-    if not username or not email or not password_hash:
-        return jsonify({"error": "username, email and password_hash are required"}), 400
+    if not username or not email or not password:
+        return jsonify({"error": "username, email and password are required"}), 400
 
     conn = get_db_connection()
 
     try:
         cursor = conn.execute(
             """
-            INSERT INTO users (username, email, password_hash, first_name, last_name, phone)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO users (username, email, password, first_name, last_name, phone, role)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
-            (username, email, password_hash, first_name, last_name, phone),
+            (username, email, password, first_name, last_name, phone, role),
         )
         conn.commit()
         new_id = cursor.lastrowid
@@ -106,9 +107,10 @@ def update_user(user_id):
     data = request.get_json(silent=True) or {}
 
     email = (data.get("email") or "").strip()
-    first_name = (data.get("first_name") or "").strip()
-    last_name = (data.get("last_name") or "").strip()
+    first_name = (data.get("fname") or "").strip()
+    last_name = (data.get("lname") or "").strip()
     phone = (data.get("phone") or "").strip()
+    role = (data.get("role") or "").strip()
 
     if not email or not first_name or not last_name or not phone:
         return jsonify({"error": "email, first_name, last_name and phone are required"}), 400
@@ -126,10 +128,10 @@ def update_user(user_id):
     conn.execute(
         """
         UPDATE users
-        SET email = ?, first_name = ?, last_name = ?, phone = ?
+        SET email = ?, first_name = ?, last_name = ?, phone = ?, role = ?, 
         WHERE user_id = ?
         """,
-        (email, first_name, last_name, phone, user_id),
+        (email, first_name, last_name, phone, role, user_id),
     )
     conn.commit()
     conn.close()
