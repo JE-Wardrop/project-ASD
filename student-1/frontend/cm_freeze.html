@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Freezing/Unfreezing Cards</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+    <link rel="stylesheet" href="shared/styles.css"> 
+
+
+    <!-- <link rel="stylesheet" href="style.css"> -->
 </head>
 <body>
 
@@ -13,6 +17,63 @@
         <p></p>
     </div>
 
-    <script src="index.js"></script>
+
+    <div class="card-form">
+        <form id="freezeCard">
+            <label for="freeze-card-number">Enter Card Number:</label>
+            <input type="text" id="freeze-card-number" name="card_number" required>
+            <button type="submit">Freeze</button>
+        </form>
+        <div id="freezeResult" class="panel"></div>
+    </div>
+
+
+
+    
+    <div class="card-form">
+        <form id="unfreezeCard">
+            <label for="unfreeze-card-number">Enter Card Number:</label>
+            <input type="text" id="unfreeze-card-number" name="card_number" required>
+            <button type="submit">Unfreeze</button>
+        </form>
+        <div id="unfreezeResult" class="panel"></div>
+    </div>
+
+    <script>
+    const BACKEND_URL = "http://localhost:8201";
+
+    async function renderIntoPanel(panelId, url, options = {}) {
+        const panel = document.getElementById(panelId);
+        try {
+            const response = await fetch(url, options);
+            const body = await response.text();
+            panel.innerHTML = body;
+        } catch (error) {
+            panel.innerHTML = `<p>Request failed.</p><pre>${error}</pre>`;
+        }
+    }
+
+    const freezeForm = document.getElementById("freezeCard");
+    freezeForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const formData = new URLSearchParams(new FormData(freezeForm));
+        renderIntoPanel("freezeResult", `${BACKEND_URL}/cards/freeze`, {
+            method: "POST",
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: formData,
+        });
+    });
+
+    const unfreezeForm = document.getElementById("unfreezeCard");
+    unfreezeForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const formData = new URLSearchParams(new FormData(unfreezeForm));
+        renderIntoPanel("unfreezeResult", `${BACKEND_URL}/cards/unfreeze`, {
+            method: "POST",
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: formData,
+        });
+    });
+    </script>
 </body>
 </html>

@@ -3,7 +3,7 @@ import sys
 
 # p = Path.parent() / "agentic_loop" / "main.py"
 
-ENGINE_DIR = Path(__file__).resolve().parent / "agentic_loop"
+ENGINE_DIR = Path(__file__).resolve().parent / "ai-services" / "agentic_loop"
 if str(ENGINE_DIR) not in sys.path:
     sys.path.insert(0, str(ENGINE_DIR))
 

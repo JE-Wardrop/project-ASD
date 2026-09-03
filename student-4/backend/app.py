@@ -1,77 +1,89 @@
-from flask import Flask, render_template, request
-import sqlite3
+from flask import Flask, render_template, request, jsonify
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
+from flask_cors import CORS
+import requests
 
-# from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__, template_folder="../frontend/templates")
-
-DATABASE_NAME = Path(__file__).parent.parent / "database" / "users.db"
+CORS(app)
 
 
 # =========================
-# AI-Mode configuration (Ollama via the OpenAI-compatible API)
+# Database Service
 # =========================
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:0.5b")
+
+DATABASE_SERVICE_URL = os.getenv(
+    "DATABASE_SERVICE_URL",
+    "http://localhost:5002"
+)
+
+
+# =========================
+# AI-Mode configuration
+# Ollama via OpenAI-compatible API
+# =========================
+
+OLLAMA_BASE_URL = os.getenv(
+    "OLLAMA_BASE_URL",
+    "http://localhost:11434/v1"
+)
+
+OLLAMA_MODEL = os.getenv(
+    "OLLAMA_MODEL",
+    "qwen2.5:0.5b"
+)
 
 client = OpenAI(
     base_url=OLLAMA_BASE_URL,
     api_key="ollama"
 )
 
+
 PROMPT_DIR = Path(__file__).resolve().parent.parent / "prompts"
+
 
 def load_prompt(filename):
     prompt_path = PROMPT_DIR / filename
     return prompt_path.read_text(encoding="utf-8").strip()
 
 
-def get_db_connection():
-    conn = sqlite3.connect(DATABASE_NAME)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
 # =========================
-# Front end right on startup
+# Frontend
 # =========================
+
 @app.route("/")
 def index():
     return render_template("frontend.html")
+
+
 # =========================
 # GET ALL USERS
 # =========================
 
 @app.route("/users", methods=["GET"])
 def get_users():
-    conn = get_db_connection()
 
-    users = conn.execute("""
-        SELECT user_id, username, email, first_name, last_name, phone
-        FROM users
-    """).fetchall()
-
-    conn.close()
-
-    html = "<ul>"
-
-    for user in users:
-        html += (
-            f"<li>"
-            f"{user['user_id']} - "
-            f"{user['username']} - "
-            f"{user['email']} - "
-            f"{user['first_name']} {user['last_name']}"
-            f"</li>"
+    try:
+        response = requests.get(
+            f"{DATABASE_SERVICE_URL}/users",
+            timeout=5
         )
 
-    html += "</ul>"
+    except requests.RequestException as exc:
+        return jsonify({
+            "error": "Database service unavailable",
+            "details": str(exc)
+        }), 503
 
-    return html
+    if response.status_code != 200:
+        return jsonify({
+            "error": "Database service error"
+        }), 502
+
+    return jsonify(response.json())
 
 
 # =========================
@@ -80,28 +92,30 @@ def get_users():
 
 @app.route("/users/<int:user_id>", methods=["GET"])
 def get_user(user_id):
-    conn = get_db_connection()
 
-    user = conn.execute("""
-        SELECT user_id, username, email, first_name, last_name, phone
-        FROM users
-        WHERE user_id = ?
-    """, (user_id,)).fetchone()
+    try:
+        response = requests.get(
+            f"{DATABASE_SERVICE_URL}/users/{user_id}",
+            timeout=5
+        )
 
-    conn.close()
+    except requests.RequestException as exc:
+        return jsonify({
+            "error": "Database service unavailable",
+            "details": str(exc)
+        }), 503
 
-    if user is None:
-        return "<p>User not found.</p>", 404
+    if response.status_code == 404:
+        return jsonify({
+            "error": "User not found"
+        }), 404
 
-    return (
-        f"<p>"
-        f"ID: {user['user_id']}<br>"
-        f"Username: {user['username']}<br>"
-        f"Email: {user['email']}<br>"
-        f"Name: {user['first_name']} {user['last_name']}<br>"
-        f"Phone: {user['phone']}"
-        f"</p>"
-    )
+    if response.status_code != 200:
+        return jsonify({
+            "error": "Database service error"
+        }), 502
+
+    return jsonify(response.json())
 
 
 # =========================
@@ -119,35 +133,41 @@ def register_user():
     phone = request.form.get("phone", "").strip()
 
     if not username or not email or not password:
-        return "<p>Username, email and password are required.</p>", 400
+        return jsonify({
+            "error": "Username, email and password are required"
+        }), 400
 
-    # password_hash = generate_password_hash(password)
-
-    conn = get_db_connection()
+    data = {
+        "username": username,
+        "email": email,
+        "password": password,
+        "first_name": first_name,
+        "last_name": last_name,
+        "phone": phone
+    }
 
     try:
-        conn.execute("""
-            INSERT INTO users
-            (username, email, password, first_name, last_name, phone)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            username,
-            email,
-            password,
-            first_name,
-            last_name,
-            phone
-        ))
+        response = requests.post(
+            f"{DATABASE_SERVICE_URL}/users",
+            json=data,
+            timeout=5
+        )
 
-        conn.commit()
+    except requests.RequestException as exc:
+        return jsonify({
+            "error": "Database service unavailable",
+            "details": str(exc)
+        }), 503
 
-    except sqlite3.IntegrityError:
-        conn.close()
-        return "<p>Username or email already exists.</p>", 409
+    if response.status_code == 409:
+        return jsonify(response.json()), 409
 
-    conn.close()
+    if response.status_code != 201:
+        return jsonify({
+            "error": "Database service error"
+        }), 502
 
-    return "<p>User registered successfully.</p>", 201
+    return jsonify(response.json()), 201
 
 
 # =========================
@@ -161,30 +181,55 @@ def login_user():
     password = request.form.get("password", "").strip()
 
     if not username or not password:
-        return "<p>Username and password are required.</p>", 400
+        return jsonify({
+            "error": "Username and password are required"
+        }), 400
 
-    conn = get_db_connection()
+    try:
+        response = requests.get(
+            f"{DATABASE_SERVICE_URL}/users/by-username",
+            params={
+                "username": username
+            },
+            timeout=5
+        )
 
-    user = conn.execute("""
-        SELECT *
-        FROM users
-        WHERE username = ?
-    """, (username,)).fetchone()
+    except requests.RequestException as exc:
+        return jsonify({
+            "error": "Database service unavailable",
+            "details": str(exc)
+        }), 503
 
-    conn.close()
+    if response.status_code == 404:
+        return jsonify({
+            "error": "Invalid username or password"
+        }), 401
 
-    if user is None:
-        return "<p>Invalid username or password.</p>", 401
+    if response.status_code != 200:
+        return jsonify({
+            "error": "Database service error"
+        }), 502
 
+    user = response.json()
+
+    # Plain-text password comparison.
+    # No hashing.
     if user["password"] != password:
-        return "<p>Invalid username or password.</p>", 401
+        return jsonify({
+            "error": "Invalid username or password"
+        }), 401
 
-    return (
-        f"<p>"
-        f"Login successful.<br>"
-        f"Welcome, {user['first_name']}!"
-        f"</p>"
-    )
+    return jsonify({
+        "message": "Login successful",
+        "user": {
+            "user_id": user["user_id"],
+            "username": user["username"],
+            "email": user["email"],
+            "first_name": user["first_name"],
+            "last_name": user["last_name"],
+            "phone": user["phone"]
+        }
+    }), 200
 
 
 # =========================
@@ -200,39 +245,41 @@ def update_user(user_id):
     phone = request.form.get("phone", "").strip()
 
     if not email or not first_name or not last_name or not phone:
-        return "<p>All fields are required.</p>", 400
+        return jsonify({
+            "error": "All fields are required"
+        }), 400
 
-    conn = get_db_connection()
+    data = {
+        "email": email,
+        "first_name": first_name,
+        "last_name": last_name,
+        "phone": phone
+    }
 
-    existing_user = conn.execute("""
-        SELECT user_id
-        FROM users
-        WHERE user_id = ?
-    """, (user_id,)).fetchone()
+    try:
+        response = requests.put(
+            f"{DATABASE_SERVICE_URL}/users/{user_id}",
+            json=data,
+            timeout=5
+        )
 
-    if existing_user is None:
-        conn.close()
-        return "<p>User not found.</p>", 404
+    except requests.RequestException as exc:
+        return jsonify({
+            "error": "Database service unavailable",
+            "details": str(exc)
+        }), 503
 
-    conn.execute("""
-        UPDATE users
-        SET email = ?,
-            first_name = ?,
-            last_name = ?,
-            phone = ?
-        WHERE user_id = ?
-    """, (
-        email,
-        first_name,
-        last_name,
-        phone,
-        user_id
-    ))
+    if response.status_code == 404:
+        return jsonify({
+            "error": "User not found"
+        }), 404
 
-    conn.commit()
-    conn.close()
+    if response.status_code != 200:
+        return jsonify({
+            "error": "Database service error"
+        }), 502
 
-    return "<p>User updated successfully.</p>"
+    return jsonify(response.json()), 200
 
 
 # =========================
@@ -242,69 +289,100 @@ def update_user(user_id):
 @app.route("/users/<int:user_id>", methods=["DELETE"])
 def delete_user(user_id):
 
-    conn = get_db_connection()
+    try:
+        response = requests.delete(
+            f"{DATABASE_SERVICE_URL}/users/{user_id}",
+            timeout=5
+        )
 
-    existing_user = conn.execute("""
-        SELECT user_id
-        FROM users
-        WHERE user_id = ?
-    """, (user_id,)).fetchone()
+    except requests.RequestException as exc:
+        return jsonify({
+            "error": "Database service unavailable",
+            "details": str(exc)
+        }), 503
 
-    if existing_user is None:
-        conn.close()
-        return "<p>User not found.</p>", 404
+    if response.status_code == 404:
+        return jsonify({
+            "error": "User not found"
+        }), 404
 
-    conn.execute("""
-        DELETE FROM users
-        WHERE user_id = ?
-    """, (user_id,))
+    if response.status_code != 200:
+        return jsonify({
+            "error": "Database service error"
+        }), 502
 
-    conn.commit()
-    conn.close()
+    return jsonify(response.json()), 200
 
-    return "<p>User deleted successfully.</p>"
 
 # =========================
-# AI HELP (Ollama, OpenAI-compatible API)
+# AI HELP
+# Ollama, OpenAI-compatible API
 # =========================
 
 @app.route("/users/help", methods=["POST"])
 def ask_user_help():
 
     question = request.form.get("question", "").strip()
+
     print("DEBUG question:", repr(question))
+
     if not question:
-        return "<p>Question is required.</p>", 400
+        return jsonify({
+            "error": "Question is required"
+        }), 400
 
-    system_prompt = load_prompt("user_management_sys_prompt.txt")
-    task_prompt = load_prompt("user_help_task_prompt.txt")
+    system_prompt = load_prompt(
+        "user_management_sys_prompt.txt"
+    )
 
-    final_prompt = f"{task_prompt}\n\nUser question: {question}"
+    task_prompt = load_prompt(
+        "user_help_task_prompt.txt"
+    )
+
+    final_prompt = (
+        f"{task_prompt}\n\n"
+        f"User question: {question}"
+    )
 
     try:
         response = client.chat.completions.create(
             model=OLLAMA_MODEL,
             messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": final_prompt}
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user",
+                    "content": final_prompt
+                }
             ],
             max_tokens=300,
-            temperature=0.2,
+            temperature=0.2
         )
 
         answer = response.choices[0].message.content
-
-        return f"<p>{answer}</p>"
+        return jsonify({
+            "response": answer
+        })
 
     except Exception as exc:
-        return (
-            "<p>Local AI agent request failed. "
-            f"Check that Ollama is running and that {OLLAMA_MODEL} is installed.</p>"
-            f"<pre>{exc}</pre>",
-            503,
-        )
+
+        print("AI ERROR:", exc)
+
+        return jsonify({
+            "error": "Local AI agent request failed.",
+            "details": str(exc)
+        }), 503
 
 
+# =========================
+# Start application
+# =========================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(
+        host="0.0.0.0",
+        port=5001,
+        debug=True
+    )

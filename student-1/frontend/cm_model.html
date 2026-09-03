@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Talk to Model</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Talk to Model
+    </title>
+    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+    <link rel="stylesheet" href="shared/styles.css"> 
+
+
+    <!-- <link rel="stylesheet" href="style.css"> -->
 </head>
 <body>
 
@@ -18,23 +23,23 @@
 </head>
 <body>
 
-    <div class="card">
+    <div class="card-form">
     <h1>You can talk to model here</h1>
 
 
 
-    <form id="ask-form">
+    <form hx-post="/ask" hx-target="#agent-result" id="ask-form">
         <label for="question">Question</label>
         <textarea id="question" name="question" rows="5">Explain what this Card Management App does in one short paragraph.</textarea>
         <button type="submit">Ask Local Agent</button>
     </form>
 
     <!-- Result of AI output -->
+     <!-- 5:00 into Lab 2 Lecture -->
     <div id="agent-result" class="panel">
 
 
-
-    </div>
+    </div class="card-form">
 
     <h2>Ask With Context</h2>
 
@@ -47,13 +52,57 @@
 
 
     <!-- Result of AI output -->
-    <div id="context-result" class="panel">
-        {% if response %}
-            <h2>Response:</h2>
-            <p>{{ response }}</p>
-        {% endif %}
+    <div id="context-result">
     </div>
 
-    <script src="index.js"></script>
+    <script>
+
+
+        //Lab code (week 4 /templates/ai_mode.html)
+
+        const askForm = document.getElementById("ask-form");
+        const askWithContextForm = document.getElementById("ask-with-context-form");
+
+        async function renderIntoPanel(panelId, url, options = {}) {
+            const panel = document.getElementById(panelId);
+
+            try {
+                const response = await fetch(url, options);
+                const body = await response.text();
+                panel.innerHTML = body;
+            } catch (error) {
+                panel.innerHTML = `<p>Request failed.</p><pre>${error}</pre>`;
+            }
+        }
+
+        // to do with ask form, that is a lot of code that I do not really understand uhhhh
+        askForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            //URLSearchParams is a built-in JavaScript 
+            // interface that lets you easily read, add, update, and delete query parameters in a URL.
+            // and putting this onto a new askFrom (formattedas form data?)
+            const formData = new URLSearchParams(new FormData(askForm));
+
+            //renders to the panel "ask". might have to 
+            // class="panel" in html output allows this???
+
+            renderIntoPanel("agent-result", "http://localhost:8201/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: formData,
+            });
+        });
+
+        // same with this girl
+        askWithContextForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const formData = new URLSearchParams(new FormData(askWithContextForm));
+            renderIntoPanel("context-result", "http://localhost:8201/ask-with-context", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: formData,
+            });
+        });
+    </script>
 </body>
 </html>

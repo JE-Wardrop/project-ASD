@@ -5,7 +5,7 @@ def format_cards_html(cards):
     html = "<ul>"
     for card in cards:
         html += (
-            f"<li>#{card['card_id']} - {card['card_holder_name']} - "
+            f"<li>#{card['card_id']} - {card['card_name']} - "
         )
     html += "</ul>"
     return html
@@ -14,6 +14,6 @@ def format_cards_html(cards):
 def format_card_html(card):
     return (
         f"<p>ID: {card['card_id']}<br>"
-        f"Holder: {card['card_holder_name']}<br>"
+        f"Holder: {card['card_name']}<br>"
         f"Card Number: {card['card_number']}<br>"
     )

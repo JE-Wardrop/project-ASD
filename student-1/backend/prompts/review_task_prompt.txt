@@ -1,0 +1,33 @@
+Application Scope:
+- card database fields: user_id, card_number, card_type, expiry_date, status
+- user database fields: name, email, password, address, phone
+- endpoints: GET /card/type, GET /card/{card_id}, GET /card/freeze, /card/unfreeze, /ask, /ask-with-context
+
+Important domain rule:
+- card_number, card_type, expiry_date and status are all unquie to one card.
+- Multiple users may have multiple cards.
+- Never recommend a unique constraint on user_id.
+
+Implementation Recommendation:
+{{IMPLEMENTATION_RECOMMENDATION}}
+
+Validation Evidence:
+{{VALIDATION_EVIDENCE}}
+
+Task:
+Before reviewing the recommendation, use the validation evidence provided. Review only the implementation-agent recommendation and identify evidence-backed risks or corrections. If no evidence-backed risk exists, say so.
+
+Format:
+Risk: <one short sentence>
+Correction: <one short sentence>
+Retest: <one short sentence>
+
+If no risk is supported by the evidence, use:
+Risk: No evidence-backed risk identified.
+Correction: No correction required.
+Retest: Repeat validation after future changes.
+
+Output rules:
+- Return exactly three lines.
+- Maximum 35 words total.
+- Do not explain reasoning.

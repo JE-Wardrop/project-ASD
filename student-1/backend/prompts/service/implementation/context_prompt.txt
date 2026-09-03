@@ -1,0 +1,31 @@
+Application Name:
+Student Enrolment App
+
+Database Schema:
+- card_id (INTEGER PRIMARY KEY AUTOINCREMENT)
+- user_id (INTEGER NOT NULL)
+- card_number (TEXT UNIQUE NOT NULL)
+- card_type ((card_type IN ('Debit', 'Credit')) NOT NULL),
+- expiry_date (TEXT NOT NULL),
+- status TEXT (CHECK(status IN ('Unfrozen', 'Frozen')) DEFAULT 'Unfrozen'),
+- balance REAL (DEFAULT 0.0),
+
+Important Domain Rule:
+- card_id is primary key.
+- user_id is forgien key.
+- user_id can have mutlipe card_number
+
+Endpoints (ONLY these exist):
+
+GET Endpoints (Read-Only):
+- GET /card/type
+- GET /card/{card_id}
+- GET /card/freeze
+- GET /card/unfreeze
+
+POST Endpoints (AI Queries):
+- POST /ask
+- POST /ask-with-context
+
+Forbidden Operations:
+Do not mention or suggest create, add, update, delete, or edit operations for cards — they are not implemented in this application.

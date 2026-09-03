@@ -1,0 +1,67 @@
+/* Fallback: if the shared-index container is not running, the shared theme
+   cannot load, so the variables below keep the page readable. */
+:root {
+  --brand:      #0a6a4f;
+  --brand-dark: #085740;
+  --brand-soft: #dcefe7;
+  --bg:         #f4f6f5;
+  --surface:    #ffffff;
+  --surface-2:  #eef2f0;
+  --line:       #d8ddda;
+  --line-soft:  #e8ecea;
+  --text:       #12191c;
+  --muted:      #6b7a75;
+  --radius:     5px;
+}
+
+/* ---------- page header ---------- */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1.2rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.page-header h1 { margin: .15rem 0 0; font-size: 1.45rem; letter-spacing: -.015em; }
+.eyebrow {
+  margin: 0; font-size: .7rem; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--brand); font-weight: 600;
+}
+.btn-link {
+  text-decoration: none; font-weight: 600; font-size: .85rem;
+  padding: .4rem .8rem; border: 1px solid var(--line);
+  border-radius: 4px; color: var(--text); background: var(--surface);
+}
+.btn-link:hover { background: var(--surface-2); }
+
+/* ---------- forms  ---------- */
+.card-form {
+  display: grid; gap: .45rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: .9rem;
+  background: var(--surface);
+}
+
+/* tab content */
+.div-inner-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sec-outer-tabbed-content{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ---------- Footer---------- */
+.page-footer {
+  padding: 1rem 1.5rem 2rem;
+  border-top: 1px solid var(--line);
+  font-size: .78rem; color: var(--muted);
+}

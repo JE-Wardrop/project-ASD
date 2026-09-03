@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Card Details</title>
-    <link rel="stylesheet" href="style.css">
+
+
+    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+    <link rel="stylesheet" href="shared/styles.css"> 
+
+
+    <!-- <link rel="stylesheet" href="style.css"> -->
 </head>
 <body>
 
@@ -14,17 +20,163 @@
     </div>
 
 
-    
 
-    <div class="create-card">
-        <form method="POST" action="/add-card-details">
-            <label for="name">Enter Name:</label>
-            <input type="text" id="name" name="name" required>
+    <div class="card-form">
+        <p>Search Card</p>
+        <form id="searchCard" method="POST">
+            <label for="card-id">What ID are you searching for?</label>
+            <input type="text" id="card-id" name="card_id" required>
             <button type="submit">Submit</button>
         </form>
+
+        <div id="searchCardResult" class="panel">
+        </div>
+
+        <hr>
+
+    </div>
+    
+
+    <div class="card-form">
+        <form id="createCard" method="POST">
+            <p>Create Card</p>
+            <label>Enter Name:</label>
+            <input type="text" id="name" name="card_holder_name" required>
+
+            <label for="card-type">Enter Type of Card You want (Credit or Debit):</label>
+            <input type="text" id="card-type" name="card_type" required>
+
+            <label for="user-id">Enter User ID:</label>
+            <input type="text" id="user-id" name="user_id" required>
+
+            <button type="submit">Submit</button>
+
+            <div id="createCardAuth" class="panel">
+            </div>
+
+        </form>
+        <hr>
     </div>
 
 
-    <script src="index.js"></script>
+
+    <div class="delete-card">
+        <p>Delete Card</p>
+
+        <form method="POST" id="deleteCard">
+        <label for="delete-card-id">Enter Card ID You want to delete:</label>
+        <input type="text" id="delete-card-id" name="card_id" required>
+        <button type="submit">Submit</button>
+        </form>
+        <div id="deleteCardResult" class="panel"></div>
+
+
+        <hr>
+    </div>
+
+
+
+    <div class="update-card">
+        <p>Update Card</p>
+        <form method="POST" id="updateCard">
+        <label>Enter Card ID you want to update:</label>
+        <input type="text" id="update-card-id" name="card_id" required>
+
+        <label>New Card Holder Name (optional):</label>
+        <input type="text" name="card_holder_name">
+
+        <label>New Card Number (optional):</label>
+        <input type="text" name="card_number">
+
+        <label>New Card Type (optional):</label>
+        <input type="text" name="card_type">
+
+        <label>New Expiry Date (optional):</label>
+        <input type="text" name="expiry_date">
+
+        <label>New Status (Frozen/Unfrozen, optional):</label>
+        <input type="text" name="status">
+
+        <button type="submit">Submit</button>
+        </form>
+    <div id="updateCardResult" class="panel"></div>
+    </div>
+
+    
+
+
+    <script>
+
+        const BACKEND_URL = "http://localhost:8201";
+
+        async function renderIntoPanel(panelId, url, options = {}) {
+            const panel = document.getElementById(panelId);
+            try {
+                const response = await fetch(url, options);
+                const body = await response.text();
+                panel.innerHTML = body;
+            } catch (error) {
+                panel.innerHTML = `<p>Request failed.</p><pre>${error}</pre>`;
+            }
+        }
+
+
+
+        // card search form
+        const cardSearchForm = document.getElementById("searchCard");
+        cardSearchForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const formData = new FormData(cardSearchForm);
+            const cardId = encodeURIComponent(formData.get("card_id"));
+            renderIntoPanel("searchCardResult", `${BACKEND_URL}/cards/by-id?card_id=${cardId}`, {
+                method: "GET",
+            });
+        });
+
+
+
+
+        // card create form
+        const cardCreateForm = document.getElementById("createCard");
+        cardCreateForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const formData = new URLSearchParams(new FormData(cardCreateForm));
+            renderIntoPanel("createCardAuth", `${BACKEND_URL}/cards/create`, {
+                method: "POST",
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: formData,
+            });
+        });
+
+
+
+
+        // card update form
+        const cardUpdateForm = document.getElementById("updateCard");
+        cardUpdateForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const formData = new URLSearchParams(new FormData(cardUpdateForm));
+            renderIntoPanel("updateCardResult", `${BACKEND_URL}/cards/update`, {
+                method: "POST",
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: formData,
+            });
+        });
+
+        
+
+        // card delete form
+        const cardDeleteForm = document.getElementById("deleteCard");
+        cardDeleteForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const formData = new URLSearchParams(new FormData(cardDeleteForm));
+            renderIntoPanel("deleteCardResult", `${BACKEND_URL}/cards/delete`, {
+                method: "POST",
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: formData,
+            });
+        });
+
+    </script>
 </body>
 </html>

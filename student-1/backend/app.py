@@ -50,10 +50,13 @@ def create_app():
 
     app.register_blueprint(normal_mode_bp)
     app.register_blueprint(ai_mode_bp)
+    
+    print("blueprints are running.")
 
     return app
 
 app = create_app()
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)

@@ -1,0 +1,11 @@
+This is a university project: a digital banking system built as five
+independent feature sets, each with its own frontend, backend/API and
+database microservice.
+
+Requirements that matter for this review:
+- Each database microservice owns its own SQLite schema.
+- Every table must hold at least ten seeded records.
+- A backend reaches another feature's data only through that feature's HTTP
+  API, never by opening its database file.
+- Every service exposes GET /health.
+- All services run together from one shared Docker Compose file.

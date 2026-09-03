@@ -1,13 +1,22 @@
 from flask import Blueprint, request
 
-from services.llm_client import OLLAMA_MODEL, call_architecture_agent, create_chat_completion
+
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import requests
+
+# from services.llm_client import OLLAMA_MODEL, create_chat_completion, call_architecture_agent
+
+from services.llm_client import OLLAMA_MODEL, create_chat_completion
 from services.prompt_loader import load_prompt
 
 ai_mode_bp = Blueprint("ai_mode", __name__)
 
 
-@ai_mode_bp.post("/ask")
+@ai_mode_bp.route("/ask", methods=["POST"])
 def ask_local_agent():
+    # Lab code
+
     question = request.form.get("question", "").strip()
 
     if not question:
@@ -30,6 +39,8 @@ def ask_local_agent():
             model=OLLAMA_MODEL,
         )
         return f"<p>{answer}</p>", 200
+
+    
     except Exception as exc:
         return (
             "<p>Local AI agent request failed. "
@@ -39,7 +50,7 @@ def ask_local_agent():
         )
 
 
-@ai_mode_bp.post("/ask-with-context")
+@ai_mode_bp.route("/ask-with-context", methods=["POST"])
 def ask_with_context():
     question = request.form.get("question", "").strip()
 
