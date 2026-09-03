@@ -2,7 +2,6 @@ from flask import Blueprint, request
 import requests
 
 from services.database_api import (
-    adjust_balance_response,
     close_account_response,
     create_account_response,
     delete_account_response,
@@ -200,41 +199,6 @@ def update_account():
     except requests.RequestException as exc:
         return (
             "<p>Failed to update account in database-service.</p>"
-            f"<pre>{exc}</pre>",
-            503,
-        )
-
-
-# ---------------------------------------------------------------------------
-# Balance adjustment (deposit / withdraw)
-# ---------------------------------------------------------------------------
-
-@normal_ui_bp.post("/accounts/adjust-balance")
-def adjust_balance():
-    account_id = request.form.get("account_id", "").strip()
-    delta_raw = request.form.get("delta", "").strip()
-
-    if not account_id or not delta_raw:
-        return "<p>Account ID and amount are required.</p>", 400
-
-    try:
-        delta = float(delta_raw)
-    except ValueError:
-        return "<p>Amount must be a number.</p>", 400
-
-    try:
-        response = adjust_balance_response(account_id, delta)
-
-        if response.status_code == 404:
-            return "<p>Account not found.</p>", 404
-        if response.status_code in (400, 409):
-            return f"<p>{response.json().get('error', 'Unable to adjust balance.')}</p>", response.status_code
-
-        response.raise_for_status()
-        return format_balance_html(response.json()), 200
-    except requests.RequestException as exc:
-        return (
-            "<p>Failed to adjust balance in database-service.</p>"
             f"<pre>{exc}</pre>",
             503,
         )

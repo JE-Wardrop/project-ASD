@@ -1,0 +1,32 @@
+Application Name:
+Bank Account Management Service
+
+Database Fields:
+- account_id
+- user_id
+- account_number
+- account_type
+- balance
+- account_status
+- created_at
+
+Endpoints:
+- GET /accounts
+- GET /accounts/by-id
+- GET /accounts/by-user
+- GET /accounts/by-status
+- GET /accounts/balance
+- POST /accounts/create
+- POST /accounts/update
+- POST /accounts/adjust-balance
+- POST /accounts/freeze
+- POST /accounts/unfreeze
+- POST /accounts/close
+- POST /accounts/delete
+- POST /ask
+- POST /ask-with-context
+
+These are the ONLY features that exist. Do not mention create, update, or delete operations beyond the ones listed above.
+
+Task:
+Answer the user's question below using only the supplied context. Maximum 60 words.

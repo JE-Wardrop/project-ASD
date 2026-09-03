@@ -28,6 +28,7 @@
                 <label for="find_account_id">Account ID</label>
                 <input id="find_account_id" name="account_id" type="number" min="1" placeholder="Example: 1">
                 <button type="submit">Get Account</button>
+                <button type="button" id="view-balance-btn">View Balance</button>
             </form>
 
             <form id="find-by-user-form">
@@ -45,12 +46,6 @@
                 </select>
                 <button type="submit">Find by Status</button>
             </form>
-
-            <form id="find-balance-form">
-                <label for="balance_account_id">Account ID</label>
-                <input id="balance_account_id" name="account_id" type="number" min="1" placeholder="Example: 1">
-                <button type="submit">View Balance</button>
-            </form>
         </div>
 
         <div id="find-result" class="panel"></div>
@@ -66,7 +61,9 @@
             </div>
             <div>
                 <label for="create_account_number">Account Number</label>
-                <input id="create_account_number" name="account_number" type="text" required placeholder="Example: 10000011">
+                <input id="create_account_number" name="account_number" type="text" required
+                       pattern="[0-9]{8}" maxlength="8" inputmode="numeric"
+                       title="Exactly 8 digits" placeholder="Example: 10000011">
             </div>
             <div>
                 <label for="create_account_type">Account Type</label>
@@ -95,12 +92,14 @@
             </div>
             <div>
                 <label for="update_account_number">New Account Number</label>
-                <input id="update_account_number" name="account_number" type="text" placeholder="Leave blank to keep">
+                <input id="update_account_number" name="account_number" type="text"
+                       pattern="[0-9]{8}" maxlength="8" inputmode="numeric"
+                       title="Exactly 8 digits" placeholder="Leave blank to keep">
             </div>
             <div>
                 <label for="update_account_type">New Account Type</label>
                 <select id="update_account_type" name="account_type">
-                    <option value="">Leave unchanged</option>
+                    <option value="">UNCHANGED</option>
                     <option value="EVERYDAY">EVERYDAY</option>
                     <option value="SAVINGS">SAVINGS</option>
                 </select>
@@ -109,24 +108,6 @@
         </form>
 
         <div id="update-result" class="panel"></div>
-    </section>
-
-    <section class="card">
-        <h2>Deposit / Withdraw</h2>
-
-        <form id="adjust-balance-form" class="form-grid">
-            <div>
-                <label for="adjust_account_id">Account ID</label>
-                <input id="adjust_account_id" name="account_id" type="number" min="1" required>
-            </div>
-            <div>
-                <label for="adjust_delta">Amount (negative to withdraw)</label>
-                <input id="adjust_delta" name="delta" type="number" step="0.01" required placeholder="Example: 50 or -20">
-            </div>
-            <button type="submit" class="rag-action">Adjust Balance</button>
-        </form>
-
-        <div id="adjust-result" class="panel"></div>
     </section>
 
     <section class="card">
@@ -221,10 +202,9 @@ document.getElementById("find-by-status-form").addEventListener("submit", (event
     renderIntoPanel("find-result", `${API}/accounts/by-status?${query}`);
 });
 
-document.getElementById("find-balance-form").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const query = toFormBody(new FormData(event.target));
-    renderIntoPanel("find-result", `${API}/accounts/balance?${query}`);
+document.getElementById("view-balance-btn").addEventListener("click", () => {
+    const accountId = document.getElementById("find_account_id").value;
+    renderIntoPanel("find-result", `${API}/accounts/balance?account_id=${encodeURIComponent(accountId)}`);
 });
 
 // ---- Create ----
@@ -243,17 +223,6 @@ document.getElementById("update-account-form").addEventListener("submit", (event
     event.preventDefault();
     const body = toFormBody(new FormData(event.target));
     renderIntoPanel("update-result", `${API}/accounts/update`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body,
-    });
-});
-
-// ---- Adjust balance ----
-document.getElementById("adjust-balance-form").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const body = toFormBody(new FormData(event.target));
-    renderIntoPanel("adjust-result", `${API}/accounts/adjust-balance`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body,
