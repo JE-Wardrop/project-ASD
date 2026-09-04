@@ -45,14 +45,6 @@ def update_account_response(account_id, payload):
     return requests.put(f"{DATABASE_SERVICE_URL}/accounts/{account_id}", json=payload, timeout=TIMEOUT)
 
 
-def adjust_balance_response(account_id, delta):
-    return requests.patch(
-        f"{DATABASE_SERVICE_URL}/accounts/{account_id}/balance",
-        json={"delta": delta},
-        timeout=TIMEOUT,
-    )
-
-
 def freeze_account_response(account_id):
     return requests.post(f"{DATABASE_SERVICE_URL}/accounts/{account_id}/freeze", timeout=TIMEOUT)
 

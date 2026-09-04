@@ -1,4 +1,5 @@
 import os
+import re
 import sqlite3
 
 from flask import Flask, jsonify, request
@@ -6,6 +7,8 @@ from flask import Flask, jsonify, request
 from init_db import DATABASE_NAME, VALID_ACCOUNT_TYPES, VALID_STATUSES, init_db
 
 app = Flask(__name__)
+
+ACCOUNT_NUMBER_PATTERN = re.compile(r"^\d{8}$")
 
 ACCOUNT_COLUMNS = (
     "account_id, user_id, account_number, account_type, "
@@ -130,6 +133,9 @@ def create_account():
     if user_id is None or not account_number or not account_type:
         return jsonify({"error": "user_id, account_number and account_type are required"}), 400
 
+    if not ACCOUNT_NUMBER_PATTERN.match(account_number):
+        return jsonify({"error": "account_number must be exactly 8 digits"}), 400
+
     if account_type not in VALID_ACCOUNT_TYPES:
         return jsonify({"error": f"account_type must be one of {VALID_ACCOUNT_TYPES}"}), 400
 
@@ -174,8 +180,8 @@ def update_account(account_id):
 
     if "account_number" in data:
         account_number = str(data["account_number"]).strip()
-        if not account_number:
-            return jsonify({"error": "account_number cannot be empty"}), 400
+        if not ACCOUNT_NUMBER_PATTERN.match(account_number):
+            return jsonify({"error": "account_number must be exactly 8 digits"}), 400
         fields.append("account_number = ?")
         params.append(account_number)
 
