@@ -33,7 +33,7 @@ def health():
     conn = get_db_connection()
     cards = conn.execute('SELECT * FROM cards').fetchall()
     conn.close()
-    return jsonify([dict(card) for card in cards]), 200
+    return jsonify([dict(card) for card in cards]), 200, jsonify({"service": "database", "status": "running"})
     
     #normal
     # return jsonify({"service": "database", "status": "running"})

@@ -67,6 +67,11 @@ def _validate_payload(payload, partial=False):
 
 @app.post("/cards/create")
 def create_card():
+
+    # maybe something to do with this payload and json  format
+    # The database cannot communicate with the backend -> 
+    # The backend cannot communicate with the database -> 
+
     payload = request.get_json(silent=True) or {}
 
     error = _validate_payload(payload, partial=False)
@@ -182,7 +187,7 @@ def update_card(card_id):
         """
         UPDATE cards
         SET user_id = ?, card_number = ?, card_type = ?,
-            expiry_date = ?, status = ?, credit_limit = ?
+            expiry_date = ?, status = ?, balance = ?
         WHERE card_id = ?
         """,
         (
@@ -191,7 +196,7 @@ def update_card(card_id):
             updated["card_type"],
             updated["expiry_date"],
             updated["status"],
-            float(updated["credit_limit"]),
+            float(updated["balance"]),
             card_id,
         ),
     )
@@ -199,12 +204,12 @@ def update_card(card_id):
     conn.commit()
     card = conn.execute(
         "SELECT card_id, user_id, card_number, card_type, "
-        "expiry_date, status, credit_limit FROM cards WHERE card_id = ?",
+        "expiry_date, status, balance FROM cards WHERE card_id = ?",
         (card_id,),
     ).fetchone()
     conn.close()
 
-    return jsonify(dict(card)), 200
+    return jsonify(dict(card)), 200   
 
 
 

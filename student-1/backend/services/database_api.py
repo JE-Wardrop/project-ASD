@@ -33,6 +33,10 @@ def get_cards_by_status_response(status):
     )
 
 
+#cannot find DATABASE_URL
+# possible issues this could be:
+# DATABASE_URL is not setting correctly
+# 
 def create_card_response(payload):
     return requests.post(f"{DATABASE_URL}/cards/create", json=payload, timeout=5)
 
@@ -55,3 +59,5 @@ def unfreeze_card_response(card_number):
     return requests.post(
         f"{DATABASE_URL}/cards/unfreeze", json={"card_number": card_number}, timeout=5
     )
+
+

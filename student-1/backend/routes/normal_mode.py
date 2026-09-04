@@ -91,9 +91,13 @@ def get_cards_by_type():
             503,
         )
 
+# the backend cannot find the database's port or the route isn't functioning correctly. 
 
 @normal_mode_bp.post("/cards/create")
 def create_card():
+
+    # The backend cannot communicate with the database 
+
     card_type = request.form.get("card_type", "").strip()
     user_id = request.form.get("user_id", "").strip()
 
@@ -110,6 +114,10 @@ def create_card():
     }
 
     try:
+
+        # this operation is failing because the backend cannot communicate with the database.
+        # this is a 404 error.
+
         response = create_card_response(payload)
 
         if response.status_code == 400:

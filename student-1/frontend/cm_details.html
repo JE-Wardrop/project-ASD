@@ -26,7 +26,7 @@
         <form id="searchCard" method="POST">
             <label for="card-id">What ID are you searching for?</label>
             <input type="text" id="card-id" name="card_id" required>
-            <button type="submit">Submit</button>
+            <button type="submit" id="searchBtn">Submit</button>
         </form>
 
         <div id="searchCardResult" class="panel">
@@ -109,6 +109,7 @@
 
         const BACKEND_URL = "http://localhost:8201";
 
+
         async function renderIntoPanel(panelId, url, options = {}) {
             const panel = document.getElementById(panelId);
             try {
@@ -121,33 +122,60 @@
         }
 
 
+        // might be causing errors in the CRUD operations as they except usual JSON payloads
+        //  but are gettong form-urlencoded payloads.
+
 
         // card search form
-        const cardSearchForm = document.getElementById("searchCard");
-        cardSearchForm.addEventListener("submit", (event) => {
-            event.preventDefault();
-            const formData = new FormData(cardSearchForm);
-            const cardId = encodeURIComponent(formData.get("card_id"));
-            renderIntoPanel("searchCardResult", `${BACKEND_URL}/cards/by-id?card_id=${cardId}`, {
-                method: "GET",
+        // const cardSearchForm = document.getElementById("searchCard");
+        // cardSearchForm.addEventListener("submit", (event) => {
+        //     event.preventDefault();
+        //     const formData = new FormData(cardSearchForm);
+        //     const cardId = encodeURIComponent(formData.get("card_id"));
+        //     renderIntoPanel("searchCardResult", `${BACKEND_URL}/cards/by-id?card_id=${cardId}`, {
+        //         method: "GET",
+        //     });
+        // });
+
+
+        document.getElementById('searchBtn').addEventListener('click', async () => {
+            const searchCardtextValue = document.getElementById('searchCard').value;
+
+            const response = await fetch('/api/data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message: searchCardtextValue })
             });
+
+            const result = await response.json();
+            console.log(result);
         });
 
 
 
 
         // card create form
+
+        // the error is most likely NOT from this.
+        // this is because it sends the payload as a form-urlencoded, but this is not 
+        // causing errors in the backend yet.
+
+
         const cardCreateForm = document.getElementById("createCard");
         cardCreateForm.addEventListener("submit", (event) => {
             event.preventDefault();
-            const formData = new URLSearchParams(new FormData(cardCreateForm));
+
+            //updated name
+            const createCardFormData = new URLSearchParams(new FormData(cardCreateForm));
+
             renderIntoPanel("createCardAuth", `${BACKEND_URL}/cards/create`, {
                 method: "POST",
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: formData,
+                body: createCardFormData,
             });
         });
-
 
 
 
