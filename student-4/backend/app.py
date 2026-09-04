@@ -28,7 +28,7 @@ DATABASE_SERVICE_URL = os.getenv(
 
 OLLAMA_BASE_URL = os.getenv(
     "OLLAMA_BASE_URL",
-    "http://localhost:11434/v1"
+    "http://host.docker.internal:11434/v1"
 )
 
 OLLAMA_MODEL = os.getenv(
@@ -42,7 +42,7 @@ client = OpenAI(
 )
 
 
-PROMPT_DIR = Path(__file__).resolve().parent.parent / "prompts"
+PROMPT_DIR = Path(__file__).resolve().parent / "prompts"
 
 
 def load_prompt(filename):
@@ -122,15 +122,16 @@ def get_user(user_id):
 # REGISTER USER
 # =========================
 
-@app.route("/users/register", methods=["POST"])
+@app.route("/users", methods=["POST"])
 def register_user():
-
-    username = request.form.get("username", "").strip()
-    email = request.form.get("email", "").strip()
-    password = request.form.get("password", "").strip()
-    first_name = request.form.get("first_name", "").strip()
-    last_name = request.form.get("last_name", "").strip()
-    phone = request.form.get("phone", "").strip()
+    data = request.get_json(silent=True) or {}
+    username = (data.get("username") or "").strip()
+    email = (data.get("email") or "").strip()
+    password = (data.get("password") or "").strip()
+    first_name = (data.get("fname") or "").strip()
+    last_name = (data.get("lname") or "").strip()
+    phone = (data.get("phone") or "").strip()
+    role = (data.get("role") or "").strip()
 
     if not username or not email or not password:
         return jsonify({
@@ -141,9 +142,10 @@ def register_user():
         "username": username,
         "email": email,
         "password": password,
-        "first_name": first_name,
-        "last_name": last_name,
-        "phone": phone
+        "fname": first_name,
+        "lname": last_name,
+        "phone": phone,
+        "role": role
     }
 
     try:

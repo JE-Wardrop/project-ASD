@@ -7,6 +7,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 
 DATABASE_NAME = Path(__file__).parent / "users.db"
+# CORS(app)
 
 
 def get_db_connection():

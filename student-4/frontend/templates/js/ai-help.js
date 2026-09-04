@@ -83,7 +83,11 @@ async function askAI() {
             );
 
         if (!response.ok) {
-            console.log(response)
+
+            const errorData = await response.json();
+            // console.log(response)
+            console.error("STATUS:", response.status);
+            console.error("ERROR:", errorData);
             throw new Error(
                 "AI request failed"
             );
@@ -97,7 +101,7 @@ async function askAI() {
             .getElementById("aiResponse")
             .innerHTML = `
                 <h4>AI Response</h4>
-                <p>${escapeHtml(data.response || data.answer || "The AI did not return a response.")}</p>
+                <p>${escapeHtml(data.response || "The AI did not return a response.")}</p>
             `;
 
     }
