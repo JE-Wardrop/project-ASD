@@ -6,6 +6,9 @@ from flask import Flask, jsonify, request, Blueprint
 import sqlite3
 import os
 
+# THIS SHIT IS NOT WORKING!!!@!!!!!
+# i am no.1 cm_crud.py hater
+
 
 app = Flask(__name__)
 DATABASE_NAME = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cm.db")
@@ -69,8 +72,8 @@ def _validate_payload(payload, partial=False):
 def create_card():
 
     # maybe something to do with this payload and json  format
-    # The database cannot communicate with the backend -> 
-    # The backend cannot communicate with the database -> 
+    # The database cannot communicate with the backend 
+    # The backend cannot communicate with the database
 
     payload = request.get_json(silent=True) or {}
 

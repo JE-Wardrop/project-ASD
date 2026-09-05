@@ -4,6 +4,9 @@ import requests
 
 load_dotenv()
 
+# database api maybe is trying to access only the app.py and not the full database folder
+# and therefore none of these operations actually exist
+
 DATABASE_URL = os.getenv(
     "DATABASE_SERVICE_URL", 
     "http://student-1-database:5002"

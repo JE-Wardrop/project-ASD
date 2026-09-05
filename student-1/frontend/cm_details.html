@@ -127,31 +127,36 @@
 
 
         // card search form
-        // const cardSearchForm = document.getElementById("searchCard");
-        // cardSearchForm.addEventListener("submit", (event) => {
-        //     event.preventDefault();
-        //     const formData = new FormData(cardSearchForm);
-        //     const cardId = encodeURIComponent(formData.get("card_id"));
-        //     renderIntoPanel("searchCardResult", `${BACKEND_URL}/cards/by-id?card_id=${cardId}`, {
-        //         method: "GET",
-        //     });
-        // });
-
-
-        document.getElementById('searchBtn').addEventListener('click', async () => {
-            const searchCardtextValue = document.getElementById('searchCard').value;
-
-            const response = await fetch('/api/data', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ message: searchCardtextValue })
+        const cardSearchForm = document.getElementById("searchCard");
+        cardSearchForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const formData = new FormData(cardSearchForm);
+            const cardId = encodeURIComponent(formData.get("card_id"));
+            renderIntoPanel("searchCardResult", `${BACKEND_URL}/cards/by-id?card_id=${cardId}`, {
+                method: "GET",
             });
-
-            const result = await response.json();
-            console.log(result);
         });
+
+
+        //changes data to specifically JSON data 
+        // this may solve backend issues as it will allow the payload to be formatted properly
+
+        // this causes a 405 error :(( *proceeds to destroy the moon*
+
+        // document.getElementById('searchBtn').addEventListener('click', async () => {
+        //     const searchCardtextValue = document.getElementById('searchCard').value;
+
+        //     const response = await fetch(`${BACKEND_URL}/cards/search`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     },
+        //     body: JSON.stringify({ message: searchCardtextValue })
+        //     });
+
+        //     const searchCardResult = await response.json();
+        //     console.log(searchCardResult);
+        // });
 
 
 
