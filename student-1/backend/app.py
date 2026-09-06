@@ -1,11 +1,3 @@
-# this app is currently defunked however I don't know if im meant to store app in backend or outside. 
-# currently it is using the one outside 
-
-# source .venv/bin/activate
-# cd "/home/juno/Desktop/ASD 2026/project-ASD/student-1/backend"
-
-# python3 -m venv .venv
-
 from flask import Flask, render_template, request, send_from_directory
 from dotenv import load_dotenv
 from openai import OpenAI

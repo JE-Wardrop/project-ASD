@@ -42,17 +42,11 @@
     <div class="card-form">
         <form id="createCard" method="POST">
             <p>Create Card</p>
-            <label>Enter Name:</label>
-            <input type="text" id="name" name="card_holder_name" required>
+            <label>Enter user ID:</label>
+            <input type="text" id="name" name="user_id" required>
 
             <label for="card-type">Enter Type of Card You want (Credit or Debit):</label>
             <input type="text" id="card-type" name="card_type" required>
-
-            <label for="card-id">Enter Card ID you want:</label>
-            <input type="text" id="card-id" name="card" required>
-
-            <label for="user-id">Enter User ID:</label>
-            <input type="text" id="user-id" name="user_id" required>
 
             <button type="submit">Submit</button>
 
@@ -87,9 +81,6 @@
         <label>Enter Card ID you want to update:</label>
         <input type="text" id="update-card-id" name="card_id" required>
 
-        <label>New Card Holder Name (optional):</label>
-        <input type="text" name="card_holder_name">
-
         <label>New Card Number (optional):</label>
         <input type="text" name="card_number">
 
@@ -106,6 +97,7 @@
         </form>
     <div id="updateCardResult" class="panel"></div>
     </div>
+
 
     
 
@@ -196,6 +188,7 @@
                 body: formData,
             });
         });
+
 
     </script>
 </body>

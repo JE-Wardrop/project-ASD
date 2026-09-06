@@ -7,6 +7,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import sqlite3
 import os
+import random
 
 app = Flask(__name__)
 CORS(app)
@@ -101,57 +102,66 @@ def _validate_payload(payload, partial=False):
     return None
 
 
-def _card_exists(conn, card_number, card_id):
-    """Returns True if either card_number or card_id already exists in the database."""
-    query = "SELECT 1 FROM cards WHERE card_number = ? OR card_id = ?"
-    result = conn.execute(query, (card_number, card_id)).fetchone()
-    return result is not None
-
 # ---------------------------------------------------------------------------
 # CREATE
 # ---------------------------------------------------------------------------
 
+#helper function for randomly genterating a card_id and card_number for when users 
+# create a new card
+def _get_rand_card_id(card_id):
+    while True:
+        random_id = random.randint(1, 100)
+
+        if random_id != card_id:
+            return random_id
+        else:
+            random_id = random.randint(1, 100)
+
+
+def _get_rand_card_numbers(card_number):
+    while True:
+        random_id = random.randint(0000000000000000, 9999999999999999)
+
+        if random_id != card_number:
+            return random_id
+        else:
+            random_id = random.randint(1000000000000000, 9999999999999999)
+
+
+
+# What this function should do:
+# Create a card based upon the user's id and card_type
+# It will generate a new card_id and card number
+
+
 @app.post("/cards/create")
 def create_card():
-
-
-    # What I want to do:
-    # What this function should do:
-    # Create a card based upon the user's name and the card_type
-    # If the user does not exist then do not make a cards
-    # If it is not a valid card_type then do not make
-
-
-    # Validatation
-
     payload = request.get_json(silent=True) or {}
+
+    if "card_type" in payload and isinstance(payload["card_type"], str):
+        payload["card_type"] = payload["card_type"].strip().capitalize()
+
+
+
+    payload["card_id"] = _get_rand_card_id(None)
+    payload["card_number"] = _get_rand_card_numbers(None)
 
     error = _validate_payload(payload, partial=False)
     if error:
         return jsonify({"error": error}), 400
 
-    if "card_type" in payload and isinstance(payload["card_type"], str):
-        payload["card_type"] = payload["card_type"].strip().capitalize()
-
     conn = get_db_connection()
-
-    
-    if _card_exists(conn, payload.get("card_number"), payload.get("card_id")):
-        conn.close()
-        return jsonify({"error": "card_id already exists"}), 400
-
-
-    # This is the main part that needs to change within the code.
 
     try:
         cursor = conn.execute(
             """
             INSERT INTO cards (
-                user_id, card_number, card_type, expiry_date, status, balance
+                card_id, user_id, card_number, card_type, expiry_date, status, balance
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (
+                payload["card_id"],
                 payload["user_id"],
                 payload["card_number"],
                 payload["card_type"],
@@ -161,7 +171,7 @@ def create_card():
             ),
         )
         conn.commit()
-        new_id = cursor.lastrowid
+        new_id = payload["card_id"]
 
         card = conn.execute(
             "SELECT card_id, user_id, card_number, card_type, "
@@ -171,10 +181,9 @@ def create_card():
         conn.close()
 
         return jsonify(dict(card)), 201
-    
     except sqlite3.IntegrityError:
         conn.close()
-        return jsonify({"error": "This card_number or card_id already exists"}), 400
+        return jsonify({"error": "Integrity error in the database"}), 400
 
     
 
@@ -195,19 +204,6 @@ def get_cards():
 
 @app.get("/cards/<int:card_id>")
 def get_card(card_id):
-
-    # ------ debugging to make sure that it is recieving an integer
-    
-    # card_id_raw = request.args.get("card_id", "").strip()
-
-    # if not card_id_raw or not card_id_raw.isdigit():
-    #     return "<p>Card ID must be a valid numeric integer.</p>", 400
-
-    # card_id = int(card_id_raw)
-
-
-    # ------ end of debug
-
 
     conn = get_db_connection()
     card = conn.execute(
@@ -323,19 +319,19 @@ def delete_card(card_id):
 # Freeze and Unfreeze
 # ---------------------------------------------------------------------------
 
-def _set_status_by_card_number(card_number, new_status):
+def _set_status_by_card_id(card_id, new_status):
     conn = get_db_connection()
     existing = conn.execute(
-        "SELECT card_id FROM cards WHERE card_number = ?", (card_number,)
+        "SELECT card_id FROM cards WHERE card_number = ?", (card_id,)
     ).fetchone()
 
     if existing is None:
         conn.close()
         return None
 
-    conn.execute("UPDATE cards SET status = ? WHERE card_number = ?", (new_status, card_number))
+    conn.execute("UPDATE cards SET status = ? WHERE card_number = ?", (new_status, card_id))
     conn.commit()
-    card = conn.execute(CARD_SELECT + " WHERE cards.card_number = ?", (card_number,)).fetchone()
+    card = conn.execute(CARD_SELECT + " WHERE cards.card_number = ?", (card_id,)).fetchone()
     conn.close()
     return card
 
@@ -343,15 +339,15 @@ def _set_status_by_card_number(card_number, new_status):
 @app.post("/cards/freeze")
 def freeze_card():
     payload = request.get_json(silent=True) or request.form
-    card_number = (payload.get("card_number") or "").strip()
+    card_id = (payload.get("card_id") or "").strip()
 
 
-    if not card_number:
-        return jsonify({"error": "card_number is required"}), 400
+    if not card_id:
+        return jsonify({"error": "Card ID is required"}), 400
 
-    card = _set_status_by_card_number(card_number, "Frozen")
+    card = _set_status_by_card_id(card_id, "Frozen")
     if card is None:
-        return jsonify({"error": "Card not found"}), 404
+        return jsonify({"error": "Card not found in the database"}), 404
 
     return jsonify(dict(card)), 200
 
@@ -359,16 +355,16 @@ def freeze_card():
 @app.post("/cards/unfreeze")
 def unfreeze_card():
     payload = request.get_json(silent=True) or request.form
-    card_number = (payload.get("card_number") or "").strip()
+    card_id = (payload.get("card_id") or "").strip()
     
 
-    if not card_number:
-        return jsonify({"error": "card_number is required"}), 400
+    if not card_id:
+        return jsonify({"error": "Card ID is required"}), 400
 
-    card = _set_status_by_card_number(card_number, "Unfrozen")
+    card = _set_status_by_card_id(card_id, "Unfrozen")
 
     if card is None:
-        return jsonify({"error": "Card not found"}), 404
+        return jsonify({"error": "Card not found in the database"}), 404
 
     return jsonify(dict(card)), 200
 

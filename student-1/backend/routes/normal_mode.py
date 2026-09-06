@@ -3,6 +3,7 @@ from urllib import response
 from flask import Blueprint, jsonify, request
 import requests 
 from flask_cors import CORS
+import random
 
 
 from services.database_api import (
@@ -92,36 +93,32 @@ def get_cards_by_type():
             503,
         )
 
-# the backend cannot find the database's port or the route isn't functioning correctly. 
+
+
 
 @normal_mode_bp.post("/cards/create")
 def create_card():
 
     # What this function should do:
-    # Create a card based upon the user's name and the card_type
-
+    # Create a card based upon the user's id and card_type
+    # It will generate a new card_id and card number
 
     card_type = request.form.get("card_type", "").strip()
-    card_id = request.form.get("card_id", "").strip()
     user_id = request.form.get("user_id", "").strip()
 
-    if not all([card_type, user_id, card_id]):
+
+    if not all([card_type, user_id]):
         return "<p>All fields are required.</p>", 400
 
     payload = {
         "user_id": user_id,
-        "card_id": card_id,
         "card_type": card_type,
-        "card_number": "0000000000000000",
         "expiry_date": "2099-12-31",
         "status": "Unfrozen",
         "balance": 0.0,
     }
 
     try:
-
-        # Changes will need to be made to this to make it work the way it is intended.
-
         response = create_card_response(payload)
 
         if response.status_code == 400:
@@ -195,16 +192,16 @@ def delete_card():
 
 @normal_mode_bp.post("/cards/freeze")
 def freeze_card():
-    card_number = request.form.get("card_number", "").strip()
+    card_id = request.form.get("card_id", "").strip()
 
-    if not card_number:
+    if not card_id:
         return "<p>Card number is required.</p>", 400
 
     try:
-        response = freeze_card_response(card_number)
+        response = freeze_card_response(card_id)
 
         if response.status_code == 404:
-            return "<p>Card not found.</p>", 404
+            return "<p>Card not found in routing.</p>", 404
         if response.status_code == 400:
             return f"<p>{response.json().get('error', 'Invalid card number.')}</p>", 400
 
@@ -216,16 +213,16 @@ def freeze_card():
 
 @normal_mode_bp.post("/cards/unfreeze")
 def unfreeze_card():
-    card_number = request.form.get("card_number", "").strip()
+    card_id = request.form.get("card_id", "").strip()
 
-    if not card_number:
+    if not card_id:
         return "<p>Card number is required.</p>", 400
 
     try:
-        response = unfreeze_card_response(card_number)
+        response = unfreeze_card_response(card_id)
 
         if response.status_code == 404:
-            return "<p>Card not found.</p>", 404
+            return "<p>Card not found in routing.</p>", 404
         if response.status_code == 400:
             return f"<p>{response.json().get('error', 'Invalid card number.')}</p>", 400
 
