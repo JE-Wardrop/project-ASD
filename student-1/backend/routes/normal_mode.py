@@ -2,6 +2,7 @@ from urllib import response
 
 from flask import Blueprint, jsonify, request
 import requests 
+from flask_cors import CORS
 
 
 from services.database_api import (
@@ -96,16 +97,20 @@ def get_cards_by_type():
 @normal_mode_bp.post("/cards/create")
 def create_card():
 
-    # The backend cannot communicate with the database 
+    # What this function should do:
+    # Create a card based upon the user's name and the card_type
+
 
     card_type = request.form.get("card_type", "").strip()
+    card_id = request.form.get("card_id", "").strip()
     user_id = request.form.get("user_id", "").strip()
 
-    if not all([card_type, user_id]):
+    if not all([card_type, user_id, card_id]):
         return "<p>All fields are required.</p>", 400
 
     payload = {
         "user_id": user_id,
+        "card_id": card_id,
         "card_type": card_type,
         "card_number": "0000000000000000",
         "expiry_date": "2099-12-31",
@@ -115,8 +120,7 @@ def create_card():
 
     try:
 
-        # this operation is failing because the backend cannot communicate with the database.
-        # this is a 404 error.
+        # Changes will need to be made to this to make it work the way it is intended.
 
         response = create_card_response(payload)
 

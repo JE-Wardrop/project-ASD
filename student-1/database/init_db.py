@@ -7,6 +7,7 @@ users = [
     (2, "Jane Doe", "jane.doe@example.com", "password456", "456 Oak Ave, Somewhere, AU", "04567891232"),
 ]
 cards = [
+    #(card_id, user_id, card number, card type, expiry, status, balance)
     (1, 1, "1234567890123456", "Debit", "2025-12-31", "Unfrozen", 0.0),
     (2, 1, "4567890123456789", "Credit", "2025-12-31", "Frozen", 0.0),
     (3, 2, "0987654321098765", "Debit", "2025-11-30", "Frozen", 0.0),

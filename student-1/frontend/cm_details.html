@@ -14,15 +14,17 @@
 </head>
 <body>
 
-    <div class="edit-card">
+    <div class="card-form">
         <h1>You can edit your details here</h1>
-        <p></p>
     </div>
 
 
 
     <div class="card-form">
-        <p>Search Card</p>
+        <p class="eyebrow">
+            Search Card
+        </p>
+
         <form id="searchCard" method="POST">
             <label for="card-id">What ID are you searching for?</label>
             <input type="text" id="card-id" name="card_id" required>
@@ -32,7 +34,7 @@
         <div id="searchCardResult" class="panel">
         </div>
 
-        <hr>
+        <hr class="spec-hr">
 
     </div>
     
@@ -45,6 +47,9 @@
 
             <label for="card-type">Enter Type of Card You want (Credit or Debit):</label>
             <input type="text" id="card-type" name="card_type" required>
+
+            <label for="card-id">Enter Card ID you want:</label>
+            <input type="text" id="card-id" name="card" required>
 
             <label for="user-id">Enter User ID:</label>
             <input type="text" id="user-id" name="user_id" required>
@@ -122,52 +127,33 @@
         }
 
 
-        // might be causing errors in the CRUD operations as they except usual JSON payloads
-        //  but are gettong form-urlencoded payloads.
-
+        // Card Search Form:
+        // Not outputting anything at all. This is most likely an error with the frontend in the output (cardSearchFrom results)
 
         // card search form
         const cardSearchForm = document.getElementById("searchCard");
+        
         cardSearchForm.addEventListener("submit", (event) => {
+            // this shouldnt do anything bad but it breaks the whole application causing a 405 error
+            // event.preventDefault();
+
+            // const cardSearchForm = new FormData(cardSearchForm);
+            // const cardId = encodeURIComponent(cardSearchForm.get("card_id"));
+
+            //suggested code
             event.preventDefault();
             const formData = new FormData(cardSearchForm);
             const cardId = encodeURIComponent(formData.get("card_id"));
+
+
             renderIntoPanel("searchCardResult", `${BACKEND_URL}/cards/by-id?card_id=${cardId}`, {
                 method: "GET",
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             });
         });
 
 
-        //changes data to specifically JSON data 
-        // this may solve backend issues as it will allow the payload to be formatted properly
-
-        // this causes a 405 error :(( *proceeds to destroy the moon*
-
-        // document.getElementById('searchBtn').addEventListener('click', async () => {
-        //     const searchCardtextValue = document.getElementById('searchCard').value;
-
-        //     const response = await fetch(`${BACKEND_URL}/cards/search`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify({ message: searchCardtextValue })
-        //     });
-
-        //     const searchCardResult = await response.json();
-        //     console.log(searchCardResult);
-        // });
-
-
-
-
         // card create form
-
-        // the error is most likely NOT from this.
-        // this is because it sends the payload as a form-urlencoded, but this is not 
-        // causing errors in the backend yet.
-
-
         const cardCreateForm = document.getElementById("createCard");
         cardCreateForm.addEventListener("submit", (event) => {
             event.preventDefault();
@@ -188,6 +174,7 @@
         const cardUpdateForm = document.getElementById("updateCard");
         cardUpdateForm.addEventListener("submit", (event) => {
             event.preventDefault();
+
             const formData = new URLSearchParams(new FormData(cardUpdateForm));
             renderIntoPanel("updateCardResult", `${BACKEND_URL}/cards/update`, {
                 method: "POST",

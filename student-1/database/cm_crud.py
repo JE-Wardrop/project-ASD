@@ -1,3 +1,10 @@
+
+#
+# Redundant file 
+#
+
+
+
 import json
 import sqlite3
 from datetime import datetime 
@@ -6,8 +13,6 @@ from flask import Flask, jsonify, request, Blueprint
 import sqlite3
 import os
 
-# THIS SHIT IS NOT WORKING!!!@!!!!!
-# i am no.1 cm_crud.py hater
 
 
 app = Flask(__name__)
