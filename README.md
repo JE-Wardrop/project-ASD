@@ -138,7 +138,13 @@ stops and tells you what to install rather than failing with a traceback.
 ```
 .github/workflows/    per-student CI pipelines
 ai-services/          shared agentic loop and its prompt assets
-docs/                 architecture decisions, prompt engineering, agentic loop logs
+docs/                 project documentation, diagrams, evidence and the report
+  architecture/       architecture decision records
+  diagrams/           architecture, data design and workflow diagrams
+  prompts/            prompt engineering and AI context management records
+  agentic-logs/       recorded Plan -> Act -> Observe -> Adapt runs
+  evidence/           local testing, GitHub Actions and Docker Compose evidence
+  report/             the Release 0 technical report
 shared/               shared home page, CSS theme, and assets
 student-1/ … student-5/
                       each student's frontend, backend, database, tests, Dockerfiles
@@ -224,6 +230,9 @@ not turn another student's workflow red.
 | [`docs/architecture/ollama-runtime.md`](docs/architecture/ollama-runtime.md) | Where Ollama runs and why, cross-platform networking, alternatives considered |
 | [`docs/prompts/`](docs/prompts/)                                             | Prompt engineering and AI context management records                          |
 | [`docs/agentic-logs/`](docs/agentic-logs/)                                   | Recorded Plan → Act → Observe → Adapt runs                                    |
+| [`docs/diagrams/`](docs/diagrams/)                                           | Architecture, Docker Compose, DevOps, agentic workflow and data design diagrams |
+| [`docs/evidence/`](docs/evidence/)                                           | Local testing, GitHub Actions and Docker Compose execution evidence           |
+| [`docs/report/`](docs/report/)                                               | Release 0 technical report                                                    |
 
 ---
 

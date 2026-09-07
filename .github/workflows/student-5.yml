@@ -115,6 +115,7 @@ jobs:
           - Commit: ${{ github.sha }} 
           - Branch: ${{ github.ref_name }} 
           - Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          EOF
       - name: Generate run-view.md
         run: |
           cat > reports/run-view.md << EOF
