@@ -243,6 +243,10 @@ def get_cards_by_type():
 
 @app.put("/cards/<int:card_id>")
 def update_card(card_id):
+
+    # Update Card:
+    # Update the card_type based on card_id
+
     payload = request.get_json(silent=True) or {}
 
     error = _validate_payload(payload, partial=True)
@@ -264,32 +268,26 @@ def update_card(card_id):
             updated[field] = payload[field]
 
     conn.execute(
-        """
-        UPDATE cards
-        SET user_id = ?, card_number = ?, card_type = ?,
-            expiry_date = ?, status = ?, balance = ?
-        WHERE card_id = ?
-        """,
+        "UPDATE cards SET card_type = ? WHERE card_id = ?", 
         (
-            updated["user_id"],
-            updated["card_number"],
-            updated["card_type"],
-            updated["expiry_date"],
-            updated["status"],
-            float(updated["balance"]),
-            card_id,
-        ),
+            updated["card_type"], 
+            card_id),
     )
+
 
     conn.commit()
     card = conn.execute(
-        "SELECT card_id, user_id, card_number, card_type, "
-        "expiry_date, status, balance FROM cards WHERE card_id = ?",
+        "SELECT card_id, card_type FROM cards WHERE card_id = ?",
         (card_id,),
     ).fetchone()
     conn.close()
 
     return jsonify(dict(card)), 200   
+
+
+# May add update functions for:
+# - Updating expiry of card
+# - Update the user_id of a card based on its card_id
 
 
 

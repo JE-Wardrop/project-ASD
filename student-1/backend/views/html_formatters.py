@@ -16,6 +16,7 @@ def format_card_html(card):
         f"<p>Card ID: {card['card_id']}<br>"
         f"Card Number: {card['card_number']}<br>"
         f"Status: {card['status']}<br>"
+        f"Type: {card['card_type']}<br>"
         # f"Expiry: {card['expiry']}<br>"
         # f"User Associated: {card['user_id']}<br>"
     )

@@ -137,13 +137,17 @@ def create_card():
 
 @normal_mode_bp.post("/cards/update")
 def update_card():
+
+    # Update Card:
+    # Update the card_type based on card_id
+
     card_id = request.form.get("card_id", "").strip()
 
     if not card_id:
         return "<p>Card ID is required.</p>", 400
 
     payload = {}
-    for field in ("user_id", "card_number", "card_type", "expiry_date", "status", "balance"):
+    for field in ("card_id", "card_type"):
         value = request.form.get(field, "").strip()
         if value:
             payload[field] = value
@@ -157,6 +161,13 @@ def update_card():
             return f"<p>{response.json().get('error', 'Invalid update.')}</p>", 400
 
         response.raise_for_status()
+
+        # Causing an error as there is no card number
+        # It should use the card_number associated with the card_id 
+
+        card_information = get_card_by_id_response(card_id)
+        response = card_information
+
         return format_card_html(response.json()), 200
 
     except requests.RequestException as exc:

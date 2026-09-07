@@ -58,10 +58,10 @@ jobs:
         run: docker compose config -q
 
       - name: Build student-1 services
-        run: docker compose build student1-db student1-backend student1-frontend
+        run: docker compose build --no-cache student-1-db student-1-backend student-1-frontend
 
       - name: Start student-1 services
-        run: docker compose up -d student1-db student1-backend student1-frontend
+        run: docker compose up -d student-1-db student-1-backend student-1-frontend
 
       - name: Smoke checks
         run: |
@@ -93,7 +93,7 @@ jobs:
 
       - name: Container logs on failure
         if: failure()
-        run: docker compose logs student1-db student1-backend student1-frontend
+        run: docker compose logs student-1-db student-1-backend student-1-frontend
 
       - name: Stop services
         if: always()

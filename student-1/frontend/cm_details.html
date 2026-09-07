@@ -78,22 +78,13 @@
     <div class="update-card">
         <p>Update Card</p>
         <form method="POST" id="updateCard">
-        <label>Enter Card ID you want to update:</label>
-        <input type="text" id="update-card-id" name="card_id" required>
+            <label>Enter Card ID you want to update:</label>
+            <input type="text" id="update-card-id" name="card_id" required>
 
-        <label>New Card Number (optional):</label>
-        <input type="text" name="card_number">
+            <label>New Card Type (Credit/Debit):</label>
+            <input type="text" name="card_type">
 
-        <label>New Card Type (optional):</label>
-        <input type="text" name="card_type">
-
-        <label>New Expiry Date (optional):</label>
-        <input type="text" name="expiry_date">
-
-        <label>New Status (Frozen/Unfrozen, optional):</label>
-        <input type="text" name="status">
-
-        <button type="submit">Submit</button>
+            <button type="submit">Submit</button>
         </form>
     <div id="updateCardResult" class="panel"></div>
     </div>
