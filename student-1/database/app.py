@@ -322,16 +322,16 @@ def delete_card(card_id):
 def _set_status_by_card_id(card_id, new_status):
     conn = get_db_connection()
     existing = conn.execute(
-        "SELECT card_id FROM cards WHERE card_number = ?", (card_id,)
+        "SELECT card_id FROM cards WHERE card_id = ?", (card_id,)
     ).fetchone()
 
     if existing is None:
         conn.close()
         return None
 
-    conn.execute("UPDATE cards SET status = ? WHERE card_number = ?", (new_status, card_id))
+    conn.execute("UPDATE cards SET status = ? WHERE card_id = ?", (new_status, card_id))
     conn.commit()
-    card = conn.execute(CARD_SELECT + " WHERE cards.card_number = ?", (card_id,)).fetchone()
+    card = conn.execute(CARD_SELECT + " WHERE cards.card_id = ?", (card_id,)).fetchone()
     conn.close()
     return card
 
@@ -341,6 +341,8 @@ def freeze_card():
     payload = request.get_json(silent=True) or request.form
     card_id = (payload.get("card_id") or "").strip()
 
+    print("Freeze payload:", payload)
+    print("freeze card id", card_id)
 
     if not card_id:
         return jsonify({"error": "Card ID is required"}), 400

@@ -49,7 +49,6 @@ def delete_card_response(card_id):
 
 
 
-# changes from post to put
 def freeze_card_response(card_id):
     return requests.post(f"{DATABASE_URL}/cards/freeze", json={"card_id": card_id}, timeout=5
     )

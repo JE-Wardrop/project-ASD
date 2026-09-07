@@ -194,8 +194,10 @@ def delete_card():
 def freeze_card():
     card_id = request.form.get("card_id", "").strip()
 
+    print("freeze card id", card_id)
+
     if not card_id:
-        return "<p>Card number is required.</p>", 400
+        return "<p>Card id is required.</p>", 400
 
     try:
         response = freeze_card_response(card_id)
@@ -203,7 +205,7 @@ def freeze_card():
         if response.status_code == 404:
             return "<p>Card not found in routing.</p>", 404
         if response.status_code == 400:
-            return f"<p>{response.json().get('error', 'Invalid card number.')}</p>", 400
+            return f"<p>{response.json().get('error', 'Invalid card id.')}</p>", 400
 
         response.raise_for_status()
         return format_card_html(response.json()), 200
