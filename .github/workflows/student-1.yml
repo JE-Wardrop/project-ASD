@@ -141,9 +141,9 @@ jobs:
 
           ## Stages
 
-          1. Tests - pytest over student-1/tests
-          2. Build and smoke test - three containers built, /health verified
-          3. Evidence pack - this report
+          1. Build test
+          2. Smoke Check
+          3. Evidence Pack
 
           Run URL:
           https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
