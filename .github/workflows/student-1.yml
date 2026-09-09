@@ -37,7 +37,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r student-1/backend/requirements.txt
           pip install -r student-1/database/requirements.txt
-          # pip install pytest
+          pip install pytest
 
       - name: Syntax check
         run: python -m compileall -q student-1
