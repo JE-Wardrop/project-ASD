@@ -1,0 +1,10 @@
+Review the {{REVIEW_TARGET}} of this microservice against the evidence below.
+
+Report at most three findings. For each one give the problem and the single
+concrete change that would fix it.
+
+If the evidence shows no problems, say that the {{REVIEW_TARGET}} meets the
+requirements and name the strongest thing you observed.
+
+Evidence:
+{{VALIDATION_EVIDENCE}}

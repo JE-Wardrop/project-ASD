@@ -22,28 +22,16 @@ deliberately rather than by pasting fragments into a chat window.
 
 **What was supplied to the assistant**
 
-| Context | Why |
-|---|---|
-| `ASD_2026_Project_Specifications.pdf` | So suggestions were checked against the actual rubric, not general best practice |
-| Release 0 Brief and marking criteria | To keep work aligned to what is assessed |
-| Signed Project Group Registration Form | So the code matched the API list approved by the tutor |
-| Direct read access to the repository | So the assistant read the real files instead of being told about them |
-| The unit's lab template structure | So the submission matched what the marker expects to see |
+- Context:
+  - `ASD_2026_Project_Specifications.pdf` - So suggestions were checked against the actual rubric, not general best practice
+  - Release 0 Brief and marking criteria - To keep work aligned to what is assessed
+  - Signed Project Group Registration Form - So the code matched the API list approved by the tutor
+  - Direct read access to the repository - So the assistant read the real files instead of being told about them
 
 **What was deliberately withheld**
 
-- Credentials and tokens. A GitHub personal access token was found embedded in
-  the team's registration form and was revoked; nothing of that kind was ever
-  pasted into a prompt.
 - Teammates' source files were read but never rewritten by the assistant
   without their agreement.
-
-**How context was kept accurate**
-
-Giving the assistant read access to the repository proved more reliable than
-describing the code. Several times a described state and the real state
-differed — for example a `prompts/` folder that was assumed to exist but did
-not — and only a direct file read caught it.
 
 ---
 
@@ -53,9 +41,9 @@ not — and only a direct file read caught it.
 
 **Intent:** design the `transactions` table.
 
-**Prompt:** *"For a banking transaction table supporting deposits, withdrawals
+**Prompt:** _"For a banking transaction table supporting deposits, withdrawals
 and transfers, should sender and receiver account columns be nullable? What
-constraints should the schema enforce itself?"*
+constraints should the schema enforce itself?"_
 
 **Response:** Both account columns must be nullable, because a deposit has no
 sender and a withdrawal has no receiver. A table-level `CHECK` can enforce the
@@ -74,14 +62,14 @@ rejected by SQLite. These became unit tests.
 
 **Intent:** decide where AI-Mode should live.
 
-**Prompt:** *"Where should the Ollama client live — in each backend, or in a
-shared AI service?"*
+**Prompt:** _"Where should the Ollama client live — in each backend, or in a
+shared AI service?"_
 
 **Response:** A separate `ai-service` container in front of Ollama, so that
 MCP and RAG could be added behind the same interface in Release 1.
 
 **Changed before use:** **Rejected.** The specification defines the request
-workflow as *Frontend → Backend/API → Ollama → LLM* — four hops, not five.
+workflow as _Frontend → Backend/API → Ollama → LLM_ — four hops, not five.
 The unit's lab template also places the LLM client inside the backend. The
 suggestion was reasonable engineering but did not match the specification,
 so the extra service was deleted and the client moved into
@@ -101,9 +89,9 @@ AI service.
 **Intent:** decide what the Transaction backend should do when the Account
 service cannot be reached.
 
-**Prompt:** *"My backend calls another team member's Account service. What
+**Prompt:** _"My backend calls another team member's Account service. What
 should happen when that service is unreachable, versus when it replies that
-the account does not exist?"*
+the account does not exist?"_
 
 **Response:** These are different conditions and must not share a return
 value. "Does not exist" is a business answer (400); "cannot be reached" is an
@@ -122,12 +110,12 @@ withdrawal beyond the balance is refused and the balance is unchanged.
 
 **Intent:** fix a money-flow summary that described JSON instead of money.
 
-**Observed failure:** The model replied *"It looks like you've provided a JSON
-object containing transaction records…"* and then listed field names.
+**Observed failure:** The model replied _"It looks like you've provided a JSON
+object containing transaction records…"_ and then listed field names.
 
-**Prompt:** *"The model is describing the data structure instead of
+**Prompt:** _"The model is describing the data structure instead of
 summarising the customer's money. The transactions are passed in as JSON. How
-should this be fixed?"*
+should this be fixed?"_
 
 **Response:** Three causes — the model was too small, raw JSON invites the
 model to describe JSON, and asking a small model to total fifty records
@@ -152,11 +140,11 @@ in the backend. The LLM is responsible for wording, never for arithmetic.
 The AI-Mode prompts are versioned as files under
 `student-5/backend/prompts/` so they can be revised without changing Python.
 
-| File | Purpose |
-|---|---|
-| `transaction_system_prompt.txt` | Standing rules: use only supplied figures, never invent amounts, no markdown, no data-format vocabulary, no financial advice |
-| `explain_transaction_prompt.txt` | Explains why a transaction is pending, failed or cancelled, using the stored description as the reason |
-| `analyse_money_flow_prompt.txt` | Three-sentence money-flow summary from pre-computed totals |
+| File                             | Purpose                                                                                                                      |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `transaction_system_prompt.txt`  | Standing rules: use only supplied figures, never invent amounts, no markdown, no data-format vocabulary, no financial advice |
+| `explain_transaction_prompt.txt` | Explains why a transaction is pending, failed or cancelled, using the stored description as the reason                       |
+| `analyse_money_flow_prompt.txt`  | Three-sentence money-flow summary from pre-computed totals                                                                   |
 
 **Iteration:** the first system prompt was too long and mostly ignored by
 `qwen2.5:0.5b`. It was shortened, the strongest constraint was moved to the
@@ -169,8 +157,8 @@ a demonstrated example far better than a described rule.
 
 **Intent:** find why the Explain button produced no visible result.
 
-**Prompt:** *"The button fires, the server logs show the request, but nothing
-appears on the page."*
+**Prompt:** _"The button fires, the server logs show the request, but nothing
+appears on the page."_
 
 **Response:** Two separate problems. The AI call was failing because
 `OLLAMA_BASE_URL` defaulted to `host.docker.internal`, which only resolves
@@ -191,8 +179,8 @@ before the fix and `200` after; the alert now renders in the page.
 
 **Intent:** write tests that run in CI without the services being up.
 
-**Prompt:** *"How do I test a backend that reaches its database over HTTP,
-without starting containers in CI?"*
+**Prompt:** _"How do I test a backend that reaches its database over HTTP,
+without starting containers in CI?"_
 
 **Response:** Separate pure functions (unit) from wired components
 (integration). For integration, redirect the database client at the database
@@ -212,8 +200,8 @@ running.
 
 **Intent:** check `student-5.yml` before pushing.
 
-**Prompt:** *"Review this workflow against the specification. Do not change
-the code, just tell me what is wrong."*
+**Prompt:** _"Review this workflow against the specification. Do not change
+the code, just tell me what is wrong."_
 
 **Response:** Five issues — paths left over from the lab
 (`enrolment-app-open-ai`), `working-directory` applied to only one step,
@@ -233,8 +221,8 @@ pushing; the workflow then ran green in GitHub Actions.
 
 **Intent:** the team's agentic loop was hardcoded to one student's feature.
 
-**Prompt:** *"This shared loop only reviews Card Management. How can every
-student run it against their own services without forking it?"*
+**Prompt:** _"This shared loop only reviews Card Management. How can every
+student run it against their own services without forking it?"_
 
 **Response:** Move the per-student values into a target registry selected by a
 `REVIEW_TARGET` environment variable, and make the collectors check what the
@@ -255,20 +243,20 @@ saved to `docs/agentic-logs/`.
 
 Recorded because §4.6 requires all AI output to be validated before use.
 
-| Suggestion | Outcome |
-|---|---|
-| Separate `ai-service` container | Rejected — contradicts the specification's request workflow |
-| Backend frontend proxy to avoid CORS | Rejected — the lab enables CORS instead; simpler and consistent with the team |
-| Raw JSON passed to the LLM | Rejected — caused the model to describe data structures |
-| POST probing in the agentic loop | Rejected — would create real transactions on every run |
-| `host.docker.internal` as a local default | Rejected — only resolves inside a container |
-| Letting the LLM total the transactions | Rejected — unacceptable hallucination risk for financial figures |
+| Suggestion                                | Outcome                                                                       |
+| ----------------------------------------- | ----------------------------------------------------------------------------- |
+| Separate `ai-service` container           | Rejected — contradicts the specification's request workflow                   |
+| Backend frontend proxy to avoid CORS      | Rejected — the lab enables CORS instead; simpler and consistent with the team |
+| Raw JSON passed to the LLM                | Rejected — caused the model to describe data structures                       |
+| POST probing in the agentic loop          | Rejected — would create real transactions on every run                        |
+| `host.docker.internal` as a local default | Rejected — only resolves inside a container                                   |
+| Letting the LLM total the transactions    | Rejected — unacceptable hallucination risk for financial figures              |
 
 ---
 
 ## 4. Summary
 
-AI assistance was used for schema design, debugging, test design and review.
+AI assistance was used for schema design, debugging, test design, generating code and review.
 Every suggestion was checked against the specification, the registration form
 or a running system before being accepted, and several were rejected on those
 grounds. All submitted code was executed and verified locally before commit.

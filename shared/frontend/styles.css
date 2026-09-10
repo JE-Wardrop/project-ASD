@@ -186,3 +186,6 @@ td button { padding: .22rem .5rem; font-size: .76rem; margin-right: .25rem; }
 .htmx-indicator { display: none; font-size: .84rem; color: var(--muted); }
 .htmx-request .htmx-indicator,
 .htmx-request.htmx-indicator { display: inline; }
+.hidden {
+    display: none !important;
+}

@@ -106,9 +106,7 @@ function displayUsers(users) {
                     </span>
                 </td>
 
-                <td>
-                    ${escapeHtml(user.created_at || "-")}
-                </td>
+            
 
                 <td>
 

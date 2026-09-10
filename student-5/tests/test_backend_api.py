@@ -9,7 +9,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-
+# monkeypatch.setattr(1,2,3)
+# 1. The module or object to patch.
+# 2. The attribute/function name to patch.
+# 3. The new value to set the attribute/function to.
 @pytest.fixture
 def active_account():
     return {"user_id": 7, "account_status": "ACTIVE", "balance": 1000.0}
@@ -19,6 +22,7 @@ def active_account():
 # /health  &  unknown routes                                                  #
 # --------------------------------------------------------------------------- #
 def test_health_up_when_database_healthy(client, services, monkeypatch, FakeResp):
+    # replace health() with a lambda that returns a FakeResp with status_code 200
     monkeypatch.setattr(services.db, "health", lambda: FakeResp({}, 200))
     resp = client.get("/health")
     assert resp.status_code == 200

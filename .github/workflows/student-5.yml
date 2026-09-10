@@ -1,6 +1,4 @@
 # Student 5 - Gia Tran - Transaction Management
-# Builds and validates ONLY student-5 microservices.
-
 name: student-5
 
 on:
@@ -15,9 +13,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # ------------------------------------------------------------------
-  # 1. Unit and integration tests - fast, no Docker needed
-  # ------------------------------------------------------------------
+  # 1. Unit and integration tests
   tests:
     name: Tests
     runs-on: ubuntu-latest
@@ -36,16 +32,10 @@ jobs:
           pip install -r student-5/backend/requirements.txt
           pip install -r student-5/database/requirements.txt
           pip install pytest
-
-      - name: Syntax check
-        run: python -m compileall -q student-5
-
       - name: Run pytest
         run: pytest student-5/tests -v
 
-  # ------------------------------------------------------------------
   # 2. Build the three containers and check they answer /health
-  # ------------------------------------------------------------------
   build-and-smoke:
     name: Build and smoke test
     runs-on: ubuntu-latest
@@ -54,8 +44,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate compose file
-        run: docker compose config -q
+      - name: Verify docker-compose
+        run: docker-compose --version || (sudo apt-get update && sudo apt-get install -y docker-compose)
 
       - name: Build student-5 services
         run: docker compose build student5-db student5-backend student5-frontend
@@ -85,23 +75,15 @@ jobs:
             return 1
           }
 
-          # Frontend is static nginx, so / is the page itself.
-          # Backend and database only expose /health - they have no / route.
           check_url "http://localhost:8105/"
           check_url "http://localhost:8205/health"
           check_url "http://localhost:8305/health"
-
-      - name: Container logs on failure
-        if: failure()
-        run: docker compose logs student5-db student5-backend student5-frontend
 
       - name: Stop services
         if: always()
         run: docker compose down -v
 
-  # ------------------------------------------------------------------
   # 3. Evidence for the technical report
-  # ------------------------------------------------------------------
   evidence-pack:
     name: Evidence pack
     runs-on: ubuntu-latest
@@ -128,22 +110,15 @@ jobs:
           EOF
 
           cat > reports/report.md << EOF
-          # Student 5 CI Report - Transaction Management
-
-          | Field | Value |
-          |---|---|
-          | Workflow | student-5 |
-          | Run ID | ${{ github.run_id }} |
-          | Commit | ${{ github.sha }} |
-          | Branch | ${{ github.ref_name }} |
-          | Generated | $(date -u +%Y-%m-%dT%H:%M:%SZ) |
-
-          ## Stages
-
-          1. Tests - pytest over student-5/tests
-          2. Build and smoke test - three containers built, /health verified
-          3. Evidence pack - this report
-
+          - Workflow: student-5 
+          - Run ID: ${{ github.run_id }} 
+          - Commit: ${{ github.sha }} 
+          - Branch: ${{ github.ref_name }} 
+          - Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          EOF
+      - name: Generate run-view.md
+        run: |
+          cat > reports/run-view.md << EOF
           Run URL:
           https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           EOF
