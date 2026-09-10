@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>MCP</title>
+    
+    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+    <link rel="stylesheet" href="shared/styles.css"> 
+
+
+</head>
+<body>
+
+
+<!-- Directly from lab 7, will be updated later -->
+<main class="app-shell">
+    <section class="card">
+        <h2>MCP Mode</h2>
+
+        <div class="feature-toggle-row">
+            <label class="toggle-switch" for="mcp-mode-toggle">
+                <input id="mcp-mode-toggle" type="checkbox" checked>
+                <span class="toggle-label">MCP Enabled</span>
+            </label>
+            <span id="mcp-mode-state" class="feature-state feature-on">ON</span>
+        </div>
+
+        <h2>MCP Tools</h2>
+
+        <div class="feature-actions">
+            <button
+                type="button"
+                class="mcp-action"
+                hx-post="http://localhost:5001/mcp/student-count"
+                hx-target="#mcp-result"
+                hx-swap="innerHTML"
+            >Get Student Count</button>
+        </div>
+
+        <form
+            id="mcp-subject-form"
+            class="feature-form"
+            hx-post="http://localhost:5001/mcp/students-by-subject"
+            hx-target="#mcp-result"
+            hx-swap="innerHTML"
+        >
+            <label for="mcp_subject_code">MCP: Students by Subject</label>
+            <input id="mcp_subject_code" name="subject_code" type="text" placeholder="Example: ASD101">
+            <button type="submit" class="mcp-action">Run Tool</button>
+        </form>
+
+        <form
+            id="mcp-project-form"
+            class="feature-form"
+            hx-post="http://localhost:5001/mcp/project-files"
+            hx-target="#mcp-result"
+            hx-swap="innerHTML"
+        >
+            <label for="mcp_directory_path">MCP: Project Files</label>
+            <input id="mcp_directory_path" name="directory_path" type="text" value="..">
+            <button type="submit" class="mcp-action">Run Tool</button>
+        </form>
+
+        <div id="mcp-result" class="panel panel-mcp">MCP tool responses will appear here.</div>
+    </section>
+</main>
+
+<script>
+const mcpModeToggle = document.getElementById("mcp-mode-toggle");
+const mcpModeState = document.getElementById("mcp-mode-state");
+const mcpResultPanel = document.getElementById("mcp-result");
+
+const MCP_STORAGE_KEY = "mcp_mode_enabled";
+
+function isMcpEnabled() {
+    return mcpModeToggle.checked;
+}
+
+function renderMcpState() {
+    if (isMcpEnabled()) {
+        mcpModeState.textContent = "ON";
+        mcpModeState.classList.add("feature-on");
+        mcpModeState.classList.remove("feature-off");
+    } else {
+        mcpModeState.textContent = "OFF";
+        mcpModeState.classList.add("feature-off");
+        mcpModeState.classList.remove("feature-on");
+    }
+}
+
+function renderMcpDisabledMessage() {
+    mcpResultPanel.innerHTML = "<p>MCP Mode is OFF. Enable MCP Mode to run MCP tools.</p>";
+}
+
+function saveMcpMode() {
+    localStorage.setItem(MCP_STORAGE_KEY, String(isMcpEnabled()));
+}
+
+function loadMcpMode() {
+    const persisted = localStorage.getItem(MCP_STORAGE_KEY);
+    if (persisted === null) {
+        mcpModeToggle.checked = true;
+    } else {
+        mcpModeToggle.checked = persisted === "true";
+    }
+    renderMcpState();
+}
+
+mcpModeToggle.addEventListener("change", () => {
+    saveMcpMode();
+    renderMcpState();
+
+    if (!isMcpEnabled()) {
+        renderMcpDisabledMessage();
+    }
+});
+
+document.body.addEventListener("htmx:configRequest", (event) => {
+    const trigger = event.detail.elt;
+    if (trigger && trigger.classList.contains("mcp-action")) {
+        event.detail.headers["X-MCP-Mode"] = isMcpEnabled() ? "on" : "off";
+    }
+});
+
+document.body.addEventListener("htmx:beforeRequest", (event) => {
+    const trigger = event.detail.elt;
+    if (!trigger || !trigger.classList.contains("mcp-action")) {
+        return;
+    }
+
+    if (!isMcpEnabled()) {
+        event.preventDefault();
+        renderMcpDisabledMessage();
+    }
+});
+
+loadMcpMode();
+if (!isMcpEnabled()) {
+    renderMcpDisabledMessage();
+}
+</script>
+</body>
+</html>

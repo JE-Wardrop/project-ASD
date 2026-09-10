@@ -49,6 +49,7 @@ services:
       DATABASE_SERVICE_URL: http://student-1-database:5002
       OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
       OLLAMA_MODEL: qwen2.5:0.5b
+      MCP_ENABLED: "true"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -76,114 +77,114 @@ services:
       - student2-backend
     restart: unless-stopped
  
-  # student2-backend:
-  #   build:
-  #     context: ./student-2
-  #     dockerfile: backend/dockerfile
-  #   container_name: student2-backend
-  #   ports:
-  #     - "8202:5001"
-  #   environment:
-  #     DATABASE_SERVICE_URL: http://student2-database:5002
-  #     OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
-  #     OLLAMA_MODEL: qwen2.5:0.5b
-  #     OLLAMA_REVIEW_MODEL: llama3.1:8b
-  #   extra_hosts:
-  #     - "host.docker.internal:host-gateway"
-  #   depends_on:
-  #     - student2-database
-  #   restart: unless-stopped
+  student2-backend:
+    build:
+      context: ./student-2
+      dockerfile: backend/dockerfile
+    container_name: student2-backend
+    ports:
+      - "8202:5001"
+    environment:
+      DATABASE_SERVICE_URL: http://student2-database:5002
+      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+      OLLAMA_MODEL: qwen2.5:0.5b
+      OLLAMA_REVIEW_MODEL: llama3.1:8b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - student2-database
+    restart: unless-stopped
  
-  # student2-database:
-  #   build:
-  #     context: ./student-2/database
-  #   container_name: student2-database
-  #   ports:
-  #     - "8302:5002"
-  #   environment:
-  #     DB_PATH: /app/data/accounts.db
-  #   volumes:
-  #     - student2_db_data:/app/data
-  #   restart: unless-stopped
+  student2-database:
+    build:
+      context: ./student-2/database
+    container_name: student2-database
+    ports:
+      - "8302:5002"
+    environment:
+      DB_PATH: /app/data/accounts.db
+    volumes:
+      - student2_db_data:/app/data
+    restart: unless-stopped
  
-  # #  STUDENT 5 - Gia Tran - Transaction Management
+  #  STUDENT 5 - Gia Tran - Transaction Management
  
-  # student5-db:
-  #   build: ./student-5/database
-  #   container_name: student5-db
-  #   ports:
-  #     - "8305:8000"
-  #   volumes:
-  #     - student5-data:/data
+  student5-db:
+    build: ./student-5/database
+    container_name: student5-db
+    ports:
+      - "8305:8000"
+    volumes:
+      - student5-data:/data
   
-  #   restart: unless-stopped
+    restart: unless-stopped
  
-  # student5-backend:
-  #   build: ./student-5/backend
-  #   container_name: student5-backend
-  #   ports:
-  #     - "8205:8000"
-  #   environment:
-  #     OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
-  #     OLLAMA_MODEL: qwen2.5:0.5b
-  #     DB_URL: http://student5-db:8000
-  #     ACCOUNTS_URL: http://student2-database:5002
-  #     NOTIFICATIONS_URL: http://student3-backend:8000
-  #     BACKEND_URL: http://localhost:8205
-  #     REQUIRE_ACCOUNTS: "true"      # waiting for Binh service to run
-  #   depends_on:
-  #     - student5-db
-  #   extra_hosts:
-  #     - "host.docker.internal:host-gateway"
-  #   restart: unless-stopped
+  student5-backend:
+    build: ./student-5/backend
+    container_name: student5-backend
+    ports:
+      - "8205:8000"
+    environment:
+      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+      OLLAMA_MODEL: qwen2.5:0.5b
+      DB_URL: http://student5-db:8000
+      ACCOUNTS_URL: http://student2-database:5002
+      NOTIFICATIONS_URL: http://student3-backend:8000
+      BACKEND_URL: http://localhost:8205
+      REQUIRE_ACCOUNTS: "true"      # waiting for Binh service to run
+    depends_on:
+      - student5-db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
  
-  # student5-frontend:
-  #   build: ./student-5/frontend
-  #   container_name: student5-frontend
-  #   ports:
-  #     - "8105:8000"
-  #   depends_on:
-  #     - student5-backend
-  #   restart: unless-stopped
-  # student4-frontend:
-  #   build:
-  #     context: ./student-4/frontend
-  #     dockerfile: Dockerfile
-  #   container_name: student4-frontend
-  #   ports:
-  #     - "8104:80"
-  #   depends_on:
-  #     - student4-backend
+  student5-frontend:
+    build: ./student-5/frontend
+    container_name: student5-frontend
+    ports:
+      - "8105:8000"
+    depends_on:
+      - student5-backend
+    restart: unless-stopped
+  student4-frontend:
+    build:
+      context: ./student-4/frontend
+      dockerfile: Dockerfile
+    container_name: student4-frontend
+    ports:
+      - "8104:80"
+    depends_on:
+      - student4-backend
  
-  #   restart: unless-stopped
-  # student4-backend:
-  #   build:
-  #     context: ./student-4/backend
-  #     dockerfile: Dockerfile
-  #   container_name: student4-backend
-  #   ports:
-  #     - "8204:5001"
-  #   environment:
-  #     DATABASE_SERVICE_URL: http://student4-database:5002
-  #     OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
-  #     OLLAMA_MODEL: qwen2.5:0.5b
-  #   extra_hosts:
-  #     - "host.docker.internal:host-gateway"
-  #   depends_on:
-  #     - student4-database
-  #   volumes:
-  #     - student4-database-data:/database
-  #   restart: unless-stopped
-  # student4-database:
-  #   build:
-  #     context: ./student-4/database
-  #     dockerfile: Dockerfile
-  #   container_name: student4-database
-  #   ports:
-  #     - "8304:5002"
-  #   volumes:
-  #     - student4-database-data:/database
-  #   restart: unless-stopped
+    restart: unless-stopped
+  student4-backend:
+    build:
+      context: ./student-4/backend
+      dockerfile: Dockerfile
+    container_name: student4-backend
+    ports:
+      - "8204:5001"
+    environment:
+      DATABASE_SERVICE_URL: http://student4-database:5002
+      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+      OLLAMA_MODEL: qwen2.5:0.5b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - student4-database
+    volumes:
+      - student4-database-data:/database
+    restart: unless-stopped
+  student4-database:
+    build:
+      context: ./student-4/database
+      dockerfile: Dockerfile
+    container_name: student4-database
+    ports:
+      - "8304:5002"
+    volumes:
+      - student4-database-data:/database
+    restart: unless-stopped
  
   
  
