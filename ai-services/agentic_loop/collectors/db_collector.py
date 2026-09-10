@@ -4,6 +4,9 @@
 # requires of every student: an owned schema, at least ten seeded records,
 # and a database service that answers /health.
 
+# might have to change this a little to make it so that it can work with
+# other forms of databases.
+
 
 import re
 import sqlite3
