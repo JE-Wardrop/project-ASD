@@ -44,45 +44,63 @@ def _load_schema_in_memory(schema_sql: str, seed_sql: str) -> tuple[dict[str, in
     connection.close()
     return counts, None
 
+# This will load the prompts for if the model is a schema model
+# I may get rid of this later but the purpose of this will be to load 
+# different prompts for the other db sturctures
+def _is_schema_model():
+    pass
+
 
 def collect(target, repo_root: Path) -> tuple[bool, str]:
+
+    # I updated this code so that the db_collecter will still run on other student's code. 
+    # The prompts still need to be updated though bc they still are excpeting:
+    # schema.sql and seed.sql (and therefore is saying that code doesn't meet requirements)
+
     database_dir = target.root / "database"
     schema_path = database_dir / "schema.sql"
     seed_path = database_dir / "seed.sql"
 
     findings: list[str] = []
 
-    # --- schema and seed files -------------------------------------------
-    missing = [p.name for p in (schema_path, seed_path) if not p.exists()]
-    if missing:
-        return False, f"{target.key}: missing {', '.join(missing)} in database/"
 
-    schema_sql = schema_path.read_text(encoding="utf-8")
-    seed_sql = seed_path.read_text(encoding="utf-8")
+    hasSchema = [p.name for p in (schema_path, seed_path) if not p.exists()]
+    if hasSchema:
+        #run _is_schema_model()
 
-    check_constraints = len(re.findall(r"\bCHECK\s*\(", schema_sql, re.IGNORECASE))
-    findings.append(f"schema.sql defines {check_constraints} CHECK constraint(s)")
+        if _is_schema_model() == False:
+            return False, f"{target.key}: missing {', '.join(hasSchema)} in database/"
+        else:
+            return True, f"Database evidence for {target.key} ({target.label}): " + "; ".join(findings) + "."
 
-    # --- do the schema and seed actually run? ----------------------------
-    counts, error = _load_schema_in_memory(schema_sql, seed_sql)
-    if error:
-        return False, f"{target.key}: {error}"
+        
+    # This will be if the agentic_loop is not missing schema data (uses schema data)
+    else: 
+        schema_sql = schema_path.read_text(encoding="utf-8")
+        seed_sql = seed_path.read_text(encoding="utf-8")
 
-    for table, count in counts.items():
-        state = "meets" if count >= MIN_SEED_ROWS else "BELOW"
-        findings.append(f"table '{table}' seeded with {count} rows ({state} the minimum of {MIN_SEED_ROWS})")
+        check_constraints = len(re.findall(r"\bCHECK\s*\(", schema_sql, re.IGNORECASE))
+        findings.append(f"schema.sql defines {check_constraints} CHECK constraint(s)")
 
-    # --- is the live database service answering? -------------------------
-    try:
-        response = requests.get(f"{target.database_url}/health", timeout=3)
-        findings.append(
-            f"database service on port {target.database_port} "
-            f"returned {response.status_code} for /health"
-        )
-    except requests.RequestException:
-        findings.append(
-            f"database service on port {target.database_port} is not running "
-            "(file evidence only)"
-        )
 
-    return True, f"Database evidence for {target.key} ({target.label}): " + "; ".join(findings) + "."
+        counts, error = _load_schema_in_memory(schema_sql, seed_sql)
+        if error:
+            return False, f"{target.key}: {error}"
+
+        for table, count in counts.items():
+            state = "meets" if count >= MIN_SEED_ROWS else "BELOW"
+            findings.append(f"table '{table}' seeded with {count} rows ({state} the minimum of {MIN_SEED_ROWS})")
+
+        try:
+            response = requests.get(f"{target.database_url}/health", timeout=3)
+            findings.append(
+                f"database service on port {target.database_port} "
+                f"returned {response.status_code} for /health"
+            )
+        except requests.RequestException:
+            findings.append(
+                f"database service on port {target.database_port} is not running "
+                "(file evidence only)"
+            )
+
+        return True, f"Database evidence for {target.key} ({target.label}): " + "; ".join(findings) + "."

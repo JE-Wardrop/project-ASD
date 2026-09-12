@@ -25,6 +25,7 @@ MENU = {
     "2": "endpoints",
     "3": "architecture",
     "4": "devops",
+    "5": "MCP",
 }
 
 
@@ -37,9 +38,12 @@ def _resolve_roots() -> tuple[Path, Path]:
 
 def _ask_for_target(repo_root: Path):
     """REVIEW_TARGET is missing, so ask rather than guessing someone's feature."""
+
+
     print("Available review targets: " + ", ".join(available_targets()))
     while True:
         choice = input("Which student's services should be reviewed? ").strip()
+
         try:
             return resolve_target(repo_root, choice)
         except ValueError as exc:
@@ -52,6 +56,7 @@ def _print_mode_mapping(app_dir: Path) -> None:
         "Endpoints":    str(app_dir / "prompts" / "service" / "implementation" / "task_prompt.txt"),
         "Architecture": str(app_dir / "prompts" / "architecture" / "implementation" / "architecture_task_prompt.txt"),
         "DevOps":       str(app_dir / "prompts" / "devops" / "implementation" / "devops_task_prompt.txt"),
+        "MCP":          str(app_dir / "prompts" / "devops" / "implementation" / "mcp_task_prompt.txt"),
     })
 
 
