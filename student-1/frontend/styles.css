@@ -27,8 +27,12 @@
 }
 .page-header h1 { margin: .15rem 0 0; font-size: 1.45rem; letter-spacing: -.015em; }
 .eyebrow {
-  margin: 0; font-size: .7rem; letter-spacing: .13em;
-  text-transform: uppercase; color: var(--brand); font-weight: 600;
+  margin: 0; 
+  font-size: .7rem; 
+  letter-spacing: .13em;
+  text-transform: uppercase; 
+  color: var(--brand); 
+  font-weight: 600;
 }
 .btn-link {
   text-decoration: none; font-weight: 600; font-size: .85rem;
@@ -37,6 +41,14 @@
 }
 .btn-link:hover { background: var(--surface-2); }
 
+.label-text{
+  text-decoration: none; 
+  font-weight: 600; 
+  font-size: .85rem;
+  padding: .4rem .8rem; 
+  color: var(--text); 
+}
+
 /* ---------- forms  ---------- */
 .card-form {
   display: grid; gap: .45rem;
@@ -44,6 +56,12 @@
   border-radius: 4px;
   padding: .9rem;
   background: var(--surface);
+}
+
+
+.spec-hr{
+  padding: .3 rem;
+  color: var(--brand-dark);
 }
 
 /* tab content */

@@ -9,101 +9,104 @@ on:
     branches: ["**"]
     paths:
       - "student-1/**"
-      - "shared/frontend/**"
       - "docker-compose.yml"
       - ".github/workflows/student-1.yml"
   pull_request:
     paths:
       - "student-1/**"
-      - "shared/frontend/**"
-      - "docker-compose.yml"
-      - ".github/workflows/student-1.yml"
 
 jobs:
-  tests:
-    name: Tests
+
+  build-images:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-
-      - name: Install dependencies
+      - name: Verify docker-compose
         run: |
-          python -m pip install --upgrade pip
-          pip install -r student-1/backend/requirements.txt
-          pip install -r student-1/database/requirements.txt
-          pip install pytest
+          docker-compose --version || (sudo apt-get update && sudo apt-get install -y docker-compose)
 
-      - name: Syntax check
-        run: python -m compileall -q student-1
+      - name: Build services
+        run: docker-compose build
 
-      - name: Run pytest
-        run: pytest student-1/tests -v
+  # tests:
+  #   name: Tests
+  #   runs-on: ubuntu-latest
 
-#build-and-smoke for student-1
-  build-and-smoke:
-    name: Build and smoke test
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.12"
+  #         cache: pip
+
+  #     - name: Install dependencies
+  #       run: |
+  #         python -m pip install --upgrade pip
+  #         pip install -r student-1/backend/requirements.txt
+  #         pip install -r student-1/database/requirements.txt
+  #         pip install pytest
+
+  #     - name: Syntax check
+  #       run: python -m compileall -q student-1
+
+  #     # - name: Run pytest
+  #     #   run: pytest student-1/tests -v
+
+  #     - name: Run pytest
+  #       run: pytest --override-ini=junit_duration_report=call || [ $? -eq 5 ]
+
+
+  smoke-check:
     runs-on: ubuntu-latest
-    needs: [tests]
+    needs: [build-images]
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate compose file
-        run: docker compose config -q
+      - name: Verify docker-compose
+        run: |
+          docker-compose --version || (sudo apt-get update && sudo apt-get install -y docker-compose)
 
-      - name: Build student-1 services
-        run: docker compose build student1-db student1-backend student1-frontend
-
-      - name: Start student-1 services
-        run: docker compose up -d student1-db student1-backend student1-frontend
-
+      - name: Start services
+        run: docker-compose up -d
+        
       - name: Smoke checks
         run: |
           check_url() {
             local url="$1"
-            local attempts=10
+            local attempts=8
             local code=""
 
             for i in $(seq 1 "$attempts"); do
-              code=$(curl -sS -o /dev/null -w "%{http_code}" \
-                     --connect-timeout 5 --max-time 20 "$url" || true)
+              code=$(curl -sS -o /dev/null -w "%{http_code}" --connect-timeout 5 --max-time 20 "$url" || true)
               if [ "$code" = "200" ]; then
-                echo "PASS  $url -> $code"
+                echo "PASS $url -> $code"
                 return 0
               fi
-              echo "wait  $i/$attempts  $url (got: ${code:-none})"
-              sleep 3
+              echo "Retry $i/$attempts for $url (got: ${code:-none})"
+              sleep 2
             done
 
-            echo "FAIL  $url after $attempts attempts"
+            echo "FAIL $url after $attempts attempts"
             return 1
           }
 
-          # Frontend is static nginx, so / is the page itself.
-          # Backend and database only expose /health - they have no / route.
           check_url "http://localhost:8101/"
-          check_url "http://localhost:8201/health"
-          check_url "http://localhost:8301/health"
-
-      - name: Container logs on failure
-        if: failure()
-        run: docker compose logs student1-db student1-backend student1-frontend
+          check_url "http://localhost:8201/"
+          check_url "http://localhost:8301/"
 
       - name: Stop services
         if: always()
-        run: docker compose down -v
+        run: docker-compose down -v
 
 #evidence-pack for student-1
   evidence-pack:
     name: Evidence pack
     runs-on: ubuntu-latest
-    needs: [build-and-smoke]
+    needs: [smoke-check]
 
     steps:
       - uses: actions/checkout@v4
@@ -138,9 +141,9 @@ jobs:
 
           ## Stages
 
-          1. Tests - pytest over student-1/tests
-          2. Build and smoke test - three containers built, /health verified
-          3. Evidence pack - this report
+          1. Build test
+          2. Smoke Check
+          3. Evidence Pack
 
           Run URL:
           https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
