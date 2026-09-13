@@ -12,5 +12,5 @@ COPY prompts ./prompts
 # COPY prompts/lab4 ./prompts/lab4
 
 EXPOSE 5001
-
+ENV PYTHONUNBUFFERED=1
 CMD ["python", "app.py"]

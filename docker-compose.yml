@@ -156,6 +156,7 @@ services:
       - student4-backend
 
     restart: unless-stopped
+
   student4-backend:
     build:
       context: ./student-4/backend
@@ -165,8 +166,12 @@ services:
       - "8204:5001"
     environment:
       DATABASE_SERVICE_URL: http://student4-database:5002
-      OLLAMA_BASE_URL: http://ollama:11434/v1
+      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+      OLLAMA_REVIEW_MODEL: llama3.1:8b
+
       OLLAMA_MODEL: qwen2.5:0.5b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
    
     depends_on:
       - student4-database

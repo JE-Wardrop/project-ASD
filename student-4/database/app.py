@@ -107,6 +107,15 @@ def create_user():
 def update_user(user_id):
     data = request.get_json(silent=True) or {}
 
+    username = (data.get("username") or "").strip()
+    email = (data.get("email") or "").strip()
+    password = (data.get("password") or "").strip()
+    first_name = (data.get("fname") or "").strip()
+    last_name = (data.get("lname") or "").strip()
+    phone = (data.get("phone") or "").strip()
+    role = (data.get("role") or "").strip()
+
+    
     email = (data.get("email") or "").strip()
     first_name = (data.get("fname") or "").strip()
     last_name = (data.get("lname") or "").strip()
@@ -129,10 +138,10 @@ def update_user(user_id):
     conn.execute(
         """
         UPDATE users
-        SET email = ?, first_name = ?, last_name = ?, phone = ?, role = ?, 
+        SET username = ?, email = ?, password = ?, first_name = ?, last_name = ?, phone = ?, role = ?
         WHERE user_id = ?
         """,
-        (email, first_name, last_name, phone, role, user_id),
+        (username, email, password, first_name, last_name, phone, role, user_id),
     )
     conn.commit()
     conn.close()

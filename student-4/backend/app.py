@@ -241,10 +241,15 @@ def login_user():
 @app.route("/users/<int:user_id>", methods=["PUT"])
 def update_user(user_id):
 
-    email = request.form.get("email", "").strip()
-    first_name = request.form.get("first_name", "").strip()
-    last_name = request.form.get("last_name", "").strip()
-    phone = request.form.get("phone", "").strip()
+    data = request.get_json(silent=True) or {}  
+
+    username = (data.get("username") or "").strip()
+    email = (data.get("email") or "").strip()
+    password = (data.get("password") or "").strip()
+    first_name = (data.get("fname") or "").strip()
+    last_name = (data.get("lname") or "").strip()
+    phone = (data.get("phone") or "").strip()
+    role = (data.get("role") or "").strip()
 
     if not email or not first_name or not last_name or not phone:
         return jsonify({
@@ -253,9 +258,13 @@ def update_user(user_id):
 
     data = {
         "email": email,
-        "first_name": first_name,
-        "last_name": last_name,
-        "phone": phone
+        "fname": first_name,
+        "lname": last_name,
+        "phone": phone,
+        "username": username, 
+        "role": role, 
+        "password": password
+        
     }
 
     try:
@@ -325,7 +334,7 @@ def delete_user(user_id):
 def ask_user_help():
 
     question = request.form.get("question", "").strip()
-
+    
     print("DEBUG question:", repr(question))
 
     if not question:
