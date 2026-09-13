@@ -86,8 +86,8 @@ async function askAI() {
 
             const errorData = await response.json();
             // console.log(response)
-            console.error("STATUS:", response.status);
-            console.error("ERROR:", errorData);
+            console.error("STATUS:", response);
+            console.error("ERROR:", errorData.details);
             throw new Error(
                 "AI request failed"
             );

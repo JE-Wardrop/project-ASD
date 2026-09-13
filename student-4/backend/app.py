@@ -28,7 +28,7 @@ DATABASE_SERVICE_URL = os.getenv(
 
 OLLAMA_BASE_URL = os.getenv(
     "OLLAMA_BASE_URL",
-    "http://host.docker.internal:11434/v1"
+    "http://localhost:11434/v1"
 )
 
 OLLAMA_MODEL = os.getenv(
