@@ -27,6 +27,10 @@ def _connect_db():
 
 
 
+# def health(){
+#     
+# }
+
 
 def list_project_files(directory_path: str = ".."):  # relative to mcp-server/
     path = (BASE_DIR / directory_path).resolve()

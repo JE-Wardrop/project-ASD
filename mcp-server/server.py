@@ -1,7 +1,9 @@
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP, Context
+from flask import Flask, jsonify, request
+
 
 from tools import (
-    get_card_count,
+    # get_card_count,
     list_project_files,
     read_ci_report
 )
@@ -20,6 +22,10 @@ AVAILABLE_TOOLS = [
 # def card_count():
 #     return get_card_count()
 
+# @mcp.tool()
+# def health(){
+#     return jsonify({'status': 'mcp healthy'}), 200
+# }
 
 
 @mcp.tool()
