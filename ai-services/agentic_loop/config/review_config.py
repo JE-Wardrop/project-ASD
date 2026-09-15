@@ -51,6 +51,22 @@ def build_mode_config() -> dict[str, ModeConfig]:
                 "implementation/devops_task_prompt.txt",),
             review_prompts=("review/agent_review_prompt.txt",),
         ),
+        "mcp": ModeConfig(
+            key="mcp",
+            label="MCP",
+            prompt_family="mcp",
+            implementation_prompts=("tool_review_prompts.txt", 
+                ),
+            review_prompts=("tool_review_prompts.txt","integration_review_prompts.txt",),
+        ),
+        "rag": ModeConfig(
+            key="rag",
+            label="RAG",
+            prompt_family="rag",
+            implementation_prompts=( "implementation/devops_system_prompt.txt",
+                "implementation/devops_task_prompt.txt",),
+            review_prompts=("review/agent_review_prompt.txt",),
+        ),
     }
 
 

@@ -15,37 +15,17 @@ def _connect_db():
     return conn
 
 
-def get_card_count():
-    conn = _connect_db()
-    try:
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) AS card_count FROM cards")
-        row = cursor.fetchone()
-        return {"card_count": row[0] if row else 0}
-    finally:
-        conn.close()
-
-
-# def get_students_by_subject(subject_code: str):
-#     subject = (subject_code or "").strip().upper()
-#     if not subject:
-#         return {"error": "subject_code is required"}
-
+# def get_card_count():
 #     conn = _connect_db()
 #     try:
 #         cursor = conn.cursor()
-#         cursor.execute(
-#             """
-#             SELECT student_id, student_name, subject_code
-#             FROM students
-#             WHERE subject_code = ?
-#             ORDER BY student_id
-#             """,
-#             (subject,),
-#         )
-#         return [dict(row) for row in cursor.fetchall()]
+#         cursor.execute("SELECT COUNT(*) AS card_count FROM cards")
+#         row = cursor.fetchone()
+#         return {"card_count": row[0] if row else 0}
 #     finally:
 #         conn.close()
+
+
 
 
 def list_project_files(directory_path: str = ".."):  # relative to mcp-server/
@@ -70,7 +50,6 @@ def read_ci_report(report_path: str = "../reports/report.json"):
 
 
 if __name__ == "__main__":
-    print(get_card_count())
-    # print(get_students_by_subject("ASD101"))
+    # print(get_card_count())
     print(list_project_files(".."))
     print(read_ci_report("../reports/report.json"))

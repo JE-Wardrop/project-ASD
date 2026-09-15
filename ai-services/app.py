@@ -54,6 +54,7 @@ def generate():
     Tra ve  {"response": "...", "model": "..."}
 
     Day la contract dung chung cho ca nhom - dung doi ten truong."""
+    
     data = request.get_json(silent=True) or {}
     prompt = (data.get("prompt") or "").strip()
 

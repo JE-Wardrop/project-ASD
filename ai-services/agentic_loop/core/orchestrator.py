@@ -16,6 +16,7 @@ from collectors import (
     db_collector,
     devops_collector,
     endpoints_collector,
+    mcp_collector,
 )
 from config.review_config import ModeConfig
 from core.ai_runner import AIRunner
@@ -25,6 +26,7 @@ from pipelines import (
     db_pipeline,
     devops_pipeline,
     endpoints_pipeline,
+    mcp_pipeline,
 )
 
 
@@ -33,6 +35,7 @@ COLLECTORS = {
     "endpoints": endpoints_collector.collect,
     "architecture": architecture_collector.collect,
     "devops": devops_collector.collect,
+    "mcp": mcp_collector.collect,
 }
 
 # Modes that run a second, larger model to review the first model's output

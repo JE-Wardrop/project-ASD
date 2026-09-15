@@ -16,16 +16,10 @@ AVAILABLE_TOOLS = [
 ]
 
 
-@mcp.tool()
-def card_count():
-    return get_card_count()
-
-
 # @mcp.tool()
-# def students_by_subject(
-#     subject_code: str
-# ):
-#     return get_students_by_subject(subject_code)
+# def card_count():
+#     return get_card_count()
+
 
 
 @mcp.tool()

@@ -1,0 +1,6 @@
+# for install do:
+# python3 -m pip install -r requirements.txt (look at lab 8 for more information)
+
+mcp
+chromadb
+requests

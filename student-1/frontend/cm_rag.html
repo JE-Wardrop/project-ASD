@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>RAG Tab</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<section class="card">
+    <h2>RAG Mode</h2>
+    <p>Refresh corpus, retrieve context, and generate grounded answers with citations.</p>
+
+    <div class="feature-toggle-row">
+        <label class="toggle-switch" for="rag-mode-toggle">
+            <input id="rag-mode-toggle" type="checkbox" checked>
+            <span class="toggle-label">RAG Enabled</span>
+        </label>
+        <span id="rag-mode-state" class="feature-state feature-on">ON</span>
+    </div>
+
+    <form id="rag-refresh-form" class="stack-form">
+        <button type="submit" class="rag-action">Refresh Corpus</button>
+    </form>
+
+    <form id="rag-retrieve-form" class="stack-form">
+        <label for="rag-retrieve-query">Query</label>
+        <input
+            id="rag-retrieve-query"
+            name="query"
+            required
+            placeholder="Example: students enrolled in ASD101"
+        >
+        <p class="rag-helper">Hint: use short retrieval phrases.</p>
+        <button type="submit" class="rag-action">Retrieve Context</button>
+    </form>
+
+    <form id="rag-answer-form" class="stack-form">
+        <label for="rag-answer-query">Question</label>
+        <input
+            id="rag-answer-query"
+            name="query"
+            required
+            placeholder="Example: Which students are enrolled in ASD101?"
+        >
+        <p class="rag-helper">Hint: ask a full question for grounded answers.</p>
+        <button type="submit" class="rag-action">Answer with Citations</button>
+    </form>
+
+    <div id="rag-results" class="panel panel-mcp">RAG responses will appear here.</div>
+</section>
+
+<script>
+const apiBase = "http://localhost:5001";
+const output = document.getElementById("rag-results");
+const ragModeToggle = document.getElementById("rag-mode-toggle");
+const ragModeState = document.getElementById("rag-mode-state");
+const RAG_STORAGE_KEY = "rag_mode_enabled";
+
+function isRagEnabled() {
+    return ragModeToggle.checked;
+}
+
+function renderRagState() {
+    if (isRagEnabled()) {
+        ragModeState.textContent = "ON";
+        ragModeState.classList.add("feature-on");
+        ragModeState.classList.remove("feature-off");
+    } else {
+        ragModeState.textContent = "OFF";
+        ragModeState.classList.add("feature-off");
+        ragModeState.classList.remove("feature-on");
+    }
+}
+
+function renderRagDisabledMessage() {
+    output.innerHTML = "<p>RAG Mode is OFF. Enable RAG Mode to run RAG tools.</p>";
+}
+
+function saveRagMode() {
+    localStorage.setItem(RAG_STORAGE_KEY, String(isRagEnabled()));
+}
+
+function loadRagMode() {
+    const persisted = localStorage.getItem(RAG_STORAGE_KEY);
+    if (persisted === null) {
+        ragModeToggle.checked = true;
+    } else {
+        ragModeToggle.checked = persisted === "true";
+    }
+    renderRagState();
+}
+
+function renderJson(title, payload) {
+    output.innerHTML = `<h3>${title}</h3><pre>${JSON.stringify(payload, null, 2)}</pre>`;
+}
+
+async function postForm(path, data) {
+    if (!isRagEnabled()) {
+        renderRagDisabledMessage();
+        return { status: "error", error: "RAG Mode is OFF" };
+    }
+
+    const res = await fetch(`${apiBase}${path}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-RAG-Mode": isRagEnabled() ? "on" : "off",
+        },
+        body: new URLSearchParams(data),
+    });
+    const text = await res.text();
+    try {
+        return JSON.parse(text);
+    } catch {
+        return { raw: text };
+    }
+}
+
+ragModeToggle.addEventListener("change", () => {
+    saveRagMode();
+    renderRagState();
+
+    if (!isRagEnabled()) {
+        renderRagDisabledMessage();
+    }
+});
+
+document.getElementById("rag-refresh-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = await postForm("/rag/refresh", {});
+    renderJson("RAG Tool: refresh_corpus", payload);
+});
+
+document.getElementById("rag-retrieve-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const query = document.getElementById("rag-retrieve-query").value.trim();
+    const payload = await postForm("/rag/retrieve", { query, k: "5" });
+    renderJson("RAG Tool: retrieve_context", payload);
+});
+
+document.getElementById("rag-answer-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const query = document.getElementById("rag-answer-query").value.trim();
+    const payload = await postForm("/rag/answer", { query, k: "5" });
+    renderJson("RAG Tool: answer_question", payload);
+});
+
+loadRagMode();
+if (!isRagEnabled()) {
+    renderRagDisabledMessage();
+}
+</script>
+
+</body>
+</html>
