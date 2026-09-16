@@ -103,6 +103,10 @@ def main() -> None:
 
         for key in keys:
             print()
+
+            #error here with the mcp (and im guessing rag as well) key
+            # i dont really get where this error is coming from
+
             result = run_mode(mode_config[key], target, repo_root, prompts, ai)
             print_result(mode_config[key].label, result)
             transcript.append((mode_config[key].label, result))
