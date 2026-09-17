@@ -28,6 +28,8 @@ client = OpenAI(
 
 from routes.ai_mode import ai_mode_bp
 from routes.normal_mode import normal_mode_bp
+from routes.mcp_mode import mcp_mode_bp
+from routes.rag_mode import rag_mode_bp
 
 
 def get_db_connection():
@@ -42,6 +44,8 @@ def create_app():
 
     app.register_blueprint(normal_mode_bp)
     app.register_blueprint(ai_mode_bp)
+    app.register_blueprint(mcp_mode_bp)
+    # app.register_blueprint(rag_mode_bp)
     
     print("blueprints are running.")
 

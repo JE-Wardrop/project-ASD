@@ -102,6 +102,9 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
     _stage(mode.label, "ACT", "Gathering evidence from the running system")
     collector = COLLECTORS[mode.key]
 
+
+    # evidence is not being created properly  in MCP case
+    
     ok, evidence = collector(target, repo_root)
 
     if not ok:

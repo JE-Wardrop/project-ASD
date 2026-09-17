@@ -12,18 +12,29 @@
 <body>
 
 
-<!-- Directly from lab 7, will be updated later -->
+
 <main class="app-shell">
     <section class="card">
         <h2>MCP Mode</h2>
 
-        <div class="feature-toggle-row">
-            <label class="toggle-switch" for="mcp-mode-toggle">
+        <div class="card-form">
+            <label class="switches" for="mcp-mode-toggle">
                 <input id="mcp-mode-toggle" type="checkbox" checked>
+
                 <span class="toggle-label">MCP Enabled</span>
             </label>
             <span id="mcp-mode-state" class="feature-state feature-on">ON</span>
         </div>
+
+        <!-- Information about MCP that will be needed here:
+
+         I want MCP to run at localhost:5500,
+         in dockerfile file it should alos run at 5500 as this is 
+         an open port in this project.
+
+        This will use card_count card_per_user_id
+        -->
+
 
         <h2>MCP Tools</h2>
 
@@ -31,32 +42,43 @@
             <button
                 type="button"
                 class="mcp-action"
-                hx-post="http://localhost:5001/mcp/student-count"
+                hx-post="http://localhost:5500/mcp/student-count"
                 hx-target="#mcp-result"
                 hx-swap="innerHTML"
             >Get Student Count</button>
         </div>
 
 
-        <!-- define the mcp server as running on a particular port. -->
-        <!-- most likely WON'T be port 5001... -->
-        <!-- will also have to define db,  -->
         <form
-            id="mcp-subject-form"
+            id="mcp-card-pcount-form"
             class="feature-form"
-            hx-post="http://localhost:5001/mcp/students-by-subject"
+            hx-post="http://localhost:5500/mcp/students-by-subject"
             hx-target="#mcp-result"
             hx-swap="innerHTML"
         >
-            <label for="mcp_subject_code">MCP: Students by Subject</label>
-            <input id="mcp_subject_code" name="subject_code" type="text" placeholder="Example: ASD101">
+            <label for="mcp_card_count">MCP: Total Card Count</label>
+            <input id="mcp_card_per_user_id" name="card_count" type="text" placeholder="There are 5 cards">
+            <button type="submit" class="mcp-action">Run Tool</button>
+        </form>
+
+        <form
+            id="mcp-card-per-user-form"
+            class="feature-form"
+            hx-post="http://localhost:5500/mcp/students-by-subject"
+            hx-target="#mcp-result"
+            hx-swap="innerHTML"
+        >
+            <label for="mcp_card_per_user_id">MCP: Cards by User ID</label>
+
+            <input id="mcp_card_per_user_id" name="card_per_user_id" type="text" placeholder="Example: 1 card for User ID 1">
+
             <button type="submit" class="mcp-action">Run Tool</button>
         </form>
 
         <form
             id="mcp-project-form"
             class="feature-form"
-            hx-post="http://localhost:5001/mcp/project-files"
+            hx-post="http://localhost:5500/mcp/project-files"
             hx-target="#mcp-result"
             hx-swap="innerHTML"
         >
@@ -143,5 +165,6 @@ if (!isMcpEnabled()) {
     renderMcpDisabledMessage();
 }
 </script>
+
 </body>
 </html>

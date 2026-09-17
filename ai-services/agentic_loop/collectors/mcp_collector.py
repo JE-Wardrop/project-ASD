@@ -5,29 +5,28 @@ from pathlib import Path
 
 REQUIRED_MCP_TOOLS = [
     # general tools
-    # "db_tools",
-    # "repo_tools",
+    "db_tools",
+    "repo_tools",
     
     "project_files", 
     "ci_report",
 
     # tools for db's
-    # "card_count",
-    # "card_per_user",
+    "card_count",
+    "card_per_user",
 
     ]
 
 REQUIRED_FUNCTIONS = {
     # general functions
-    # "db_tools": "",
-    # "repo_tools": "" ,
-
+    "db_tools": "db_function",
+    "repo_tools": "repo_function" ,
     "project_files": "list_project_files",
     "ci_report": "read_ci_report",
 
     #functions for db's
-    # "card_count": "",
-    # "card_per_user": "",
+    "card_count": "get_card_count",
+    "card_per_user": "get_card_per_user",
 }
 
 
@@ -41,25 +40,30 @@ def _load_tools_module(mcp_server_dir: Path):
 
 def collect(app_dir: Path, repo_root: Path) -> tuple[bool, str]:
 
-    # issue with this file path
+    # had issues with app_dir so I had to add app_dir = Path('/')
+    app_dir = Path('/')
+    mcp_server_dir = app_dir / 'ai-services' / 'mcp-server'
 
-    mcp_server_dir = app_dir / "mcp-server"
+
+    # mcp_server_dir = app_dir / "mcp-server"
+    # resolve.mcp_server_dir()
+
+
+    # doesn't seem as if these file paths are working...
+
+    # ACT FAILED: MCP evidence incomplete. Missing: 
+    # ai-services/mcp-server/tools.py, ai-services/mcp-server/server.py, ai-services/mcp-server/requirements.txt, 
+    # prompts/mcp/implementation/tool_selection_prompt.txt, prompts/mcp/review/integration_review_prompt.txt, prompts/mcp/review/tool_review_prompt.txt
     
     required_paths = [
         mcp_server_dir / "tools.py",
         mcp_server_dir / "server.py",
         mcp_server_dir / "requirements.txt",
 
-        # This will need to be done in the orchestrator or another part of the agentic_loop
-        # This handles which microservice the mcp server go to.
-        # app_dir / "student-?" / "routes" / "mcp_mode.py",
-
-        # tool selection prompt will need to be updated with the rest of the MCP structure.
-        # I need to create MCP "commands" (functions? not really sure what they are) that fit everyone's architecture
-        # The architecture of the labs is small so...
         app_dir / "prompts" / "mcp" / "implementation" / "tool_selection_prompt.txt",
         app_dir / "prompts" / "mcp" / "review" / "integration_review_prompt.txt",
         app_dir / "prompts" / "mcp" / "review" / "tool_review_prompt.txt",
+
     ]
     
     missing = [str(path.relative_to(app_dir)) for path in required_paths if not path.exists()]

@@ -15,16 +15,6 @@ def _connect_db():
     return conn
 
 
-# def get_card_count():
-#     conn = _connect_db()
-#     try:
-#         cursor = conn.cursor()
-#         cursor.execute("SELECT COUNT(*) AS card_count FROM cards")
-#         row = cursor.fetchone()
-#         return {"card_count": row[0] if row else 0}
-#     finally:
-#         conn.close()
-
 
 
 # def health(){
@@ -53,7 +43,33 @@ def read_ci_report(report_path: str = "../reports/report.json"):
         return json.load(file)
 
 
+
+# For each database
+
+
+def get_card_count():
+    conn = _connect_db()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) AS card_count FROM cards")
+        row = cursor.fetchone()
+        return {"card_count": row[0] if row else 0}
+    finally:
+        conn.close()
+
+
+def get_card_per_user():
+    conn = _connect_db()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) AS card_count FROM cards")
+        row = cursor.fetchone()
+        return {"card_count": row[0] if row else 0}
+    finally:
+        conn.close()
+
+
 if __name__ == "__main__":
-    # print(get_card_count())
+    print(get_card_count())
     print(list_project_files(".."))
     print(read_ci_report("../reports/report.json"))
