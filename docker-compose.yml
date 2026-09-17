@@ -38,6 +38,7 @@ services:
     container_name: frontend
     ports:
       - "8101:80"
+  
     depends_on:
       - student-1-backend
     restart: unless-stopped
@@ -47,6 +48,7 @@ services:
       context: ./student-1/backend
       dockerfile: dockerfile
     container_name: backend
+    
     ports:
       - "8201:5001"
     environment:
@@ -54,6 +56,11 @@ services:
       OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
       OLLAMA_MODEL: qwen2.5:0.5b
       MCP_ENABLED: "true"
+
+      # connecting MCP to the backend. 
+      # this is all that should be needed to connect the files.
+      MCP_SERVER_URL: http://mcp-server:5501
+
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -69,42 +76,6 @@ services:
     volumes:
       - database_data:/student-1/database/data
     restart: unless-stopped
-
-
-# connection to MCP service (currently not working)
-
-#Error message:
-# target mcp-server: failed to solve: failed to read dockerfile: open Dockerfile: no such file or directory
-# View build details: docker-desktop://dashboard/build/default/default/s3cff7nnp9wbx6k2x6w286a9h
-
-
-  # student-1-mcp-server:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: custom-mcp-server
-  #   restart: unless-stopped
-  #   ports:
-  #     - "5500:5500"
-  #   environment:
-  #     - PORT=5500
-  #     - MCP_TRANSPORT=sse
-  #     - PYTHONUNBUFFERED=1
-
-  #     # Functions
-  #     # Add API keys or credentials below if your MCP tools connect to third-party services
-  #     # - OPENAI_API_KEY=${OPENAI_API_KEY}
-  #     # - GITHUB_TOKEN=${GITHUB_TOKEN}
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:5500/health"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #   logging:
-  #     driver: "json-file"
-  #     options:
-  #       max-size: "10m"
-  #       max-file: "3"
 
 
  
@@ -235,9 +206,3 @@ volumes:
   student2_db_data:
   student5-data:
   student4-database-data:
- 
-
-
-  
-
-

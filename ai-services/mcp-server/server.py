@@ -78,7 +78,7 @@ if __name__ == "__main__":
     for tool in AVAILABLE_TOOLS:
         print(f"- {tool}")
 
+    mcp.run()
 
-    # edited mcp.run() to make sure it runs on port 5500
-    # mcp.run()
-    mcp.run(transport="sse", port=5500)
+    # I will make it so that MCP runs on port 5500
+    # mcp.run(transport="sse", port=5500)
