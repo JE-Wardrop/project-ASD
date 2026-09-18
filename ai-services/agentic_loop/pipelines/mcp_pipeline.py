@@ -1,7 +1,3 @@
-# Week 7 Lab work for context - this can be edited later 
-
-
-
 def build_implementation_prompt(task_prompt: str, evidence: str) -> str:
     return f"""
 {task_prompt}

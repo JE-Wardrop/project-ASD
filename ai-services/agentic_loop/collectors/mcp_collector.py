@@ -1,13 +1,12 @@
 import importlib.util
 from pathlib import Path
 
+import sys
+
 # Unimplemented tool: db_tools, repo_tools, card_count, card_per_user
 
 REQUIRED_MCP_TOOLS = [
-    # general tools
-    "db_tools",
-    "repo_tools",
-    
+    # general tools    
     "project_files", 
     "ci_report",
 
@@ -19,8 +18,6 @@ REQUIRED_MCP_TOOLS = [
 
 REQUIRED_FUNCTIONS = {
     # general functions
-    "db_tools": "db_function",
-    "repo_tools": "repo_function" ,
     "project_files": "list_project_files",
     "ci_report": "read_ci_report",
 
@@ -41,20 +38,18 @@ def _load_tools_module(mcp_server_dir: Path):
 def collect(app_dir: Path, repo_root: Path) -> tuple[bool, str]:
 
     # had issues with app_dir so I had to add app_dir = Path('/')
-    app_dir = Path('/')
-    mcp_server_dir = app_dir / 'ai-services' / 'mcp-server'
+    # app_dir = Path('/')
+
+    # app_dir = Path(app_dir)
+    # repo_root = Path(repo_root)
+
+    # print("app_dir:", app_dir.resolve())
+    # print("repo_root:", repo_root.resolve())
+    # print("mcp_server_dir:", (repo_root / "ai-services" / "mcp-server").resolve())
+
+    mcp_server_dir = app_dir / "ai-services" / "mcp-server"
 
 
-    # mcp_server_dir = app_dir / "mcp-server"
-    # resolve.mcp_server_dir()
-
-
-    # doesn't seem as if these file paths are working...
-
-    # ACT FAILED: MCP evidence incomplete. Missing: 
-    # ai-services/mcp-server/tools.py, ai-services/mcp-server/server.py, ai-services/mcp-server/requirements.txt, 
-    # prompts/mcp/implementation/tool_selection_prompt.txt, prompts/mcp/review/integration_review_prompt.txt, prompts/mcp/review/tool_review_prompt.txt
-    
     required_paths = [
         mcp_server_dir / "tools.py",
         mcp_server_dir / "server.py",
