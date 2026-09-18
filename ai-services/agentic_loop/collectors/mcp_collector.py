@@ -43,11 +43,15 @@ def collect(app_dir: Path, repo_root: Path) -> tuple[bool, str]:
     # app_dir = Path(app_dir)
     # repo_root = Path(repo_root)
 
-    # print("app_dir:", app_dir.resolve())
-    # print("repo_root:", repo_root.resolve())
-    # print("mcp_server_dir:", (repo_root / "ai-services" / "mcp-server").resolve())
+    # repo_root is the same as app_dir
+    # for some app_dir just causes errors, if it is the same as repo_dir, why would it do this?
 
-    mcp_server_dir = app_dir / "ai-services" / "mcp-server"
+    # print("app_dir:", app_dir.resolve())
+    print("repo_root:", repo_root.resolve())
+    print("mcp_server_dir:", (repo_root / "ai-services" / "mcp-server").resolve())
+
+
+    mcp_server_dir = repo_root / "ai-services" / "mcp-server"
 
 
     required_paths = [
@@ -55,13 +59,19 @@ def collect(app_dir: Path, repo_root: Path) -> tuple[bool, str]:
         mcp_server_dir / "server.py",
         mcp_server_dir / "requirements.txt",
 
-        app_dir / "prompts" / "mcp" / "implementation" / "tool_selection_prompt.txt",
-        app_dir / "prompts" / "mcp" / "review" / "integration_review_prompt.txt",
-        app_dir / "prompts" / "mcp" / "review" / "tool_review_prompt.txt",
+        # repo_root / "prompts" / "mcp" / "implementation" / "tool_selection_prompt.txt",
+        # repo_root / "prompts" / "mcp" / "review" / "integration_review_prompt.txt",
+        # repo_root / "prompts" / "mcp" / "review" / "tool_review_prompt.txt",
+
+        repo_root / "ai-services" / "prompts" / "mcp" / "implementation" / "tool_selection_prompt.txt",
+        repo_root / "ai-services" / "prompts" / "mcp" / "review" / "integration_review_prompt.txt",
+        repo_root / "ai-services" / "prompts" / "mcp" / "review" / "tool_review_prompt.txt",
+
+        
 
     ]
     
-    missing = [str(path.relative_to(app_dir)) for path in required_paths if not path.exists()]
+    missing = [str(path.relative_to(repo_root)) for path in required_paths if not path.exists()]
     if missing:
         return False, "MCP evidence incomplete. Missing: " + ", ".join(missing)
     

@@ -58,6 +58,7 @@ def _stage(mode_label: str, phase: str, message: str) -> None:
 
 def run_mode(mode: ModeConfig, target, repo_root: Path,
              prompts: PromptRegistry, ai: AIRunner) -> str:
+    
     """Run one review target through the four phases."""
 
     _stage(mode.label, "PLAN", f"Reviewing {target.key} ({target.label}) for {target.owner}")
