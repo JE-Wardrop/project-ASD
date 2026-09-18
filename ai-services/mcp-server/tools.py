@@ -1,0 +1,75 @@
+import json
+import sqlite3
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+APP_DIR = BASE_DIR.parent
+DATABASE_PATH = APP_DIR / "enrolment.db"
+
+
+def _connect_db():
+    if not DATABASE_PATH.exists():
+        raise FileNotFoundError(f"Database not found: {DATABASE_PATH}")
+    conn = sqlite3.connect(DATABASE_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+
+
+# def health(){
+#     
+# }
+
+
+def list_project_files(directory_path: str = ".."):  # relative to mcp-server/
+    path = (BASE_DIR / directory_path).resolve()
+    if not path.exists() or not path.is_dir():
+        return {"error": f"Directory not found: {path}"}
+
+    return sorted(item.name for item in path.iterdir())
+
+
+def read_ci_report(report_path: str = "../reports/report.json"):
+    report_file = (BASE_DIR / report_path).resolve()
+    if not report_file.exists():
+        return {
+            "error": "Report not found",
+            "path": str(report_file),
+            "hint": "Run Lab 05 workflow_dispatch to generate report.json",
+        }
+
+    with report_file.open("r", encoding="utf-8") as file:
+        return json.load(file)
+
+
+
+# For each database
+
+
+def get_card_count():
+    conn = _connect_db()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) AS card_count FROM cards")
+        row = cursor.fetchone()
+        return {"card_count": row[0] if row else 0}
+    finally:
+        conn.close()
+
+
+def get_card_per_user():
+    conn = _connect_db()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) AS card_count FROM cards")
+        row = cursor.fetchone()
+        return {"card_count": row[0] if row else 0}
+    finally:
+        conn.close()
+
+
+if __name__ == "__main__":
+    print(get_card_count())
+    print(list_project_files(".."))
+    print(read_ci_report("../reports/report.json"))

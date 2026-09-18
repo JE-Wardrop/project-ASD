@@ -4,6 +4,9 @@ import requests
 
 load_dotenv()
 
+# database api maybe is trying to access only the app.py and not the full database folder
+# and therefore none of these operations actually exist
+
 DATABASE_URL = os.getenv(
     "DATABASE_SERVICE_URL", 
     "http://student-1-database:5002"
@@ -45,13 +48,14 @@ def delete_card_response(card_id):
     return requests.delete(f"{DATABASE_URL}/cards/{card_id}", timeout=5)
 
 
-def freeze_card_response(card_number):
-    return requests.post(
-        f"{DATABASE_URL}/cards/freeze", json={"card_number": card_number}, timeout=5
+
+def freeze_card_response(card_id):
+    return requests.post(f"{DATABASE_URL}/cards/freeze", json={"card_id": card_id}, timeout=5
     )
 
 
-def unfreeze_card_response(card_number):
-    return requests.post(
-        f"{DATABASE_URL}/cards/unfreeze", json={"card_number": card_number}, timeout=5
+def unfreeze_card_response(card_id):
+    return requests.post(f"{DATABASE_URL}/cards/unfreeze", json={"card_id": card_id}, timeout=5
     )
+
+

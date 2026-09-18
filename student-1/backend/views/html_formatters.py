@@ -13,7 +13,10 @@ def format_cards_html(cards):
 
 def format_card_html(card):
     return (
-        f"<p>ID: {card['card_id']}<br>"
-        f"Holder: {card['card_name']}<br>"
+        f"<p>Card ID: {card['card_id']}<br>"
         f"Card Number: {card['card_number']}<br>"
+        f"Status: {card['status']}<br>"
+        f"Type: {card['card_type']}<br>"
+        # f"Expiry: {card['expiry']}<br>"
+        # f"User Associated: {card['user_id']}<br>"
     )
