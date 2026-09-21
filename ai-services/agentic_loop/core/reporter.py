@@ -16,7 +16,9 @@ def print_menu(target_label: str) -> None:
     print("2 - Endpoints")
     print("3 - Architecture")
     print("4 - DevOps")
-    print("5 - Run all four")
+    print("5 - MCP")
+    print("6 - RAG")
+    print("7 - Run top four (db, endpoints, architecture, devOps)")
     print("0 - Exit")
     print("=" * 72)
 

@@ -1,11 +1,3 @@
-# this app is currently defunked however I don't know if im meant to store app in backend or outside. 
-# currently it is using the one outside 
-
-# source .venv/bin/activate
-# cd "/home/juno/Desktop/ASD 2026/project-ASD/student-1/backend"
-
-# python3 -m venv .venv
-
 from flask import Flask, render_template, request, send_from_directory
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -36,6 +28,8 @@ client = OpenAI(
 
 from routes.ai_mode import ai_mode_bp
 from routes.normal_mode import normal_mode_bp
+from routes.mcp_mode import mcp_mode_bp
+from routes.rag_mode import rag_mode_bp
 
 
 def get_db_connection():
@@ -50,6 +44,8 @@ def create_app():
 
     app.register_blueprint(normal_mode_bp)
     app.register_blueprint(ai_mode_bp)
+    app.register_blueprint(mcp_mode_bp)
+    # app.register_blueprint(rag_mode_bp)
     
     print("blueprints are running.")
 

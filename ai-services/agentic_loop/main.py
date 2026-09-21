@@ -25,6 +25,8 @@ MENU = {
     "2": "endpoints",
     "3": "architecture",
     "4": "devops",
+    "5": "mcp",
+    "6": "rag",
 }
 
 
@@ -37,9 +39,12 @@ def _resolve_roots() -> tuple[Path, Path]:
 
 def _ask_for_target(repo_root: Path):
     """REVIEW_TARGET is missing, so ask rather than guessing someone's feature."""
+
+
     print("Available review targets: " + ", ".join(available_targets()))
     while True:
         choice = input("Which student's services should be reviewed? ").strip()
+
         try:
             return resolve_target(repo_root, choice)
         except ValueError as exc:
@@ -52,6 +57,8 @@ def _print_mode_mapping(app_dir: Path) -> None:
         "Endpoints":    str(app_dir / "prompts" / "service" / "implementation" / "task_prompt.txt"),
         "Architecture": str(app_dir / "prompts" / "architecture" / "implementation" / "architecture_task_prompt.txt"),
         "DevOps":       str(app_dir / "prompts" / "devops" / "implementation" / "devops_task_prompt.txt"),
+        "MCP":          str(app_dir / "prompts" / "mcp" / "review" / "tool_review_prompt.txt"),
+        "RAG":          str(app_dir / "prompts" / "rag" / "review" / "integration_review_prompt.txt"),
     })
 
 
@@ -89,13 +96,17 @@ def main() -> None:
             print("Loop closed.")
             break
 
-        keys = list(MENU.values()) if choice == "5" else [MENU.get(choice)]
+        keys = list(MENU.values()) if choice == "7" else [MENU.get(choice)]
         if keys == [None]:
-            print("Invalid choice. Select 0 to 5.")
+            print("Invalid choice. Select 0 to 7.")
             continue
 
         for key in keys:
             print()
+
+            #error here with the mcp (and im guessing rag as well) key
+            # i dont really get where this error is coming from
+
             result = run_mode(mode_config[key], target, repo_root, prompts, ai)
             print_result(mode_config[key].label, result)
             transcript.append((mode_config[key].label, result))
