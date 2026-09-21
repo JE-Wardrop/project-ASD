@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCP</title>
     
     <link rel="stylesheet" href="http://localhost:8080/styles.css">
-    <!-- <link rel="stylesheet" href="shared/styles.css">  -->
+    <link rel="stylesheet" href="shared/styles.css"> 
 
 
 </head>
@@ -38,11 +39,12 @@
 
         <h2>MCP Tools</h2>
 
+
         <div class="card-form">
             <button
                 type="button"
                 class="feature-form"
-                hx-post="http://localhost:5000/mcp/student-count"
+                hx-post="http://localhost:8000/mcp/card-count"
                 hx-target="#mcp-result"
                 hx-swap="innerHTML"
             >Get Card Count</button>
@@ -53,7 +55,7 @@
         <form
             id="mcp-card-per-user-form"
             class="feature-form"
-            hx-post="http://localhost:5000/mcp/students-by-subject"
+            hx-post="http://localhost:8000/mcp/card-per-user"
             hx-target="#mcp-result"
             hx-swap="innerHTML"
         >
@@ -70,7 +72,7 @@
         <form
             id="mcp-project-form"
             class="feature-form"
-            hx-post="http://localhost:5000/mcp/project-files"
+            hx-post="http://localhost:8000/mcp/project-files"
             hx-target="#mcp-result"
             hx-swap="innerHTML"
         >
@@ -144,25 +146,11 @@ mcpModeToggle.addEventListener("change", () => {
 
 // This eventListener is not properly connecting to the backend of the system.
 // even without the shared style sheet the backend doesn't appear to be outputting anything into the mcp-result panel.
-// I think i need to use mcpResultPanel to get it to display the output of the backend
 
-// async function renderIntoPanel(panelId, url, options = {}) {
-//     const panel = document.getElementById(panelId);
-//     try {
-//         const response = await fetch(url, options);
-//         const body = await response.text();
-//         panel.innerHTML = body;
-//     } catch (error) {
-//                 panel.innerHTML = `<p>Request failed.</p><pre>${error}</pre>`;
-//     }
-// }
+// HTMX is going up one level to cm_mcp.html?directory_path=.. 
+// with a 200 GET request. 
+// But I don't why is it isn't connecting to the backend, it cannot find the backend's full file path.
 
-// function displayOutputOfMCPrequest(){
-//     renderIntoPanel("mcp-result", `http://localhost:8201/mcp/`, {
-//         method: "GET",
-//         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-//     });
-// }
 
 document.body.addEventListener("htmx:configRequest", (event) => {
     const trigger = event.detail.elt;
@@ -187,6 +175,30 @@ loadMcpMode();
 if (!isMcpEnabled()) {
     renderMcpDisabledMessage();
 }
+
+
+
+// CHnage from HTMS if you absoultely cannot get it working at all
+
+// async function renderIntoPanel(panelId, url, options = {}) {
+//     const panel = document.getElementById(panelId);
+//     try {
+//         const response = await fetch(url, options);
+//         const body = await response.text();
+//         panel.innerHTML = body;
+//     } catch (error) {
+//                 panel.innerHTML = `<p>Request failed.</p><pre>${error}</pre>`;
+//     }
+// }
+
+// function displayOutputOfMCPrequest(){
+//     renderIntoPanel("mcp-result", `http://localhost:8201/mcp/`, {
+//         method: "GET",
+//         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+//     });
+// }
+
+
 </script>
 
 </body>
