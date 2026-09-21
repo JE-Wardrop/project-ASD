@@ -5,7 +5,7 @@
     <title>MCP</title>
     
     <link rel="stylesheet" href="http://localhost:8080/styles.css">
-    <link rel="stylesheet" href="shared/styles.css"> 
+    <!-- <link rel="stylesheet" href="shared/styles.css">  -->
 
 
 </head>
@@ -20,7 +20,6 @@
         <div class="card-form">
             <label class="switches" for="mcp-mode-toggle">
                 <input id="mcp-mode-toggle" type="checkbox" checked>
-
                 <span class="toggle-label">MCP Enabled</span>
             </label>
             <span id="mcp-mode-state" class="feature-state feature-on">ON</span>
@@ -42,33 +41,23 @@
         <div class="card-form">
             <button
                 type="button"
-                class="mcp-action"
-                hx-post="http://localhost:5500/mcp/student-count"
+                class="feature-form"
+                hx-post="http://localhost:5000/mcp/student-count"
                 hx-target="#mcp-result"
                 hx-swap="innerHTML"
-            >Get Student Count</button>
+            >Get Card Count</button>
         </div>
 
-
-        <form
-            id="mcp-card-pcount-form"
-            class="feature-form"
-            hx-post="http://localhost:5500/mcp/students-by-subject"
-            hx-target="#mcp-result"
-            hx-swap="innerHTML"
-        >
-            <label for="mcp_card_count">MCP: Total Card Count</label>
-            <input id="mcp_card_per_user_id" name="card_count" type="text" placeholder="There are 5 cards">
-            <button type="submit" class="mcp-action">Run Tool</button>
-        </form>
+        <hr>
 
         <form
             id="mcp-card-per-user-form"
             class="feature-form"
-            hx-post="http://localhost:5500/mcp/students-by-subject"
+            hx-post="http://localhost:5000/mcp/students-by-subject"
             hx-target="#mcp-result"
             hx-swap="innerHTML"
         >
+
             <label for="mcp_card_per_user_id">MCP: Cards by User ID</label>
 
             <input id="mcp_card_per_user_id" name="card_per_user_id" type="text" placeholder="Example: 1 card for User ID 1">
@@ -76,10 +65,12 @@
             <button type="submit" class="mcp-action">Run Tool</button>
         </form>
 
+        <hr>
+        
         <form
             id="mcp-project-form"
             class="feature-form"
-            hx-post="http://localhost:5500/mcp/project-files"
+            hx-post="http://localhost:5000/mcp/project-files"
             hx-target="#mcp-result"
             hx-swap="innerHTML"
         >
@@ -93,6 +84,11 @@
 </main>
 
 <script>
+
+// What I need to do:
+// Connect these things to my backend code somehow
+//  I literally am so lost as to what to actually do here
+
 const mcpModeToggle = document.getElementById("mcp-mode-toggle");
 const mcpModeState = document.getElementById("mcp-mode-state");
 const mcpResultPanel = document.getElementById("mcp-result");
@@ -115,6 +111,8 @@ function renderMcpState() {
     }
 }
 
+// Gives the ability to turn MCP on and off
+// should also visually display 
 function renderMcpDisabledMessage() {
     mcpResultPanel.innerHTML = "<p>MCP Mode is OFF. Enable MCP Mode to run MCP tools.</p>";
 }
@@ -140,7 +138,31 @@ mcpModeToggle.addEventListener("change", () => {
     if (!isMcpEnabled()) {
         renderMcpDisabledMessage();
     }
+
 });
+
+
+// This eventListener is not properly connecting to the backend of the system.
+// even without the shared style sheet the backend doesn't appear to be outputting anything into the mcp-result panel.
+// I think i need to use mcpResultPanel to get it to display the output of the backend
+
+// async function renderIntoPanel(panelId, url, options = {}) {
+//     const panel = document.getElementById(panelId);
+//     try {
+//         const response = await fetch(url, options);
+//         const body = await response.text();
+//         panel.innerHTML = body;
+//     } catch (error) {
+//                 panel.innerHTML = `<p>Request failed.</p><pre>${error}</pre>`;
+//     }
+// }
+
+// function displayOutputOfMCPrequest(){
+//     renderIntoPanel("mcp-result", `http://localhost:8201/mcp/`, {
+//         method: "GET",
+//         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+//     });
+// }
 
 document.body.addEventListener("htmx:configRequest", (event) => {
     const trigger = event.detail.elt;
