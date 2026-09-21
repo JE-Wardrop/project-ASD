@@ -35,7 +35,7 @@ def _load_tools_module(mcp_server_dir: Path):
     return module
 
 
-def collect(app_dir: Path, repo_root: Path) -> tuple[bool, str]:
+def collect(app_dir:Path, repo_root: Path) -> tuple[bool, str]:
 
     # had issues with app_dir so I had to add app_dir = Path('/')
     # app_dir = Path('/')
@@ -59,9 +59,6 @@ def collect(app_dir: Path, repo_root: Path) -> tuple[bool, str]:
         mcp_server_dir / "server.py",
         mcp_server_dir / "requirements.txt",
 
-        # repo_root / "prompts" / "mcp" / "implementation" / "tool_selection_prompt.txt",
-        # repo_root / "prompts" / "mcp" / "review" / "integration_review_prompt.txt",
-        # repo_root / "prompts" / "mcp" / "review" / "tool_review_prompt.txt",
 
         repo_root / "ai-services" / "prompts" / "mcp" / "implementation" / "tool_selection_prompt.txt",
         repo_root / "ai-services" / "prompts" / "mcp" / "review" / "integration_review_prompt.txt",

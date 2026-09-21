@@ -62,9 +62,10 @@ def get_card_per_user():
     conn = _connect_db()
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) AS card_count FROM cards")
+        cursor.execute("SELECT user_id, card_id FROM cards" 
+                       )
         row = cursor.fetchone()
-        return {"card_count": row[0] if row else 0}
+        return {"get_card_per_user": row[0] if row else 0}
     finally:
         conn.close()
 
