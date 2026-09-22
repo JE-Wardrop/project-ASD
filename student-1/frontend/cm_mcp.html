@@ -18,6 +18,15 @@
     <section class="card">
         <h2>MCP Mode</h2>
 
+
+
+        <!-- 
+            Current errors:
+            - stylesheet (?) is preventing the backend to frontend connection
+            - card-count doesn't even send anything to backend. i have literally no idea why
+        
+        -->
+
         <div class="card-form">
             <label class="switches" for="mcp-mode-toggle">
                 <input id="mcp-mode-toggle" type="checkbox" checked>
@@ -25,26 +34,20 @@
             </label>
             <span id="mcp-mode-state" class="feature-state feature-on">ON</span>
         </div>
-
-        <!-- Information about MCP that will be needed here:
-
-         I want MCP to run at localhost:5500,
-         in dockerfile file it should alos run at 5500 as this is 
-         an open port in this project.
-
-        This will use card_count card_per_user_id
-        This will use project files as well
-        -->
-
-
         <h2>MCP Tools</h2>
+        <h2>Docker Test</h2>
 
-
+        <!-- 
+        chnaged type from button to submit
+        chnaged class from feature-form to mcp-action 
+        no effect in either case.
+        -->
         <div class="card-form">
             <button
-                type="button"
-                class="feature-form"
-                hx-post="http://localhost:8000/mcp/card-count"
+                id="card-count"
+                type="submit"
+                class="mcp-action"
+                hx-post="http://localhost:8201/backend/card-count"
                 hx-target="#mcp-result"
                 hx-swap="innerHTML"
             >Get Card Count</button>
@@ -55,7 +58,7 @@
         <form
             id="mcp-card-per-user-form"
             class="feature-form"
-            hx-post="http://localhost:8000/mcp/card-per-user"
+            hx-post="http://localhost:8201/backend/mcp/card-per-user"
             hx-target="#mcp-result"
             hx-swap="innerHTML"
         >
@@ -72,7 +75,7 @@
         <form
             id="mcp-project-form"
             class="feature-form"
-            hx-post="http://localhost:8000/mcp/project-files"
+            hx-post="http://localhost:8201/backend/project-files"
             hx-target="#mcp-result"
             hx-swap="innerHTML"
         >
@@ -82,6 +85,19 @@
         </form>
 
         <div id="mcp-result" class="panel panel-mcp">MCP tool responses will appear here.</div>
+
+
+        <hr>
+
+        <p>Test form</p>
+        <form id="cardCount" method="POST">
+            <button type="submit">Get Card Count</button>
+            <div id="cardCountAuth" class="panel">
+            </div>
+
+        </form>
+
+
     </section>
 </main>
 
@@ -143,15 +159,6 @@ mcpModeToggle.addEventListener("change", () => {
 
 });
 
-
-// This eventListener is not properly connecting to the backend of the system.
-// even without the shared style sheet the backend doesn't appear to be outputting anything into the mcp-result panel.
-
-// HTMX is going up one level to cm_mcp.html?directory_path=.. 
-// with a 200 GET request. 
-// But I don't why is it isn't connecting to the backend, it cannot find the backend's full file path.
-
-
 document.body.addEventListener("htmx:configRequest", (event) => {
     const trigger = event.detail.elt;
     if (trigger && trigger.classList.contains("mcp-action")) {
@@ -174,30 +181,22 @@ document.body.addEventListener("htmx:beforeRequest", (event) => {
 loadMcpMode();
 if (!isMcpEnabled()) {
     renderMcpDisabledMessage();
+
 }
+        const BACKEND_URL = "http://localhost:8201";
 
+        // MCP test form
+        const cardCountForm = document.getElementById("cardCount");
+        cardCountForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const cardCountFormData = new URLSearchParams(new FormData(cardCountForm));
 
-
-// CHnage from HTMS if you absoultely cannot get it working at all
-
-// async function renderIntoPanel(panelId, url, options = {}) {
-//     const panel = document.getElementById(panelId);
-//     try {
-//         const response = await fetch(url, options);
-//         const body = await response.text();
-//         panel.innerHTML = body;
-//     } catch (error) {
-//                 panel.innerHTML = `<p>Request failed.</p><pre>${error}</pre>`;
-//     }
-// }
-
-// function displayOutputOfMCPrequest(){
-//     renderIntoPanel("mcp-result", `http://localhost:8201/mcp/`, {
-//         method: "GET",
-//         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-//     });
-// }
-
+            renderIntoPanel("cardCountAuth", `${BACKEND_URL}/mcp/card-count`, {
+                method: "POST",
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: cardCountFormData,
+            });
+        });
 
 </script>
 

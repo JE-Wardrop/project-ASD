@@ -1,1 +1,4 @@
-mcp
+fastmcp>=2.14.0
+mcp<2
+flask
+flask-cors

@@ -30,13 +30,23 @@ services:
       - "8080:8000"
     restart: unless-stopped
 
-
   mcp-server:
     build:
-      context: .
-      dockerfile: ai-services/mcp-server/dockerfile
+      context: ./ai-services/mcp-server
+      dockerfile: dockerfile
+
+    # Casuing errors at docker compose up -d
+    # Error response from daemon: failed to set up container networking: 
+    # driver failed programming external connectivity onendpoint project-asd-mcp-server-1 (e5d0e93155db7c2274fcc164c33daeb3fb7ecbddc295daf2017a6b454078ffe7):
+    #  Bind for 0.0.0.0:8000 failed: port is already allocated
+
     # ports:
     #   - "8000:5500"
+
+
+
+    ports:
+      - "5500:5500"
  
  
   # Student 1
@@ -67,7 +77,7 @@ services:
 
       # connecting MCP to the backend. 
       # this is all that should be needed to connect the files.
-      MCP_SERVER_URL: http://mcp-server:8000
+      MCP_SERVER_URL: http://mcp-server:5500
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
