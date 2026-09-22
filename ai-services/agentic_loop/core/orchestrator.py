@@ -84,6 +84,43 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
         # elif mode.key == "rag":
         #     pass
 
+        #     if mode.key == "rag":
+        # _stage(mode.label, "PROMPTS", f"Loading prompt family: {mode.prompt_family}")
+        # task_prompt = prompts.read(mode.prompt_family, mode.implementation_prompts[0])
+        # system_prompt = (
+        #     "You are a precise RAG pipeline validator. "
+        #     "Use only supplied evidence and reply in at most 40 words."
+        # )
+        # implementation_user_prompt = rag_pipeline.build_implementation_prompt(task_prompt, evidence)
+        # _stage(mode.label, "PROMPTS", "Loaded RAG implementation prompt")
+
+        # _stage(mode.label, "LLM", "Running RAG implementation model")
+        # implementation_output, err = ai.call(system_prompt, implementation_user_prompt, review=False)
+        # if err:
+        #     _stage(mode.label, "LLM", "Failed")
+        #     return f"MODEL FAILED: {err}"
+        # _stage(mode.label, "LLM", "RAG implementation model complete")
+
+        # review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
+        # reasoning_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[1])
+        # review_system_prompt = f"{review_prompt_text}\n\n{reasoning_prompt_text}"
+        # review_user_prompt = rag_pipeline.build_review_prompt(implementation_output, evidence)
+        # _stage(mode.label, "PROMPTS", "Loaded RAG review and reasoning prompts")
+        # _stage(mode.label, "LLM", "Running RAG review model")
+        # review_output, review_err = ai.call(review_system_prompt, review_user_prompt, review=True)
+        # if review_err:
+        #     review_output = review_err
+        #     _stage(mode.label, "LLM", "Review model failed")
+        # else:
+        #     _stage(mode.label, "LLM", "Review model complete")
+
+        # _stage(mode.label, "DONE", "Review complete")
+
+        # return (
+        #     f"OBSERVE: {evidence}\n\n"
+        #     f"IMPLEMENTATION: {implementation_output}\n"
+        #     f"REVIEW: {review_output}"
+        # )
 
         # Code for other loops ----------------------------------------
         # for some reason this mode.implementation_prompts breaks the code so i put it in this else loop so 
