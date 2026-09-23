@@ -18,6 +18,7 @@ from views.html_formatters import format_card_html, format_cards_html
 
 
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 APP_DIR = BASE_DIR.parent
 
@@ -69,12 +70,21 @@ def mcp_card_per_user():
     if not mcp_mode_is_enabled(request):
         return mcp_disabled_response()
 
+    user_id = request.form.get("mcp_card_per_user_id", "").strip().upper()
+    if not user_id:
+        return "<p>userd_id is required.</p>", 400
+
     try:
-        count = len(get_cards())
-        return mcp_render_json("MCP Tool: card count", {"card_count": count}), 200
+        # will have to make a function that gets the cards of a particular user_ID
+        response = get_card_by_id_response(user_id)
+
+        if response.status_code == 404:
+            return mcp_render_json("MCP Tool: card per user id", []), 200
+        
+        return mcp_render_json("MCP Tool: card  per user ID", {"card per user ID": response}), 200
     except requests.RequestException as exc:
         return (
-            "<p>MCP card count failed.</p>"
+            "<p>MCP card per user ID failed.</p>"
             f"<pre>{exc}</pre>",
             503,
         )

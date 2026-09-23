@@ -31,17 +31,16 @@ from pipelines import (
     rag_pipeline,
 )
 
-
+# Once RAG is being implemented we can comment out this line
 COLLECTORS = {
     "db": db_collector.collect,
     "endpoints": endpoints_collector.collect,
     "architecture": architecture_collector.collect,
     "devops": devops_collector.collect,
     "mcp": mcp_collector.collect,
-    # "rag": rag_collector.collect,
+    "rag": rag_collector.collect,
 }
 
-# Modes that run a second, larger model to review the first model's output
 DUAL_MODEL_MODES = {"architecture", "devops"}
 
 REVIEW_PIPELINES = {
@@ -64,14 +63,8 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
     _stage(mode.label, "PLAN", f"Reviewing {target.key} ({target.label}) for {target.owner}")
     _stage(mode.label, "PLAN", f"Loading prompt family: {mode.prompt_family}")
 
-
-
-
     try:
-
- 
-
-        # MCP agentic loop code ------------------
+        # MCP Plan code ------------------
         if mode.key == "mcp":
             _stage(mode.label, "PROMPTS", f"Loading prompt family: {mode.prompt_family}")
             task_prompt = prompts.read(mode.prompt_family, mode.implementation_prompts[0])
@@ -80,14 +73,17 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
                 "Use only supplied evidence and reply in at most 40 words."
             )
          
-        # RAG agentic loop ---------------------------------------
-        # elif mode.key == "rag":
-        #     pass
+        # RAG Plan code ---------------------------------------
 
+        elif mode.key == "rag":
+            _stage(mode.label, "PROMPTS", f"Loading prompt family: {mode.prompt_family}")
+            task_prompt = prompts.read(mode.prompt_family, mode.implementation_prompts[0])
+            system_prompt = (
+                "You are a precise RAG pipeline validator. "
+                "Use only supplied evidence and reply in at most 40 words."
+            )
 
         # Code for other loops ----------------------------------------
-        # for some reason this mode.implementation_prompts breaks the code so i put it in this else loop so 
-        # all the other functions will work
 
         else: 
             system_prompt = prompts.read(mode.prompt_family, mode.implementation_prompts[0])
@@ -102,9 +98,6 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
     # ---------------------------------------------------------------- ACT
     _stage(mode.label, "ACT", "Gathering evidence from the running system")
     collector = COLLECTORS[mode.key]
-
-
-    # evidence is not being created properly  in MCP case
     
     ok, evidence = collector(target, repo_root)
 
@@ -112,7 +105,7 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
         _stage(mode.label, "ACT", "Failed")
         return f"ACT FAILED: {evidence}"
 
-    # --------------------------------------------------------- MCP ACT
+        # --------------------------------------------------------- MCP ACT
     if mode.key == "mcp":
         implementation_user_prompt = mcp_pipeline.build_implementation_prompt(task_prompt, evidence)
         _stage(mode.label, "PROMPTS", "Loaded MCP implementation prompt")
@@ -124,30 +117,18 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
             return f"MODEL FAILED: {err}"
         _stage(mode.label, "LLM", "MCP implementation model complete")
 
-    # review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
-    # review_user_prompt = mcp_pipeline.build_review_prompt(implementation_output, evidence)
-    # _stage(mode.label, "PROMPTS", "Loaded MCP review prompt")
-    # _stage(mode.label, "LLM", "Running MCP review model")
-    # review_output, review_err = ai.call(review_prompt_text, review_user_prompt, review=True)
-    # if review_err:
-    #     review_output = review_err
-    #     _stage(mode.label, "LLM", "Review model failed")
-    # else:
-    #     _stage(mode.label, "LLM", "Review model complete")
+        # ------------------------------------------------------------- RAG ACT
+    if mode.key == 'rag':
+        # Causing same issues with RAG pipeline.
+        implementation_user_prompt = rag_pipeline.build_implementation_prompt(task_prompt, evidence)
+        _stage(mode.label, "PROMPTS", "Loaded RAG implementation prompt")
 
-    # _stage(mode.label, "DONE", "Review complete")
-
-
-    # return (
-    #     f"OBSERVE: {evidence}\n\n"
-    #     f"IMPLEMENTATION: {implementation_output}\n"
-    #     f"REVIEW: {review_output}"
-    # )
-
-    # ------------------------------------------------------------- RAG ACT
-    # if mode.key == 'rag':
-    #     pass
-
+        _stage(mode.label, "LLM", "Running RAG implementation model")
+        implementation_output, err = ai.call(system_prompt, implementation_user_prompt, review=False)
+        if err:
+            _stage(mode.label, "LLM", "Failed")
+            return f"MODEL FAILED: {err}"
+        _stage(mode.label, "LLM", "RAG implementation model complete")
 
     # ------------------------------------------------------------ OBSERVE
     _stage(mode.label, "OBSERVE", evidence)
@@ -155,6 +136,7 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
     # -------------------------------------------------------------- ADAPT
     if mode.key in {"db", "endpoints"}:
         context_prompt = prompts.read(mode.prompt_family, mode.implementation_prompts[2])
+
         builder = db_pipeline if mode.key == "db" else endpoints_pipeline
         user_prompt = builder.build_user_prompt(task_prompt, context_prompt, evidence)
 
@@ -193,5 +175,152 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
             f"ADAPT: {first_output}\n\n"
             f"SECOND OPINION: {review_output}"
         )
+
+
+    # -------------------------------------------------------- MCP ADAPT
+
+    if mode.key in {"mcp"}:
+        pass
+
+        # Causing errors (full error message):
+            #   File "/home/juno/Desktop/ASD 2026/project-ASD/ai-services/agentic_loop/core/orchestrator.py", line 245, in run_mode
+            # review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
+            #           File "/home/juno/Desktop/ASD 2026/project-ASD/ai-services/agentic_loop/core/prompt_registry.py", line 17, in read
+            #     return self.resolve(family, relative_file).read_text(encoding="utf-8").strip()
+            #            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            #   File "/home/juno/Desktop/ASD 2026/project-ASD/ai-services/agentic_loop/core/prompt_registry.py", line 13, in resolve
+            #     raise FileNotFoundError(f"Missing prompt file: {rel}")
+            # FileNotFoundError: Missing prompt file: prompts/mcp/review/tool_review_prompts.txt
+
+        # This is a file path error. 
+            # It could be that for whatever reason the file path is:
+            # {repo_root}/prompts/mcp/review/tool_review_prompts.txt
+            # and not
+            # {repo_root}/ai-services/prompts/mcp/review/tool_review_prompts.txt
+
+
+        # This needs to be fixed to make it so it goes to the review_prompt_text using the file paths.
+        # So instead of copying and pasting the entire txt file it should be:
+        # review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
+
+
+        # Debugging
+        # print(f"mode.prompt_family: ", {mode.prompt_family} 
+        #       , "mode.review_prompts[0]: ", {mode.review_prompts[0]}
+        #       , "mode.review_prompts[1]: ", {mode.review_prompts[1]}
+
+        #       )
+
+        # app_dir = Path(__file__).resolve().parents[1]
+        # prompts = PromptRegistry(app_dir)
+        # review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
+
+        review_prompt_text = (
+            "You are a CONCISE MCP TOOL REVIEW AGENT."
+
+            "Your role: Review one MCP tool improvement proposal using execution evidence only."
+
+            "Input:"
+            "{{IMPROVEMENT_PROPOSAL}} - The proposed tool improvement"
+            "{{TOOL_EVIDENCE_BEFORE}} - Tool execution evidence before improvement"
+            "{{TOOL_EVIDENCE_AFTER}} - Tool execution evidence after improvement (if available)"
+
+            "Strict Rules:"
+            " 1. Use ONLY the provided {{TOOL_EVIDENCE_BEFORE}} and {{TOOL_EVIDENCE_AFTER}}"
+            " 2. Validate improvement addresses a specific, observable issue"
+            " 3. Confirm correction is feasible within tool scope"
+            " 4. Ensure retest step is measurable"
+            " 5. Reject proposals without evidence"
+
+            " Validation Checks:"
+
+            " **Risk Specificity:**"
+            " - Is the stated risk based on actual evidence?"
+            " Can the risk be reproduced?"
+            " Is the risk severity clear?"
+
+            " **Correction Feasibility:**"
+            " Does correction stay within tool boundaries?"
+            " Is correction implementable?"
+            " Does correction avoid breaking existing functionality?"
+
+            " **Retest Measurability:**"
+            " Can retest be executed?"
+            " Is success criteria clear?"
+            " Is evidence capture defined?"
+
+            " **Evidence Match:**"
+            " Do claims match available evidence?"
+            " Is before/after comparison valid?"
+            " Are all assertions testable?"
+
+            " Output Format:"
+
+            "Risk: [specific risk with evidence - max 20 words]"
+            "Correction: [feasible fix - max 20 words]"
+            "Retest: [measurable verification step - max 20 words]"
+
+            "Maximum 60 words total."
+
+            "Forbidden:"
+            "- Accepting proposals without evidence"
+            "- Approving changes outside tool scope"
+            "- Vague retest steps"
+            ,
+        )
+
+        review_user_prompt = mcp_pipeline.build_review_prompt(implementation_output, evidence)
+
+        _stage(mode.label, "PROMPTS", "Loaded MCP review prompt")
+
+        _stage(mode.label, "LLM", "Running MCP review model")
+
+        review_output, review_err = ai.call(review_prompt_text, review_user_prompt, review=True)
+
+        if review_err:
+            review_output = review_err
+            _stage(mode.label, "LLM", "Review model failed")
+        else:
+            _stage(mode.label, "LLM", "Review model complete")
+
+        _stage(mode.label, "DONE", "Review complete")
+
+
+        return (
+            f"OBSERVE: {evidence}\n\n"
+            f"IMPLEMENTATION: {implementation_output}\n"
+            f"REVIEW: {review_output}"
+        )
+    # ------------------------------------------------------------- RAG ADAPT
+
+
+    if mode.key == "rag":
+        # These lines will give the same errors as MCP, as they are programmed in the same way. 
+
+        review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
+        reasoning_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[1])
+
+
+
+        review_system_prompt = f"{review_prompt_text}\n\n{reasoning_prompt_text}"
+        review_user_prompt = rag_pipeline.build_review_prompt(implementation_output, evidence)
+        _stage(mode.label, "PROMPTS", "Loaded RAG review and reasoning prompts")
+        _stage(mode.label, "LLM", "Running RAG review model")
+        review_output, review_err = ai.call(review_system_prompt, review_user_prompt, review=True)
+        if review_err:
+            review_output = review_err
+            _stage(mode.label, "LLM", "Review model failed")
+        else:
+            _stage(mode.label, "LLM", "Review model complete")
+
+        _stage(mode.label, "DONE", "Review complete")
+
+        return (
+            f"OBSERVE: {evidence}\n\n"
+            f"IMPLEMENTATION: {implementation_output}\n"
+            f"REVIEW: {review_output}"
+        )
+
+
 
     return "Unknown mode."

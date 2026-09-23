@@ -108,7 +108,7 @@ def get_card_per_user():
     try:
         cursor = conn.cursor()
         cursor.execute("SELECT user_id, card_id FROM cards" 
-                       )
+                       "")
         row = cursor.fetchone()
         return {"get_card_per_user": row[0] if row else 0}
     finally:
@@ -118,5 +118,6 @@ def get_card_per_user():
 if __name__ == "__main__":
     debug_file_path()
     print(get_card_count())
+    print(get_card_per_user())
     print(list_project_files(".."))
     print(read_ci_report("../reports/report.json"))

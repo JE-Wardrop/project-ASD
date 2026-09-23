@@ -24,11 +24,14 @@ AVAILABLE_TOOLS = [
 ]
 
 
+#  this health function may cause errors. Cna remove it needed.
+@mcp.tool()
+def health():
+    return jsonify({'status': 'mcp healthy'}), 200
 
-# @mcp.tool()
-# def health(){
-#     return jsonify({'status': 'mcp healthy'}), 200
-# }
+# @mcp.get("/")
+# def health_get():
+#     return "<p>mcp is running</p>", 200
 
 
 @mcp.tool()
@@ -54,20 +57,11 @@ def card_count():
     return get_card_count()
 
 
-
-    # will update this later to make it work properly
 @mcp.tool()
 def card_per_user():
     return get_card_per_user()
 
 
-# @mcp.tool()
-# def card_per_user(card : int, user_id: int):
-#     return get_card_per_user(user_id)
-
-
-
-# Do I need to define a port for MCP to run on here?
 
 if __name__ == "__main__":
 
@@ -79,6 +73,3 @@ if __name__ == "__main__":
         print(f"- {tool}")
 
     mcp.run()
-
-    # I will make it so that MCP runs on port 5500
-    # mcp.run(transport="sse", port=5500)
