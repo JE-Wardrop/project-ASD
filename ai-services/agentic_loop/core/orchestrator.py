@@ -211,6 +211,10 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
 
         #       )
 
+        # app_dir = Path(__file__).resolve().parents[1]
+        # prompts = PromptRegistry(app_dir)
+        # review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
+
         review_prompt_text = (
             "You are a CONCISE MCP TOOL REVIEW AGENT."
 
@@ -263,8 +267,6 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
             "- Approving changes outside tool scope"
             "- Vague retest steps"
             ,
-
-            
         )
 
         review_user_prompt = mcp_pipeline.build_review_prompt(implementation_output, evidence)
