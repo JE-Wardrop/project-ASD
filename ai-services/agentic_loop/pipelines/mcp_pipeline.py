@@ -11,7 +11,7 @@ Observed Evidence:
 Validate that:
 1. All 4 MCP tools are defined and callable
 2. Tool boundaries are clear (what each tool does and does not do)
-3. MCP endpoints exist in routes/mcp_mode.py
+3. MCP endpoints exist in each student-? folder
 4. Prompts exist for tool selection and integration review
 
 Reply in at most 40 words and stay evidence-based.

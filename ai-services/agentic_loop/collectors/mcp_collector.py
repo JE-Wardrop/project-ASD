@@ -3,7 +3,7 @@ from pathlib import Path
 
 import sys
 
-# Unimplemented tool: db_tools, repo_tools, card_count, card_per_user
+# I believe this is working fine in terms of file pathing
 
 REQUIRED_MCP_TOOLS = [
     # general tools    
@@ -36,19 +36,11 @@ def _load_tools_module(mcp_server_dir: Path):
 
 
 def collect(app_dir:Path, repo_root: Path) -> tuple[bool, str]:
-
-    # had issues with app_dir so I had to add app_dir = Path('/')
-    # app_dir = Path('/')
-
-    # app_dir = Path(app_dir)
-    # repo_root = Path(repo_root)
-
-    # repo_root is the same as app_dir
-    # for some app_dir just causes errors, if it is the same as repo_dir, why would it do this?
-
     # print("app_dir:", app_dir.resolve())
-    print("repo_root:", repo_root.resolve())
-    print("mcp_server_dir:", (repo_root / "ai-services" / "mcp-server").resolve())
+
+    # Debug print statements
+    # print("repo_root:", repo_root.resolve())
+    # print("mcp_server_dir:", (repo_root / "ai-services" / "mcp-server").resolve())
 
 
     mcp_server_dir = repo_root / "ai-services" / "mcp-server"
@@ -63,8 +55,6 @@ def collect(app_dir:Path, repo_root: Path) -> tuple[bool, str]:
         repo_root / "ai-services" / "prompts" / "mcp" / "implementation" / "tool_selection_prompt.txt",
         repo_root / "ai-services" / "prompts" / "mcp" / "review" / "integration_review_prompt.txt",
         repo_root / "ai-services" / "prompts" / "mcp" / "review" / "tool_review_prompt.txt",
-
-        
 
     ]
     
@@ -89,12 +79,18 @@ def collect(app_dir:Path, repo_root: Path) -> tuple[bool, str]:
         tools_module = _load_tools_module(mcp_server_dir)
         tools_module.list_project_files("..")
         tools_module.read_ci_report("../reports/report.json")
+
+        # might have to edit these as these are how the mcp picks up on my tools
+        tools_module.get_card_count()
+        tools_module.get_card_per_user()
     except Exception as exc:
         return False, f"MCP tool execution failed: {exc}"
     
     return True, (
+
+        # this will have to be edited as more tools are added
         "MCP evidence: mcp-server/ contains tools.py and server.py; "
         f"server defines {len(REQUIRED_MCP_TOOLS)} tools ("
-        "project_files, ci_report); all [NUMBER] tools executed successfully; "
-        "routes/mcp_mode.py and lab7 prompts exist."
+        "project_files, ci_report, card_count, card_per_user); all 4 tools executed successfully; "
+        "mcp routes exist and so do the prompts folder"
     )
