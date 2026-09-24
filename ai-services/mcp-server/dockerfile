@@ -1,14 +1,18 @@
 FROM python:3.12-slim
 
-WORKDIR /app
+# docker-compose.yml has an explanation as to why this is commented out (non-working)
+# I am now trying to use stido instead of HTTP to see if this will get better results
 
-COPY requirements.txt .
+# agentic_loop runs the same without this
 
-RUN pip install --no-cache-dir -r requirements.txt
+# WORKDIR /app
 
-COPY . .
+# COPY requirements.txt .
 
-# EXPOSE 8000
-EXPOSE 5500
+# RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "server.py"]
+# COPY . .
+
+# EXPOSE 5500
+
+# CMD ["python", "server.py"]
