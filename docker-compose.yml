@@ -187,34 +187,34 @@ services:
       - student4-backend
  
     restart: unless-stopped
-  student4-backend:
-    build:
-      context: ./student-4/backend
-      dockerfile: Dockerfile
-    container_name: student4-backend
-    ports:
-      - "8204:5001"
-    environment:
-      DATABASE_SERVICE_URL: http://student4-database:5002
-      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
-      OLLAMA_MODEL: qwen2.5:0.5b
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    depends_on:
-      - student4-database
-    volumes:
-      - student4-database-data:/database
-    restart: unless-stopped
-  student4-database:
-    build:
-      context: ./student-4/database
-      dockerfile: Dockerfile
-    container_name: student4-database
-    ports:
-      - "8304:5002"
-    volumes:
-      - student4-database-data:/database
-    restart: unless-stopped
+  # student4-backend:
+  #   build:
+  #     context: ./student-4/backend
+  #     dockerfile: Dockerfile
+  #   container_name: student4-backend
+  #   ports:
+  #     - "8204:5001"
+  #   environment:
+  #     DATABASE_SERVICE_URL: http://student4-database:5002
+  #     OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+  #     OLLAMA_MODEL: qwen2.5:0.5b
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
+  #   depends_on:
+  #     - student4-database
+  #   volumes:
+  #     - student4-database-data:/database
+  #   restart: unless-stopped
+  # student4-database:
+  #   build:
+  #     context: ./student-4/database
+  #     dockerfile: Dockerfile
+  #   container_name: student4-database
+  #   ports:
+  #     - "8304:5002"
+  #   volumes:
+  #     - student4-database-data:/database
+  #   restart: unless-stopped
  
   
  

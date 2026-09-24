@@ -70,7 +70,7 @@ def mcp_card_per_user():
     if not mcp_mode_is_enabled(request):
         return mcp_disabled_response()
 
-    user_id = request.form.get("mcp_card_per_user_id", "").strip().upper()
+    user_id = request.form.get("card_per_user_id", "").strip().upper()
     if not user_id:
         return "<p>userd_id is required.</p>", 400
 

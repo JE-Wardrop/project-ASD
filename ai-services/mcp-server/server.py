@@ -72,4 +72,5 @@ if __name__ == "__main__":
     for tool in AVAILABLE_TOOLS:
         print(f"- {tool}")
 
-    mcp.run()
+    mcp.run(transport="HTTP")
+    # mcp.run(transport="sse", port=8000)
