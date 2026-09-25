@@ -1,21 +1,16 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MCP</title>
-    
-    <link rel="stylesheet" href="http://localhost:8080/styles.css">
-    <link rel="stylesheet" href="shared/styles.css"> 
 
-
-</head>
-<body>
-
-
-
-<main class="app-shell">
-    <section class="card">
+    <link rel="stylesheet" href="http://localhost:8080/styles.css" />
+    <link rel="stylesheet" href="shared/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="card">
         <h2>MCP Mode</h2>
         <!-- 
             Current errors:
@@ -25,11 +20,11 @@
         -->
 
         <div class="card-form">
-            <label class="switches" for="mcp-mode-toggle">
-                <input id="mcp-mode-toggle" type="checkbox" checked>
-                <span class="toggle-label">MCP Enabled</span>
-            </label>
-            <span id="mcp-mode-state" class="feature-state feature-on">ON</span>
+          <label class="switches" for="mcp-mode-toggle">
+            <input id="mcp-mode-toggle" type="checkbox" checked />
+            <span class="toggle-label">MCP Enabled</span>
+          </label>
+          <span id="mcp-mode-state" class="feature-state feature-on">ON</span>
         </div>
         <h2>MCP Tools</h2>
         <h2>Docker Test</h2>
@@ -40,162 +35,168 @@
         no effect in either case.
         -->
         <div class="card-form">
-            <button
-                id="card-count"
-                type="submit"
-                class="mcp-action"
-                hx-post="http://localhost:8201/backend/card-count"
-                hx-target="#mcp-result"
-                hx-swap="innerHTML"
-            >Get Card Count</button>
+          <button
+            id="card-count"
+            type="submit"
+            class="mcp-action"
+            hx-post="http://localhost:8201/backend/card-count"
+            hx-target="#mcp-result"
+            hx-swap="innerHTML"
+          >
+            Get Card Count
+          </button>
         </div>
 
-        <hr>
+        <hr />
 
         <form
-            id="mcp-card-per-user-form"
-            class="feature-form"
-            hx-post="http://localhost:8201/backend/mcp/card-per-user"
-            hx-target="#mcp-result"
-            hx-swap="innerHTML"
+          id="mcp-card-per-user-form"
+          class="feature-form"
+          hx-post="http://localhost:8201/backend/mcp/card-per-user"
+          hx-target="#mcp-result"
+          hx-swap="innerHTML"
         >
+          <label for="mcp_card_per_user_id">MCP: Cards by User ID</label>
 
-            <label for="mcp_card_per_user_id">MCP: Cards by User ID</label>
+          <input
+            id="mcp_card_per_user_id"
+            name="card_per_user_id"
+            type="text"
+            placeholder="Example: 1 card for User ID 1"
+          />
 
-            <input id="mcp_card_per_user_id" name="card_per_user_id" type="text" placeholder="Example: 1 card for User ID 1">
-
-            <button type="submit" class="mcp-action">Run Tool</button>
+          <button type="submit" class="mcp-action">Run Tool</button>
         </form>
 
-        <hr>
-        
+        <hr />
+
         <form
-            id="mcp-project-form"
-            class="feature-form"
-            hx-post="http://localhost:8201/backend/project-files"
-            hx-target="#mcp-result"
-            hx-swap="innerHTML"
+          id="mcp-project-form"
+          class="feature-form"
+          hx-post="http://localhost:8201/backend/project-files"
+          hx-target="#mcp-result"
+          hx-swap="innerHTML"
         >
-            <label for="mcp_directory_path">MCP: Project Files</label>
-            <input id="mcp_directory_path" name="directory_path" type="text" value="..">
-            <button type="submit" class="mcp-action">Run Tool</button>
+          <label for="mcp_directory_path">MCP: Project Files</label>
+          <input
+            id="mcp_directory_path"
+            name="directory_path"
+            type="text"
+            value=".."
+          />
+          <button type="submit" class="mcp-action">Run Tool</button>
         </form>
 
-        <div id="mcp-result" class="panel panel-mcp">MCP tool responses will appear here.</div>
+        <div id="mcp-result" class="panel panel-mcp">
+          MCP tool responses will appear here.
+        </div>
 
-
-        <hr>
+        <hr />
 
         <p>Test form</p>
         <form id="cardCount" method="POST">
-            <button type="submit">Get Card Count</button>
-            <div id="cardCountAuth" class="panel">
-            </div>
-
+          <button type="submit">Get Card Count</button>
+          <div id="cardCountAuth" class="panel"></div>
         </form>
+      </section>
+    </main>
 
+    <script>
+      // What I need to do:
+      // Connect these things to my backend code somehow
+      //  I literally am so lost as to what to actually do here
 
-    </section>
-</main>
+      const mcpModeToggle = document.getElementById("mcp-mode-toggle");
+      const mcpModeState = document.getElementById("mcp-mode-state");
+      const mcpResultPanel = document.getElementById("mcp-result");
 
-<script>
+      const MCP_STORAGE_KEY = "mcp_mode_enabled";
 
-// What I need to do:
-// Connect these things to my backend code somehow
-//  I literally am so lost as to what to actually do here
+      function isMcpEnabled() {
+        return mcpModeToggle.checked;
+      }
 
-const mcpModeToggle = document.getElementById("mcp-mode-toggle");
-const mcpModeState = document.getElementById("mcp-mode-state");
-const mcpResultPanel = document.getElementById("mcp-result");
+      function renderMcpState() {
+        if (isMcpEnabled()) {
+          mcpModeState.textContent = "ON";
+          mcpModeState.classList.add("feature-on");
+          mcpModeState.classList.remove("feature-off");
+        } else {
+          mcpModeState.textContent = "OFF";
+          mcpModeState.classList.add("feature-off");
+          mcpModeState.classList.remove("feature-on");
+        }
+      }
 
-const MCP_STORAGE_KEY = "mcp_mode_enabled";
+      // Gives the ability to turn MCP on and off
+      // should also visually display
+      function renderMcpDisabledMessage() {
+        mcpResultPanel.innerHTML =
+          "<p>MCP Mode is OFF. Enable MCP Mode to run MCP tools.</p>";
+      }
 
-function isMcpEnabled() {
-    return mcpModeToggle.checked;
-}
+      function saveMcpMode() {
+        localStorage.setItem(MCP_STORAGE_KEY, String(isMcpEnabled()));
+      }
 
-function renderMcpState() {
-    if (isMcpEnabled()) {
-        mcpModeState.textContent = "ON";
-        mcpModeState.classList.add("feature-on");
-        mcpModeState.classList.remove("feature-off");
-    } else {
-        mcpModeState.textContent = "OFF";
-        mcpModeState.classList.add("feature-off");
-        mcpModeState.classList.remove("feature-on");
-    }
-}
+      function loadMcpMode() {
+        const persisted = localStorage.getItem(MCP_STORAGE_KEY);
+        if (persisted === null) {
+          mcpModeToggle.checked = true;
+        } else {
+          mcpModeToggle.checked = persisted === "true";
+        }
+        renderMcpState();
+      }
 
-// Gives the ability to turn MCP on and off
-// should also visually display 
-function renderMcpDisabledMessage() {
-    mcpResultPanel.innerHTML = "<p>MCP Mode is OFF. Enable MCP Mode to run MCP tools.</p>";
-}
+      mcpModeToggle.addEventListener("change", () => {
+        saveMcpMode();
+        renderMcpState();
 
-function saveMcpMode() {
-    localStorage.setItem(MCP_STORAGE_KEY, String(isMcpEnabled()));
-}
+        if (!isMcpEnabled()) {
+          renderMcpDisabledMessage();
+        }
+      });
 
-function loadMcpMode() {
-    const persisted = localStorage.getItem(MCP_STORAGE_KEY);
-    if (persisted === null) {
-        mcpModeToggle.checked = true;
-    } else {
-        mcpModeToggle.checked = persisted === "true";
-    }
-    renderMcpState();
-}
+      document.body.addEventListener("htmx:configRequest", (event) => {
+        const trigger = event.detail.elt;
+        if (trigger && trigger.classList.contains("mcp-action")) {
+          event.detail.headers["X-MCP-Mode"] = isMcpEnabled() ? "on" : "off";
+        }
+      });
 
-mcpModeToggle.addEventListener("change", () => {
-    saveMcpMode();
-    renderMcpState();
+      document.body.addEventListener("htmx:beforeRequest", (event) => {
+        const trigger = event.detail.elt;
+        if (!trigger || !trigger.classList.contains("mcp-action")) {
+          return;
+        }
 
-    if (!isMcpEnabled()) {
+        if (!isMcpEnabled()) {
+          event.preventDefault();
+          renderMcpDisabledMessage();
+        }
+      });
+
+      loadMcpMode();
+      if (!isMcpEnabled()) {
         renderMcpDisabledMessage();
-    }
+      }
+      const BACKEND_URL = "http://localhost:8201";
 
-});
-
-document.body.addEventListener("htmx:configRequest", (event) => {
-    const trigger = event.detail.elt;
-    if (trigger && trigger.classList.contains("mcp-action")) {
-        event.detail.headers["X-MCP-Mode"] = isMcpEnabled() ? "on" : "off";
-    }
-});
-
-document.body.addEventListener("htmx:beforeRequest", (event) => {
-    const trigger = event.detail.elt;
-    if (!trigger || !trigger.classList.contains("mcp-action")) {
-        return;
-    }
-
-    if (!isMcpEnabled()) {
+      // MCP test form
+      const cardCountForm = document.getElementById("cardCount");
+      cardCountForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        renderMcpDisabledMessage();
-    }
-});
+        const cardCountFormData = new URLSearchParams(
+          new FormData(cardCountForm)
+        );
 
-loadMcpMode();
-if (!isMcpEnabled()) {
-    renderMcpDisabledMessage();
-
-}
-        const BACKEND_URL = "http://localhost:8201";
-
-        // MCP test form
-        const cardCountForm = document.getElementById("cardCount");
-        cardCountForm.addEventListener("submit", (event) => {
-            event.preventDefault();
-            const cardCountFormData = new URLSearchParams(new FormData(cardCountForm));
-
-            renderIntoPanel("cardCountAuth", `${BACKEND_URL}/mcp/card-count`, {
-                method: "POST",
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: cardCountFormData,
-            });
+        renderIntoPanel("cardCountAuth", `${BACKEND_URL}/mcp/card-count`, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: cardCountFormData,
         });
-
-</script>
-
-</body>
+      });
+    </script>
+  </body>
 </html>

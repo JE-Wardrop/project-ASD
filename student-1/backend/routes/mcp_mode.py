@@ -1,9 +1,9 @@
 import json
 from pathlib import Path
 
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 import requests
-
+from services.mcp_client import call_mcp_tool
 from services.database_api import (
     create_card_response,
     delete_card_response,
@@ -50,14 +50,15 @@ def health():
     return "<p>mcp is running</p>", 200
 
 
-@mcp_mode_bp.post("/mcp/card-count")
+@mcp_mode_bp.get("/mcp/card-count")
 def mcp_card_count():
     if not mcp_mode_is_enabled(request):
         return mcp_disabled_response()
 
     try:
         count = len(get_cards())
-        return mcp_render_json("MCP Tool: card count", {"card_count": count}), 200
+        print(f"[mcp_mode] card count: {count}")
+        return jsonify(call_mcp_tool("card_count")), 200
     except requests.RequestException as exc:
         return (
             "<p>MCP card count failed.</p>"

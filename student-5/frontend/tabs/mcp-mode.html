@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="http://localhost:8080/styles.css" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.12/htmx.min.js"></script>
+  </head>
+  <body class="tab-body">
+    <section class="card">
+      <h2>MCP tools</h2>
+      <p>
+        These call the shared Model Context Protocol server directly &mdash; the
+        result below is exactly what the tool returned, unedited. This is a
+        different path from AI Mode: no model narration, just the structured
+        result of a real MCP tool call.
+      </p>
+    </section>
+
+    <section class="card">
+      <h3>List transactions</h3>
+      <p class="muted">Tool: <code>transactions_list</code></p>
+      <form
+        class="filter-bar"
+        hx-get="http://localhost:8205/mcp/transactions"
+        hx-target="#mcp-list-output"
+        hx-swap="innerHTML"
+        hx-indicator="#mcp-list-spinner"
+      >
+        <label
+          >Account ID
+          <input type="number" name="account_id" placeholder="optional" />
+        </label>
+        <label
+          >Type
+          <select name="transaction_type">
+            <option value="">Any</option>
+            <option value="DEPOSIT">Deposit</option>
+            <option value="WITHDRAWAL">Withdrawal</option>
+            <option value="TRANSFER">Transfer</option>
+          </select>
+        </label>
+        <label
+          >Status
+          <select name="status">
+            <option value="">Any</option>
+            <option value="PENDING">Pending</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="FAILED">Failed</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </label>
+        <label
+          >Limit
+          <input type="number" name="limit" value="20" />
+        </label>
+        <button type="submit">Call MCP tool</button>
+        <span id="mcp-list-spinner" class="htmx-indicator"
+          >Calling&hellip;</span
+        >
+      </form>
+      <pre id="mcp-list-output" class="mcp-json">No result yet.</pre>
+    </section>
+
+    <section class="card">
+      <h3>Get one transaction</h3>
+      <p class="muted">Tool: <code>transaction_detail</code></p>
+      <form class="filter-bar" onsubmit="return mcpGetTransaction(event)">
+        <label
+          >Transaction ID
+          <input type="number" id="mcp-txn-id" required />
+        </label>
+        <button type="submit">Call MCP tool</button>
+      </form>
+      <pre id="mcp-detail-output" class="mcp-json">No result yet.</pre>
+    </section>
+
+    <section class="card">
+      <h3>Account activity summary</h3>
+      <p class="muted">Tool: <code>account_activity_summary</code></p>
+      <form class="filter-bar" onsubmit="return mcpGetSummary(event)">
+        <label
+          >Account ID
+          <input type="number" id="mcp-summary-account-id" required />
+        </label>
+        <button type="submit">Call MCP tool</button>
+      </form>
+      <pre id="mcp-summary-output" class="mcp-json">No result yet.</pre>
+    </section>
+
+    <script>
+      // htmx can serialise a <form>'s own fields as query params for hx-get,
+      // but it can't splice a value into the middle of a URL path — so the
+      // two path-parameter tools (transaction_detail, account_activity_summary)
+      // are triggered manually with htmx.ajax() instead of a plain hx-get.
+      function mcpGetTransaction(event) {
+        event.preventDefault();
+        var id = document.getElementById("mcp-txn-id").value;
+        htmx.ajax("GET", "http://localhost:8205/mcp/transactions/" + id, {
+          target: "#mcp-detail-output",
+          swap: "innerHTML",
+        });
+        return false;
+      }
+
+      function mcpGetSummary(event) {
+        event.preventDefault();
+        var id = document.getElementById("mcp-summary-account-id").value;
+        htmx.ajax(
+          "GET",
+          "http://localhost:8205/mcp/accounts/" + id + "/summary",
+          { target: "#mcp-summary-output", swap: "innerHTML" }
+        );
+        return false;
+      }
+
+      // Every MCP endpoint returns raw JSON (Flask's jsonify), and htmx just
+      // drops that text into the target as-is. Re-indent it after each swap
+      // so the structured result is actually readable in the tab / screenshots.
+      document.body.addEventListener("htmx:afterSwap", function (event) {
+        if (!event.target.classList.contains("mcp-json")) return;
+        try {
+          var parsed = JSON.parse(event.target.textContent);
+          event.target.textContent = JSON.stringify(parsed, null, 2);
+        } catch (err) {
+          // Not JSON (e.g. a network error string) — leave as plain text.
+        }
+      });
+    </script>
+  </body>
+</html>
