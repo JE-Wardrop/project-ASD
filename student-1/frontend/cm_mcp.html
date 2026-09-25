@@ -7,18 +7,12 @@
 
     <link rel="stylesheet" href="http://localhost:8080/styles.css" />
     <link rel="stylesheet" href="shared/styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.12/htmx.min.js"></script>
   </head>
   <body>
     <main class="app-shell">
       <section class="card">
         <h2>MCP Mode</h2>
-        <!-- 
-            Current errors:
-            - stylesheet (?) is preventing the backend to frontend connection
-            - card-count doesn't even send anything to backend. i have literally no idea why
-        
-        -->
-
         <div class="card-form">
           <label class="switches" for="mcp-mode-toggle">
             <input id="mcp-mode-toggle" type="checkbox" checked />
@@ -29,17 +23,13 @@
         <h2>MCP Tools</h2>
         <h2>Docker Test</h2>
 
-        <!-- 
-        chnaged type from button to submit
-        chnaged class from feature-form to mcp-action 
-        no effect in either case.
-        -->
+        <hr />
         <div class="card-form">
+          <label>MCP: Card Count</label>
           <button
-            id="card-count"
-            type="submit"
+            type="button"
             class="mcp-action"
-            hx-post="http://localhost:8201/backend/card-count"
+            hx-get="http://localhost:8201/mcp/card-count"
             hx-target="#mcp-result"
             hx-swap="innerHTML"
           >
@@ -47,12 +37,10 @@
           </button>
         </div>
 
-        <hr />
-
         <form
           id="mcp-card-per-user-form"
           class="feature-form"
-          hx-post="http://localhost:8201/backend/mcp/card-per-user"
+          hx-post="http://localhost:8201/mcp/card-per-user"
           hx-target="#mcp-result"
           hx-swap="innerHTML"
         >
@@ -90,14 +78,6 @@
         <div id="mcp-result" class="panel panel-mcp">
           MCP tool responses will appear here.
         </div>
-
-        <hr />
-
-        <p>Test form</p>
-        <form id="cardCount" method="POST">
-          <button type="submit">Get Card Count</button>
-          <div id="cardCountAuth" class="panel"></div>
-        </form>
       </section>
     </main>
 
@@ -181,22 +161,6 @@
       if (!isMcpEnabled()) {
         renderMcpDisabledMessage();
       }
-      const BACKEND_URL = "http://localhost:8201";
-
-      // MCP test form
-      const cardCountForm = document.getElementById("cardCount");
-      cardCountForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const cardCountFormData = new URLSearchParams(
-          new FormData(cardCountForm)
-        );
-
-        renderIntoPanel("cardCountAuth", `${BACKEND_URL}/mcp/card-count`, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: cardCountFormData,
-        });
-      });
     </script>
   </body>
 </html>

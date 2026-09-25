@@ -66,13 +66,10 @@ services:
 
       # connecting MCP to the backend. 
       # this is all that should be needed to connect the files.
-      MCP_SERVER_URL: http://mcp-server:5500
-
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
       - student-1-database
-      - mcp-server
     restart: unless-stopped
 
   student-1-database:
