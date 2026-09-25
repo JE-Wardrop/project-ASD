@@ -41,9 +41,9 @@ services:
 
     # agentic_loop runs the same without this
 
-      # dockerfile: dockerfile
-    # ports:
-    #   - "5500:5500"
+      dockerfile: dockerfile
+    ports:
+      - "5500:5500"
  
  
   # Student 1

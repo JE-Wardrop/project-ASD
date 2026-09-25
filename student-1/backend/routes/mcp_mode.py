@@ -67,6 +67,7 @@ def mcp_card_count():
     
 @mcp_mode_bp.post("/mcp/card-per-user")
 def mcp_card_per_user():
+
     if not mcp_mode_is_enabled(request):
         return mcp_disabled_response()
 
@@ -74,19 +75,28 @@ def mcp_card_per_user():
     if not user_id:
         return "<p>userd_id is required.</p>", 400
 
-    try:
-        # will have to make a function that gets the cards of a particular user_ID
-        response = get_card_by_id_response(user_id)
+    return "<p>card-per-user reached</p>", 200
 
-        if response.status_code == 404:
-            return mcp_render_json("MCP Tool: card per user id", []), 200
+
+    # Issue with this part of the function. 
+    # It is most likely true that the mcp_render_json is not correct.
+    
+
+    # try:
+    #     response = get_card_by_id_response(user_id)
+
+    #     if response.status_code == 404:
+    #         return mcp_render_json("MCP Tool: card per user id", []), 200
         
-        return mcp_render_json("MCP Tool: card  per user ID", {"card per user ID": response}), 200
-    except requests.RequestException as exc:
-        return (
-            "<p>MCP card per user ID failed.</p>"
-            f"<pre>{exc}</pre>",
-            503,
-        )
+    #     return mcp_render_json("MCP Tool: card  per user ID", {"card per user ID": response}), 200
+    # except requests.RequestException as exc:
+    #     return (
+    #         "<p>MCP card per user ID failed.</p>"
+    #         f"<pre>{exc}</pre>",
+    #         503,
+    #     )
 
+@mcp_mode_bp.post("/mcp/project-files")
+def mcp_project_files():
+    return "<p>project files has been reached</p>", 200
     
