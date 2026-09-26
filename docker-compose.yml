@@ -150,6 +150,7 @@ services:
       NOTIFICATIONS_URL: http://student3-backend:8000
       BACKEND_URL: http://localhost:8205
       REQUIRE_ACCOUNTS: "true"      # waiting for Binh service to run
+      MCP_ENABLED: ${MCP_ENABLED:-true}
     depends_on:
       - student5-db
     extra_hosts:
