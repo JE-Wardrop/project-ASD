@@ -83,7 +83,7 @@ def transaction_detail(transaction_id: int) -> dict[str, Any]:
 
 
 @mcp.tool()
-def account_activity_summary(account_id: int):
+def account_activity_summary(account_id: int)-> dict[str, Any]:
     return summarize_account_activity(account_id)
 
 

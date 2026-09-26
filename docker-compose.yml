@@ -62,7 +62,10 @@ services:
       DATABASE_SERVICE_URL: http://student-1-database:5002
       OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
       OLLAMA_MODEL: qwen2.5:0.5b
+      MCP_ENABLED: "true"
 
+      # connecting MCP to the backend. 
+      # this is all that should be needed to connect the files.
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -147,6 +150,7 @@ services:
       NOTIFICATIONS_URL: http://student3-backend:8000
       BACKEND_URL: http://localhost:8205
       REQUIRE_ACCOUNTS: "true"      # waiting for Binh service to run
+      MCP_ENABLED: ${MCP_ENABLED:-true}
     depends_on:
       - student5-db
     extra_hosts:

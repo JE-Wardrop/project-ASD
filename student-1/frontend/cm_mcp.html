@@ -5,23 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCP</title>
 
-    <!--
-        htmx 2.x blocks cross-origin requests by default (selfRequestsOnly = true).
-        The frontend is on :8101 and the backend on :8201, so this must be turned off.
-        This meta tag has to appear BEFORE the htmx script.
-    -->
-    <meta name="htmx-config" content='{"selfRequestsOnly": false}'>
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-
-    <link rel="stylesheet" href="http://localhost:8080/styles.css">
-    <link rel="stylesheet" href="shared/styles.css">
-</head>
-<body>
-
-<main class="app-shell">
-    <section class="card">
+    <link rel="stylesheet" href="http://localhost:8080/styles.css" />
+    <link rel="stylesheet" href="shared/styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.12/htmx.min.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="card">
         <h2>MCP Mode</h2>
-
         <div class="card-form">
             <label class="switches" for="mcp-mode-toggle">
                 <input id="mcp-mode-toggle" type="checkbox" checked>
@@ -32,25 +23,26 @@
 
         <h2>MCP Tools</h2>
 
+        <hr />
         <div class="card-form">
-            <button
-                id="card-count"
-                type="button"
-                class="mcp-action"
-                hx-post="http://localhost:8201/mcp/card-count"
-                hx-target="#mcp-result"
-                hx-swap="innerHTML"
-            >Get Card Count</button>
-        </div>
-
-        <hr>
-
-        <form
-            id="mcp-card-per-user-form"
-            class="feature-form"
-            hx-post="http://localhost:8201/mcp/card-per-user"
+          <label>MCP: Card Count</label>
+          <button
+            type="button"
+            class="mcp-action"
+            hx-get="http://localhost:8201/mcp/card-count"
             hx-target="#mcp-result"
             hx-swap="innerHTML"
+          >
+            Get Card Count
+          </button>
+        </div>
+
+        <form
+          id="mcp-card-per-user-form"
+          class="feature-form"
+          hx-post="http://localhost:8201/mcp/card-per-user"
+          hx-target="#mcp-result"
+          hx-swap="innerHTML"
         >
             <label for="mcp_card_per_user_id">MCP: Cards by User ID</label>
             <input id="mcp_card_per_user_id" name="card_per_user_id" type="text" placeholder="Example: 1 card for User ID 1">
@@ -71,97 +63,92 @@
             <button type="submit" class="mcp-action">Run Tool</button>
         </form>
 
-        <div id="mcp-result" class="panel panel-mcp">MCP tool responses will appear here.</div>
-    </section>
-</main>
+        <div id="mcp-result" class="panel panel-mcp">
+          MCP tool responses will appear here.
+        </div>
+      </section>
+    </main>
 
-<script>
-const mcpModeToggle = document.getElementById("mcp-mode-toggle");
-const mcpModeState = document.getElementById("mcp-mode-state");
-const mcpResultPanel = document.getElementById("mcp-result");
+    <script>
+      // What I need to do:
+      // Connect these things to my backend code somehow
+      //  I literally am so lost as to what to actually do here
 
-const MCP_STORAGE_KEY = "mcp_mode_enabled";
+      const mcpModeToggle = document.getElementById("mcp-mode-toggle");
+      const mcpModeState = document.getElementById("mcp-mode-state");
+      const mcpResultPanel = document.getElementById("mcp-result");
 
-function isMcpEnabled() {
-    return mcpModeToggle.checked;
-}
+      const MCP_STORAGE_KEY = "mcp_mode_enabled";
 
-function renderMcpState() {
-    if (isMcpEnabled()) {
-        mcpModeState.textContent = "ON";
-        mcpModeState.classList.add("feature-on");
-        mcpModeState.classList.remove("feature-off");
-    } else {
-        mcpModeState.textContent = "OFF";
-        mcpModeState.classList.add("feature-off");
-        mcpModeState.classList.remove("feature-on");
-    }
-}
+      function isMcpEnabled() {
+        return mcpModeToggle.checked;
+      }
 
-function renderMcpDisabledMessage() {
-    mcpResultPanel.innerHTML = "<p>MCP Mode is OFF. Enable MCP Mode to run MCP tools.</p>";
-}
+      function renderMcpState() {
+        if (isMcpEnabled()) {
+          mcpModeState.textContent = "ON";
+          mcpModeState.classList.add("feature-on");
+          mcpModeState.classList.remove("feature-off");
+        } else {
+          mcpModeState.textContent = "OFF";
+          mcpModeState.classList.add("feature-off");
+          mcpModeState.classList.remove("feature-on");
+        }
+      }
 
-function saveMcpMode() {
-    localStorage.setItem(MCP_STORAGE_KEY, String(isMcpEnabled()));
-}
+      // Gives the ability to turn MCP on and off
+      // should also visually display
+      function renderMcpDisabledMessage() {
+        mcpResultPanel.innerHTML =
+          "<p>MCP Mode is OFF. Enable MCP Mode to run MCP tools.</p>";
+      }
 
-function loadMcpMode() {
-    const persisted = localStorage.getItem(MCP_STORAGE_KEY);
-    mcpModeToggle.checked = persisted === null ? true : persisted === "true";
-    renderMcpState();
-}
+      function saveMcpMode() {
+        localStorage.setItem(MCP_STORAGE_KEY, String(isMcpEnabled()));
+      }
 
-mcpModeToggle.addEventListener("change", () => {
-    saveMcpMode();
-    renderMcpState();
+      function loadMcpMode() {
+        const persisted = localStorage.getItem(MCP_STORAGE_KEY);
+        if (persisted === null) {
+          mcpModeToggle.checked = true;
+        } else {
+          mcpModeToggle.checked = persisted === "true";
+        }
+        renderMcpState();
+      }
 
-    if (!isMcpEnabled()) {
+      mcpModeToggle.addEventListener("change", () => {
+        saveMcpMode();
+        renderMcpState();
+
+        if (!isMcpEnabled()) {
+          renderMcpDisabledMessage();
+        }
+      });
+
+      document.body.addEventListener("htmx:configRequest", (event) => {
+        const trigger = event.detail.elt;
+        if (trigger && trigger.classList.contains("mcp-action")) {
+          event.detail.headers["X-MCP-Mode"] = isMcpEnabled() ? "on" : "off";
+        }
+      });
+
+      document.body.addEventListener("htmx:beforeRequest", (event) => {
+        const trigger = event.detail.elt;
+        if (!trigger || !trigger.classList.contains("mcp-action")) {
+          return;
+        }
+
+        if (!isMcpEnabled()) {
+          event.preventDefault();
+          renderMcpDisabledMessage();
+        }
+      });
+
+      loadMcpMode();
+      if (!isMcpEnabled()) {
         renderMcpDisabledMessage();
-    }
-});
-
-// Tell the backend whether MCP mode is on. This custom header triggers a CORS preflight,
-// so the backend must allow it (see CORS(...) in the Flask app).
-document.body.addEventListener("htmx:configRequest", (event) => {
-    const trigger = event.detail.elt;
-    if (trigger && trigger.classList.contains("mcp-action")) {
-        event.detail.headers["X-MCP-Mode"] = isMcpEnabled() ? "on" : "off";
-    }
-});
-
-// Don't send anything when MCP mode is off.
-document.body.addEventListener("htmx:beforeRequest", (event) => {
-    const trigger = event.detail.elt;
-    if (!trigger || !trigger.classList.contains("mcp-action")) {
-        return;
-    }
-
-    if (!isMcpEnabled()) {
-        event.preventDefault();
-        renderMcpDisabledMessage();
-    }
-});
-
-// htmx ignores 4xx/5xx responses by default. Swap them in so error messages from the backend show up.
-document.body.addEventListener("htmx:beforeSwap", (event) => {
-    if (event.detail.xhr.status >= 400) {
-        event.detail.shouldSwap = true;
-        event.detail.isError = false;
-    }
-});
-
-// Network-level failures (backend down, CORS blocked, etc.) never reach beforeSwap.
-document.body.addEventListener("htmx:sendError", () => {
-    mcpResultPanel.innerHTML =
-        "<p>Could not reach the backend at localhost:8201. Check that the container is running and CORS is enabled.</p>";
-});
-
-loadMcpMode();
-if (!isMcpEnabled()) {
-    renderMcpDisabledMessage();
-}
-</script>
-
-</body>
+      }
+    </script>
+  </body>
 </html>

@@ -1,7 +1,22 @@
 from flask import Blueprint, jsonify
 from services.mcp_client import call_mcp_tool
-from flask import request
-import os
+from services.database_api import (
+    create_card_response,
+    delete_card_response,
+    update_card_response,
+    get_card_by_id_response,
+    get_cards_by_type_response,
+    freeze_card_response,
+    unfreeze_card_response,
+)
+from views.html_formatters import format_card_html, format_cards_html
+
+
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+APP_DIR = BASE_DIR.parent
+
 mcp_mode_bp = Blueprint("mcp_mode", __name__)
 
 MCP_ENABLED = os.getenv("MCP_ENABLED", "true").lower() == "true"
@@ -38,8 +53,6 @@ def mcp_card_count():
         return mcp_disabled_response()
 
     try:
-        count = len(get_cards())
-        print(f"[mcp_mode] card count: {count}")
         return jsonify(call_mcp_tool("card_count")), 200
     except requests.RequestException as exc:
         return (
@@ -53,24 +66,17 @@ def mcp_card_per_user():
     if not mcp_mode_is_enabled(request):
         return mcp_disabled_response()
 
-    user_id = request.form.get("mcp_card_per_user_id", "").strip().upper()
-    if not user_id:
-        return "<p>userd_id is required.</p>", 400
+    user_id_raw = request.form.get("card_per_user_id", "").strip()
+    if not user_id_raw:
+        return "<p>user_id is required.</p>", 400
 
     try:
-        # will have to make a function that gets the cards of a particular user_ID
-        response = get_card_by_id_response(user_id)
+        user_id = int(user_id_raw)
+    except ValueError:
+        return "<p>user_id must be a number.</p>", 400
 
-        if response.status_code == 404:
-            return mcp_render_json("MCP Tool: card per user id", []), 200
-        
-        return mcp_render_json("MCP Tool: card  per user ID", {"card per user ID": response}), 200
-    except requests.RequestException as exc:
-        return (
-            "<p>MCP card per user ID failed.</p>"
-            f"<pre>{exc}</pre>",
-            503,
-        )
+    result = call_mcp_tool("cards_by_user", {"user_id": user_id})
+    return mcp_render_json("MCP Tool: cards by user", result), 200
 
 
 
