@@ -15,8 +15,6 @@ ai_mode_bp = Blueprint("ai_mode", __name__)
 
 @ai_mode_bp.route("/ask", methods=["POST"])
 def ask_local_agent():
-    # Lab code
-
     question = request.form.get("question", "").strip()
 
     if not question:

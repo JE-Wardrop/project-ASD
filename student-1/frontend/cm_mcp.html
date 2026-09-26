@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCP</title>
 
     <link rel="stylesheet" href="http://localhost:8080/styles.css" />
@@ -14,14 +14,14 @@
       <section class="card">
         <h2>MCP Mode</h2>
         <div class="card-form">
-          <label class="switches" for="mcp-mode-toggle">
-            <input id="mcp-mode-toggle" type="checkbox" checked />
-            <span class="toggle-label">MCP Enabled</span>
-          </label>
-          <span id="mcp-mode-state" class="feature-state feature-on">ON</span>
+            <label class="switches" for="mcp-mode-toggle">
+                <input id="mcp-mode-toggle" type="checkbox" checked>
+                <span class="toggle-label">MCP Enabled</span>
+            </label>
+            <span id="mcp-mode-state" class="feature-state feature-on">ON</span>
         </div>
+
         <h2>MCP Tools</h2>
-        <h2>Docker Test</h2>
 
         <hr />
         <div class="card-form">
@@ -44,35 +44,23 @@
           hx-target="#mcp-result"
           hx-swap="innerHTML"
         >
-          <label for="mcp_card_per_user_id">MCP: Cards by User ID</label>
-
-          <input
-            id="mcp_card_per_user_id"
-            name="card_per_user_id"
-            type="text"
-            placeholder="Example: 1 card for User ID 1"
-          />
-
-          <button type="submit" class="mcp-action">Run Tool</button>
+            <label for="mcp_card_per_user_id">MCP: Cards by User ID</label>
+            <input id="mcp_card_per_user_id" name="card_per_user_id" type="text" placeholder="Example: 1 card for User ID 1">
+            <button type="submit" class="mcp-action">Run Tool</button>
         </form>
 
-        <hr />
+        <hr>
 
         <form
-          id="mcp-project-form"
-          class="feature-form"
-          hx-post="http://localhost:8201/backend/project-files"
-          hx-target="#mcp-result"
-          hx-swap="innerHTML"
+            id="mcp-project-form"
+            class="feature-form"
+            hx-post="http://localhost:8201/mcp/project-files"
+            hx-target="#mcp-result"
+            hx-swap="innerHTML"
         >
-          <label for="mcp_directory_path">MCP: Project Files</label>
-          <input
-            id="mcp_directory_path"
-            name="directory_path"
-            type="text"
-            value=".."
-          />
-          <button type="submit" class="mcp-action">Run Tool</button>
+            <label for="mcp_directory_path">MCP: Project Files</label>
+            <input id="mcp_directory_path" name="directory_path" type="text" value="..">
+            <button type="submit" class="mcp-action">Run Tool</button>
         </form>
 
         <div id="mcp-result" class="panel panel-mcp">

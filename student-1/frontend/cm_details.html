@@ -117,11 +117,6 @@
         const cardSearchForm = document.getElementById("searchCard");
         
         cardSearchForm.addEventListener("submit", (event) => {
-            // this shouldnt do anything bad but it breaks the whole application causing a 405 error
-            // event.preventDefault();
-
-            // const cardSearchForm = new FormData(cardSearchForm);
-            // const cardId = encodeURIComponent(cardSearchForm.get("card_id"));
 
             //suggested code
             event.preventDefault();

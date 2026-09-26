@@ -44,25 +44,6 @@ def _get(base_url: str, path: str, params: dict | None = None) -> dict:
         return {"error": f"Database API returned {resp.status_code}", "detail": str(exc)}
  
 
-
-# Student 1 (Card Management) 
-# database API (student-1/database/app.py: GET /cards, GET /cards/<id>, GET /cards/by-type, GET /cards/by-status, POST /cards/create, PUT /cards/<id>, DELETE /cards/<id>, POST /cards/freeze, POST /cards/unfreeze)
-
-def get_card_count() -> dict:
-    cards = _get(DB_API_URLS[1], "/cards")
-    if isinstance(cards, dict) and "error" in cards:
-        return cards
-    return {"card_count": len(cards)}
-
-
-def get_cards_by_user(user_id: int) -> dict:
-    cards = _get(DB_API_URLS[1], "/cards")
-    if isinstance(cards, dict) and "error" in cards:
-        return cards
-    matching = [c for c in cards if c.get("user_id") == user_id]
-    return {"user_id": user_id, "card_count": len(matching), "cards": matching}
-    
-        
 # def list_project_files(directory_path: str = ".."):  # relative to mcp-server/
 #     path = (BASE_DIR / directory_path).resolve()
 #     if not path.exists() or not path.is_dir():
@@ -84,6 +65,26 @@ def get_cards_by_user(user_id: int) -> dict:
 #         return json.load(file)
 
 
+
+# Student 1 (Card Management) 
+# database API (student-1/database/app.py: GET /cards, GET /cards/<id>, GET /cards/by-type, GET /cards/by-status, POST /cards/create, PUT /cards/<id>, DELETE /cards/<id>, POST /cards/freeze, POST /cards/unfreeze)
+
+def card_count() -> dict:
+    cards = _get(DB_API_URLS[1], "/cards")
+    if isinstance(cards, dict) and "error" in cards:
+        return cards
+    return {"card_count": len(cards)}
+
+
+# change all instances of "get_cards_by_user" to "get_cards_per_user"
+def cards_per_user(user_id: int) -> dict:
+    cards = _get(DB_API_URLS[1], "/cards")
+    if isinstance(cards, dict) and "error" in cards:
+        return cards
+    matching = [c for c in cards if c.get("user_id") == user_id]
+    return {"user_id": user_id, "card_count": len(matching), "cards": matching}
+    
+    
 
 
 # Transaction Management (student-5)
