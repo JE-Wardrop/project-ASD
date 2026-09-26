@@ -1,28 +1,11 @@
-import json
-from pathlib import Path
-
-from flask import Blueprint, request, jsonify
-import requests
+from flask import Blueprint, jsonify
 from services.mcp_client import call_mcp_tool
-from services.database_api import (
-    create_card_response,
-    delete_card_response,
-    get_cards,
-    update_card_response,
-    get_card_by_id_response,
-    get_cards_by_type_response,
-    freeze_card_response,
-    unfreeze_card_response,
-)
-from views.html_formatters import format_card_html, format_cards_html
-
-
-
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-APP_DIR = BASE_DIR.parent
-
+from flask import request
+import json
+import os
 mcp_mode_bp = Blueprint("mcp_mode", __name__)
+
+MCP_ENABLED = os.getenv("MCP_ENABLED", "true").lower() == "true"
 
 
 
@@ -89,5 +72,7 @@ def mcp_card_per_user():
             f"<pre>{exc}</pre>",
             503,
         )
+
+
 
     

@@ -2,8 +2,8 @@ from mcp.server.fastmcp import FastMCP, Context
 from flask import Flask, jsonify, request
 from typing import Any
 from tools import (
-    get_card_count,
-    get_cards_by_user,
+    card_count,
+    cards_per_user,
     # list_project_files,
     # read_ci_report,
     # Transaction Management (student-5)
@@ -19,13 +19,11 @@ mcp = FastMCP(
     port=5500,)
 
 AVAILABLE_TOOLS = [
-    "db_tools",
-    "repo_tools",
     "project_files",
     "ci_report",
 
-    # for each database
-    "get_card_per_user",
+    # Card Management (student-1)
+    "card_per_user",
     "card_count",
     
     # Transaction Management (student-5)
@@ -41,34 +39,33 @@ AVAILABLE_TOOLS = [
 #     return jsonify({'status': 'mcp healthy'}), 200
 # }
 
-@mcp.tool()
-def project_files(
-    directory_path: str = ".."
-):
-    return list_project_files(directory_path)
-
-
-@mcp.tool()
-def ci_report(
-    report_path: str = "../reports/report.json"
-):
-    return read_ci_report(report_path)
-
-# For each database
-
-@mcp.tool()
-def card_count() -> dict[str, Any]:
-     return get_card_count()
-
-
-@mcp.tool()
-def cards_by_user(user_id: int) -> dict[str, Any]:
-   return get_cards_by_user(user_id)
+# @mcp.tool()
+# def project_files(
+#     directory_path: str = ".."
+# ):
+#     return list_project_files(directory_path)
 
 
 # @mcp.tool()
-# def card_per_user(card : int, user_id: int):
-#     return get_card_per_user(user_id)
+# def ci_report(
+#     report_path: str = "../reports/report.json"
+# ):
+#     return read_ci_report(report_path)
+
+
+
+
+
+# Card Management (student-1)
+@mcp.tool()
+def card_count() -> dict[str, Any]:
+    return card_count()
+
+
+@mcp.tool()
+def card_per_user(user_id: int) -> dict[str, Any]:
+   return card_per_user(user_id)
+
 
 # Transaction Management (student-5)
 @mcp.tool()

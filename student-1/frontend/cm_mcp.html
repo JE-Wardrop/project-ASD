@@ -1,202 +1,167 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCP</title>
 
-    <link rel="stylesheet" href="http://localhost:8080/styles.css" />
-    <link rel="stylesheet" href="shared/styles.css" />
-  </head>
-  <body>
-    <main class="app-shell">
-      <section class="card">
+    <!--
+        htmx 2.x blocks cross-origin requests by default (selfRequestsOnly = true).
+        The frontend is on :8101 and the backend on :8201, so this must be turned off.
+        This meta tag has to appear BEFORE the htmx script.
+    -->
+    <meta name="htmx-config" content='{"selfRequestsOnly": false}'>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+
+    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+    <link rel="stylesheet" href="shared/styles.css">
+</head>
+<body>
+
+<main class="app-shell">
+    <section class="card">
         <h2>MCP Mode</h2>
-        <!-- 
-            Current errors:
-            - stylesheet (?) is preventing the backend to frontend connection
-            - card-count doesn't even send anything to backend. i have literally no idea why
-        
-        -->
 
         <div class="card-form">
-          <label class="switches" for="mcp-mode-toggle">
-            <input id="mcp-mode-toggle" type="checkbox" checked />
-            <span class="toggle-label">MCP Enabled</span>
-          </label>
-          <span id="mcp-mode-state" class="feature-state feature-on">ON</span>
+            <label class="switches" for="mcp-mode-toggle">
+                <input id="mcp-mode-toggle" type="checkbox" checked>
+                <span class="toggle-label">MCP Enabled</span>
+            </label>
+            <span id="mcp-mode-state" class="feature-state feature-on">ON</span>
         </div>
-        <h2>MCP Tools</h2>
-        <h2>Docker Test</h2>
 
-        <!-- 
-        chnaged type from button to submit
-        chnaged class from feature-form to mcp-action 
-        no effect in either case.
-        -->
+        <h2>MCP Tools</h2>
+
         <div class="card-form">
-          <button
-            id="card-count"
-            type="submit"
-            class="mcp-action"
-            hx-post="http://localhost:8201/backend/card-count"
+            <button
+                id="card-count"
+                type="button"
+                class="mcp-action"
+                hx-post="http://localhost:8201/mcp/card-count"
+                hx-target="#mcp-result"
+                hx-swap="innerHTML"
+            >Get Card Count</button>
+        </div>
+
+        <hr>
+
+        <form
+            id="mcp-card-per-user-form"
+            class="feature-form"
+            hx-post="http://localhost:8201/mcp/card-per-user"
             hx-target="#mcp-result"
             hx-swap="innerHTML"
-          >
-            Get Card Count
-          </button>
-        </div>
+        >
+            <label for="mcp_card_per_user_id">MCP: Cards by User ID</label>
+            <input id="mcp_card_per_user_id" name="card_per_user_id" type="text" placeholder="Example: 1 card for User ID 1">
+            <button type="submit" class="mcp-action">Run Tool</button>
+        </form>
 
-        <hr />
+        <hr>
 
         <form
-          id="mcp-card-per-user-form"
-          class="feature-form"
-          hx-post="http://localhost:8201/backend/mcp/card-per-user"
-          hx-target="#mcp-result"
-          hx-swap="innerHTML"
+            id="mcp-project-form"
+            class="feature-form"
+            hx-post="http://localhost:8201/mcp/project-files"
+            hx-target="#mcp-result"
+            hx-swap="innerHTML"
         >
-          <label for="mcp_card_per_user_id">MCP: Cards by User ID</label>
-
-          <input
-            id="mcp_card_per_user_id"
-            name="card_per_user_id"
-            type="text"
-            placeholder="Example: 1 card for User ID 1"
-          />
-
-          <button type="submit" class="mcp-action">Run Tool</button>
+            <label for="mcp_directory_path">MCP: Project Files</label>
+            <input id="mcp_directory_path" name="directory_path" type="text" value="..">
+            <button type="submit" class="mcp-action">Run Tool</button>
         </form>
 
-        <hr />
+        <div id="mcp-result" class="panel panel-mcp">MCP tool responses will appear here.</div>
+    </section>
+</main>
 
-        <form
-          id="mcp-project-form"
-          class="feature-form"
-          hx-post="http://localhost:8201/backend/project-files"
-          hx-target="#mcp-result"
-          hx-swap="innerHTML"
-        >
-          <label for="mcp_directory_path">MCP: Project Files</label>
-          <input
-            id="mcp_directory_path"
-            name="directory_path"
-            type="text"
-            value=".."
-          />
-          <button type="submit" class="mcp-action">Run Tool</button>
-        </form>
+<script>
+const mcpModeToggle = document.getElementById("mcp-mode-toggle");
+const mcpModeState = document.getElementById("mcp-mode-state");
+const mcpResultPanel = document.getElementById("mcp-result");
 
-        <div id="mcp-result" class="panel panel-mcp">
-          MCP tool responses will appear here.
-        </div>
+const MCP_STORAGE_KEY = "mcp_mode_enabled";
 
-        <hr />
+function isMcpEnabled() {
+    return mcpModeToggle.checked;
+}
 
-        <p>Test form</p>
-        <form id="cardCount" method="POST">
-          <button type="submit">Get Card Count</button>
-          <div id="cardCountAuth" class="panel"></div>
-        </form>
-      </section>
-    </main>
+function renderMcpState() {
+    if (isMcpEnabled()) {
+        mcpModeState.textContent = "ON";
+        mcpModeState.classList.add("feature-on");
+        mcpModeState.classList.remove("feature-off");
+    } else {
+        mcpModeState.textContent = "OFF";
+        mcpModeState.classList.add("feature-off");
+        mcpModeState.classList.remove("feature-on");
+    }
+}
 
-    <script>
-      // What I need to do:
-      // Connect these things to my backend code somehow
-      //  I literally am so lost as to what to actually do here
+function renderMcpDisabledMessage() {
+    mcpResultPanel.innerHTML = "<p>MCP Mode is OFF. Enable MCP Mode to run MCP tools.</p>";
+}
 
-      const mcpModeToggle = document.getElementById("mcp-mode-toggle");
-      const mcpModeState = document.getElementById("mcp-mode-state");
-      const mcpResultPanel = document.getElementById("mcp-result");
+function saveMcpMode() {
+    localStorage.setItem(MCP_STORAGE_KEY, String(isMcpEnabled()));
+}
 
-      const MCP_STORAGE_KEY = "mcp_mode_enabled";
+function loadMcpMode() {
+    const persisted = localStorage.getItem(MCP_STORAGE_KEY);
+    mcpModeToggle.checked = persisted === null ? true : persisted === "true";
+    renderMcpState();
+}
 
-      function isMcpEnabled() {
-        return mcpModeToggle.checked;
-      }
+mcpModeToggle.addEventListener("change", () => {
+    saveMcpMode();
+    renderMcpState();
 
-      function renderMcpState() {
-        if (isMcpEnabled()) {
-          mcpModeState.textContent = "ON";
-          mcpModeState.classList.add("feature-on");
-          mcpModeState.classList.remove("feature-off");
-        } else {
-          mcpModeState.textContent = "OFF";
-          mcpModeState.classList.add("feature-off");
-          mcpModeState.classList.remove("feature-on");
-        }
-      }
-
-      // Gives the ability to turn MCP on and off
-      // should also visually display
-      function renderMcpDisabledMessage() {
-        mcpResultPanel.innerHTML =
-          "<p>MCP Mode is OFF. Enable MCP Mode to run MCP tools.</p>";
-      }
-
-      function saveMcpMode() {
-        localStorage.setItem(MCP_STORAGE_KEY, String(isMcpEnabled()));
-      }
-
-      function loadMcpMode() {
-        const persisted = localStorage.getItem(MCP_STORAGE_KEY);
-        if (persisted === null) {
-          mcpModeToggle.checked = true;
-        } else {
-          mcpModeToggle.checked = persisted === "true";
-        }
-        renderMcpState();
-      }
-
-      mcpModeToggle.addEventListener("change", () => {
-        saveMcpMode();
-        renderMcpState();
-
-        if (!isMcpEnabled()) {
-          renderMcpDisabledMessage();
-        }
-      });
-
-      document.body.addEventListener("htmx:configRequest", (event) => {
-        const trigger = event.detail.elt;
-        if (trigger && trigger.classList.contains("mcp-action")) {
-          event.detail.headers["X-MCP-Mode"] = isMcpEnabled() ? "on" : "off";
-        }
-      });
-
-      document.body.addEventListener("htmx:beforeRequest", (event) => {
-        const trigger = event.detail.elt;
-        if (!trigger || !trigger.classList.contains("mcp-action")) {
-          return;
-        }
-
-        if (!isMcpEnabled()) {
-          event.preventDefault();
-          renderMcpDisabledMessage();
-        }
-      });
-
-      loadMcpMode();
-      if (!isMcpEnabled()) {
+    if (!isMcpEnabled()) {
         renderMcpDisabledMessage();
-      }
-      const BACKEND_URL = "http://localhost:8201";
+    }
+});
 
-      // MCP test form
-      const cardCountForm = document.getElementById("cardCount");
-      cardCountForm.addEventListener("submit", (event) => {
+// Tell the backend whether MCP mode is on. This custom header triggers a CORS preflight,
+// so the backend must allow it (see CORS(...) in the Flask app).
+document.body.addEventListener("htmx:configRequest", (event) => {
+    const trigger = event.detail.elt;
+    if (trigger && trigger.classList.contains("mcp-action")) {
+        event.detail.headers["X-MCP-Mode"] = isMcpEnabled() ? "on" : "off";
+    }
+});
+
+// Don't send anything when MCP mode is off.
+document.body.addEventListener("htmx:beforeRequest", (event) => {
+    const trigger = event.detail.elt;
+    if (!trigger || !trigger.classList.contains("mcp-action")) {
+        return;
+    }
+
+    if (!isMcpEnabled()) {
         event.preventDefault();
-        const cardCountFormData = new URLSearchParams(
-          new FormData(cardCountForm)
-        );
+        renderMcpDisabledMessage();
+    }
+});
 
-        renderIntoPanel("cardCountAuth", `${BACKEND_URL}/mcp/card-count`, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: cardCountFormData,
-        });
-      });
-    </script>
-  </body>
+// htmx ignores 4xx/5xx responses by default. Swap them in so error messages from the backend show up.
+document.body.addEventListener("htmx:beforeSwap", (event) => {
+    if (event.detail.xhr.status >= 400) {
+        event.detail.shouldSwap = true;
+        event.detail.isError = false;
+    }
+});
+
+// Network-level failures (backend down, CORS blocked, etc.) never reach beforeSwap.
+document.body.addEventListener("htmx:sendError", () => {
+    mcpResultPanel.innerHTML =
+        "<p>Could not reach the backend at localhost:8201. Check that the container is running and CORS is enabled.</p>";
+});
+
+loadMcpMode();
+if (!isMcpEnabled()) {
+    renderMcpDisabledMessage();
+}
+</script>
+
+</body>
 </html>
