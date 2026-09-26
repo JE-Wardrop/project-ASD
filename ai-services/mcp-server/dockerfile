@@ -1,10 +1,5 @@
 FROM python:3.12-slim
 
-# docker-compose.yml has an explanation as to why this is commented out (non-working)
-# I am now trying to use stido instead of HTTP to see if this will get better results
-
-# agentic_loop runs the same without this
-
 # WORKDIR /app
 
 # COPY requirements.txt .
@@ -13,6 +8,7 @@ FROM python:3.12-slim
 
 # COPY . .
 
+# # EXPOSE 8000
 # EXPOSE 5500
 
 # CMD ["python", "server.py"]

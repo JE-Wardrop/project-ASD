@@ -1,122 +1,176 @@
-import json
-import sqlite3
-from pathlib import Path
+"""MCP tools — call each feature's database API over HTTP.
+ 
+Rule this file exists to enforce (Release 0 architecture invariant,
+Cross-Feature Database API Integration): no tool opens another feature's
+.db file directly. Every tool goes through that feature's exposed HTTP
+API, the same way student-5/backend/services/accounts_api.py already
+calls http://student2-database:5002 for the balance-adjustment endpoint.
+ 
+The MCP server runs on the host (not in Docker), and docker-compose.yml
+already publishes each database service on a host port, so tools call
+"localhost:<port>" directly — no host.docker.internal needed here; that
+mapping is only for container -> host calls, not host -> container.
+"""
+ 
+import os
+ 
+import requests
+ 
+# One base URL per feature's database API
+DB_API_URLS = {
+    1: os.getenv("STUDENT1_DB_URL", "http://localhost:8301"),  # Cards
+    2: os.getenv("STUDENT2_DB_URL", "http://localhost:8302"),  # Accounts
+    3: os.getenv("STUDENT3_DB_URL", "http://localhost:8303"),  # Notifications
+    4: os.getenv("STUDENT4_DB_URL", "http://localhost:8304"),  # Users
+    5: os.getenv("STUDENT5_DB_URL", "http://localhost:8305"),  # Transactions
+}
+ 
+REQUEST_TIMEOUT = 5  # seconds — a tool must fail fast, not hang the server
+ 
+ 
+def _get(base_url: str, path: str, params: dict | None = None) -> dict:
+    """Shared HTTP GET helper. Never raises — returns a structured error
+    dict instead, so a bad call surfaces as a tool result, not a crash.
+    """
+    try:
+        resp = requests.get(f"{base_url}{path}", params=params, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        return resp.json()
+    except requests.exceptions.ConnectionError:
+        return {"error": f"Database API unreachable at {base_url}. Is the container running?"}
+    except requests.exceptions.Timeout:
+        return {"error": f"Database API at {base_url} did not respond in {REQUEST_TIMEOUT}s"}
+    except requests.exceptions.HTTPError as exc:
+        return {"error": f"Database API returned {resp.status_code}", "detail": str(exc)}
+ 
+
+# def list_project_files(directory_path: str = ".."):  # relative to mcp-server/
+#     path = (BASE_DIR / directory_path).resolve()
+#     if not path.exists() or not path.is_dir():
+#         return {"error": f"Directory not found: {path}"}
+
+#     return sorted(item.name for item in path.iterdir())
 
 
-# Will have to be based off each student's database
-# I don't know how to do this in an effcient way
+# def read_ci_report(report_path: str = "../reports/report.json"):
+#     report_file = (BASE_DIR / report_path).resolve()
+#     if not report_file.exists():
+#         return {
+#             "error": "Report not found",
+#             "path": str(report_file),
+#             "hint": "Run Lab 05 workflow_dispatch to generate report.json",
+#         }
 
-BASE_DIR = Path(__file__).resolve().parent
-AI_SERVICES_DIR = BASE_DIR.parent
-STUDENT_LOCATION_PATHS = AI_SERVICES_DIR.parent
-
-# you may have to reinitalise your database if you were having issues like I was lmao
-DB_S1_PATH = STUDENT_LOCATION_PATHS / "student-1" / "database" / "cm.db"
-
-
-# commented these out for now as they contain dummy data that will cause errors
-
-# DB_S2_PATH = STUDENT_LOCATION_PATHS / "student-2" / "database" / "databasename.db"
-# DB_S3_PATH = STUDENT_LOCATION_PATHS / "student-3" / "database" / "databasename.db"
-# DB_S4_PATH = STUDENT_LOCATION_PATHS / "student-4" / "database" / "databasename.db"
-
-# #student 5 will have to do this differently i think due to not having hte same set up
-# DB_S5_PATH = STUDENT_LOCATION_PATHS / "student-5" / "database" / "databasename.db"
+#     with report_file.open("r", encoding="utf-8") as file:
+#         return json.load(file)
 
 
-def _connect_db():
-    if not DB_S1_PATH.exists():
-        raise FileNotFoundError(f"Database not found: {DB_S1_PATH}")
 
-    # if not DB_S2_PATH.exists():
-    #     raise FileNotFoundError(f"Database not found: {DB_S2_PATH}")
+# Student 1 (Card Management) 
+# database API (student-1/database/app.py: GET /cards, GET /cards/<id>, GET /cards/by-type, GET /cards/by-status, POST /cards/create, PUT /cards/<id>, DELETE /cards/<id>, POST /cards/freeze, POST /cards/unfreeze)
 
-    # if not DB_S3_PATH.exists():
-    #     raise FileNotFoundError(f"Database not found: {DB_S3_PATH}")
+def card_count() -> dict:
+    cards = _get(DB_API_URLS[1], "/cards")
+    if isinstance(cards, dict) and "error" in cards:
+        return cards
+    return {"card_count": len(cards)}
 
-    # if not DB_S4_PATH.exists():
-    #     raise FileNotFoundError(f"Database not found: {DB_S4_PATH}")
 
-    # if not DB_S5_PATH.exists():
-    #     raise FileNotFoundError(f"Database not found: {DB_S5_PATH}")
-
+# change all instances of "get_cards_by_user" to "get_cards_per_user"
+def cards_per_user(user_id: int) -> dict:
+    cards = _get(DB_API_URLS[1], "/cards")
+    if isinstance(cards, dict) and "error" in cards:
+        return cards
+    matching = [c for c in cards if c.get("user_id") == user_id]
+    return {"user_id": user_id, "card_count": len(matching), "cards": matching}
     
-    conn = sqlite3.connect(DB_S1_PATH)
-
-    # conn = sqlite3.connect(DB_S2_PATH)
-    # conn = sqlite3.connect(DB_S3_PATH)
-    # conn = sqlite3.connect(DB_S4_PATH)
-    # conn = sqlite3.connect(DB_S5_PATH)
-
-    conn.row_factory = sqlite3.Row
-    return conn
+    
 
 
+# Transaction Management (student-5)
+# student-5/database/app.py: GET /transactions, GET /transactions/<id>
 
-
-
-# def health(){
-#     
-# }
-
-
-def list_project_files(directory_path: str = ".."):  # relative to mcp-server/
-    path = (BASE_DIR / directory_path).resolve()
-    if not path.exists() or not path.is_dir():
-        return {"error": f"Directory not found: {path}"}
-
-    return sorted(item.name for item in path.iterdir())
-
-
-def read_ci_report(report_path: str = "../reports/report.json"):
-    report_file = (BASE_DIR / report_path).resolve()
-    if not report_file.exists():
-        return {
-            "error": "Report not found",
-            "path": str(report_file),
-            "hint": "Run Lab 05 workflow_dispatch to generate report.json",
-        }
-
-    with report_file.open("r", encoding="utf-8") as file:
-        return json.load(file)
-
-
-
-# For each database
-
-def debug_file_path():
-    print(BASE_DIR)
-    print(AI_SERVICES_DIR)
-    print(STUDENT_LOCATION_PATHS)
-    print(f"specific student:", DB_S1_PATH) 
-    print(_connect_db())
-
-
-def get_card_count():
-    conn = _connect_db()
-    try:
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) AS card_count FROM cards")
-        row = cursor.fetchone()
-        return {"card_count": row[0] if row else 0}
-    finally:
-        conn.close()
-
-
-def get_card_per_user():
-    conn = _connect_db()
-    try:
-        cursor = conn.cursor()
-        cursor.execute("SELECT user_id, card_id FROM cards" 
-                       "")
-        row = cursor.fetchone()
-        return {"get_card_per_user": row[0] if row else 0}
-    finally:
-        conn.close()
-
-
+VALID_TXN_TYPES = {"DEPOSIT", "WITHDRAWAL", "TRANSFER"}
+VALID_TXN_STATUSES = {"PENDING", "COMPLETED", "FAILED", "CANCELLED"}
+ 
+ 
+def list_transactions(
+    account_id: int | None = None,
+    transaction_type: str | None = None,
+    status: str | None = None,
+    limit: int = 20,
+) -> dict:
+    """List transactions, optionally filtered by account, type or status.
+ 
+    account_id matches either the sender or the receiver side.
+    """
+    if transaction_type is not None and transaction_type.upper() not in VALID_TXN_TYPES:
+        return {"error": f"transaction_type must be one of {sorted(VALID_TXN_TYPES)}"}
+    
+    if status is not None and status.upper() not in VALID_TXN_STATUSES:
+        return {"error": f"status must be one of {sorted(VALID_TXN_STATUSES)}"}
+ 
+    params = {
+        "account_id": account_id,
+        "type": transaction_type,
+        "status": status,
+        "limit": max(1, min(limit, 100)),
+    }
+    # Drop unset filters instead of sending them as the string "None"
+    params = {k: v for k, v in params.items() if v is not None}
+ 
+    return _get(DB_API_URLS[5], "/transactions", params=params)
+ 
+ 
+def get_transaction(transaction_id: int) -> dict:
+    """Fetch a single transaction by its id."""
+    return _get(DB_API_URLS[5], f"/transactions/{transaction_id}")
+ 
+ 
+def summarize_account_activity(account_id: int) -> dict:
+    """Aggregate a snapshot of an account's transaction activity.
+ 
+    All arithmetic happens here in Python, not in the LLM (NFR-02: the
+    model never computes money) — this tool hands the model finished
+    numbers to narrate, not raw rows to add up itself.
+    """
+    result = list_transactions(account_id=account_id, limit=100)
+    if "error" in result:
+        return result
+ 
+    transactions = result.get("transactions", [])
+    total_in = 0.0
+    total_out = 0.0
+    by_status: dict[str, int] = {}
+ 
+    for txn in transactions:
+        by_status[txn["status"]] = by_status.get(txn["status"], 0) + 1
+        if txn["status"] != "COMPLETED":
+            continue
+        if txn["receiver_account_id"] == account_id:
+            total_in += txn["amount"]
+        if txn["sender_account_id"] == account_id:
+            total_out += txn["amount"]
+ 
+    return {
+        "account_id": account_id,
+        "transaction_count": len(transactions),
+        "total_in": round(total_in, 2),
+        "total_out": round(total_out, 2),
+        "net": round(total_in - total_out, 2),
+        "by_status": by_status,
+    }
+ 
+ 
+# ---------------------------------------------------------------------------
+# Manual validation — mirrors the lab's "Terminal B" pattern, but every
+# call here goes over HTTP, so it only proves something when the actual
+# student5-db container (or a local run of student-5/database/app.py) is
+# reachable at DB_API_URLS[5].
+# ---------------------------------------------------------------------------
+ 
 if __name__ == "__main__":
-    print(get_card_count())
-    print(get_card_per_user())
-    print(list_project_files(".."))
-    print(read_ci_report("../reports/report.json"))
+    print("DB_API_URLS:", DB_API_URLS)
+    print(list_transactions(limit=5))
+    print(summarize_account_activity(account_id=1))
+ 

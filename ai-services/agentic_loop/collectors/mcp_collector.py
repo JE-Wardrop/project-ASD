@@ -10,7 +10,7 @@ REQUIRED_MCP_TOOLS = [
     "project_files", 
     "ci_report",
 
-    # tools for db's
+    # Card Management (student-1)
     "card_count",
     "card_per_user",
 
@@ -21,7 +21,7 @@ REQUIRED_FUNCTIONS = {
     "project_files": "list_project_files",
     "ci_report": "read_ci_report",
 
-    #functions for db's
+    # Card Management (student-1)
     "card_count": "get_card_count",
     "card_per_user": "get_card_per_user",
 }
