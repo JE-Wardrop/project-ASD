@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify
 from services.mcp_client import call_mcp_tool
 from flask import request
-import json
 import os
 mcp_mode_bp = Blueprint("mcp_mode", __name__)
 
