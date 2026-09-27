@@ -28,8 +28,19 @@ client = OpenAI(
 
 from routes.ai_mode import ai_mode_bp
 from routes.normal_mode import normal_mode_bp
-# from routes.mcp_mode import mcp_mode_bp
-# from routes.rag_mode import rag_mode_bp
+
+
+try:
+    from routes.mcp_mode import mcp_mode_bp
+except Exception as e:
+    print(f"mcp_mode failed to load: {e}")
+    mcp_mode_bp = None
+
+try:
+    from routes.rag_mode import rag_mode_bp
+except Exception as e:
+    print(f"rag_mode failed to load: {e}")
+    rag_mode_bp = None
 
 
 def get_db_connection():
@@ -49,10 +60,11 @@ def create_app():
     # These issues make the backend unuseable completely. I'm not sure why but this entire
     # app.py must not run at all even if only mcp_mode_bp and rag_mode_bp are broken.
 
-
-    # app.register_blueprint(mcp_mode_bp)
-    # app.register_blueprint(rag_mode_bp)
-    
+    if mcp_mode_bp:
+        app.register_blueprint(mcp_mode_bp)
+    if rag_mode_bp:
+        app.register_blueprint(rag_mode_bp)
+        
     print("blueprints are running.")
 
     return app

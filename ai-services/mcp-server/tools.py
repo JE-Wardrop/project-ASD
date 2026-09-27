@@ -26,7 +26,7 @@ DB_API_URLS = {
 }
  
 REQUEST_TIMEOUT = 5  # seconds — a tool must fail fast, not hang the server
- 
+
  
 def _get(base_url: str, path: str, params: dict | None = None) -> dict:
     """Shared HTTP GET helper. Never raises — returns a structured error
@@ -69,15 +69,14 @@ def _get(base_url: str, path: str, params: dict | None = None) -> dict:
 # Student 1 (Card Management) 
 # database API (student-1/database/app.py: GET /cards, GET /cards/<id>, GET /cards/by-type, GET /cards/by-status, POST /cards/create, PUT /cards/<id>, DELETE /cards/<id>, POST /cards/freeze, POST /cards/unfreeze)
 
-def card_count() -> dict:
+def get_card_count() -> dict:
     cards = _get(DB_API_URLS[1], "/cards")
     if isinstance(cards, dict) and "error" in cards:
         return cards
     return {"card_count": len(cards)}
 
 
-# change all instances of "get_cards_by_user" to "get_cards_per_user"
-def cards_per_user(user_id: int) -> dict:
+def get_card_per_user(user_id: int) -> dict:
     cards = _get(DB_API_URLS[1], "/cards")
     if isinstance(cards, dict) and "error" in cards:
         return cards

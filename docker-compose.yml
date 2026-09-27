@@ -60,8 +60,13 @@ services:
       - "8201:5001"
     environment:
       DATABASE_SERVICE_URL: http://student-1-database:5002
+
+      # This for reason stopped working and idk why
+      # I think this is an issue with the docker as I have qwen installed on my machine
       OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
       OLLAMA_MODEL: qwen2.5:0.5b
+
+      MCP_SERVER_URL: http://host.docker.internal:5500/mcp
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -122,7 +127,7 @@ services:
       - student2_db_data:/app/data
     restart: unless-stopped
  
-  #  STUDENT 5 - Gia Tran - Transaction Management
+  # STUDENT 5 - Gia Tran - Transaction Management
  
   student5-db:
     build: ./student-5/database
