@@ -1,32 +1,14 @@
-from flask import Blueprint, jsonify
+import json
+from flask import Blueprint, jsonify, request
+
 from services.mcp_client import call_mcp_tool
-from services.database_api import (
-    create_card_response,
-    delete_card_response,
-    update_card_response,
-    get_card_by_id_response,
-    get_cards_by_type_response,
-    freeze_card_response,
-    unfreeze_card_response,
-)
-from views.html_formatters import format_card_html, format_cards_html
-
-
-
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-APP_DIR = BASE_DIR.parent
+from services.database_api import get_cards
 
 mcp_mode_bp = Blueprint("mcp_mode", __name__)
 
-MCP_ENABLED = os.getenv("MCP_ENABLED", "true").lower() == "true"
-
-
 
 def mcp_mode_is_enabled(req) -> bool:
-    import os
-
-    enabled = os.getenv("MCP_ENABLED", "true").strip().lower() in ("1", "true", "yes", "on")
+    enabled = __import__("os").getenv("MCP_ENABLED", "true").strip().lower() in ("1", "true", "yes", "on")
     if not enabled:
         return False
 
@@ -38,7 +20,7 @@ def mcp_disabled_response():
     return "<p>MCP Mode is disabled.</p>", 403
 
 
-def mcp_render_json(title: str, payload):
+def mcp_render_json(title: str, payload) -> str:
     return f"<h3>{title}</h3><pre>{json.dumps(payload, indent=2)}</pre>"
 
 
@@ -53,31 +35,40 @@ def mcp_card_count():
         return mcp_disabled_response()
 
     try:
-        return jsonify(call_mcp_tool("card_count")), 200
-    except requests.RequestException as exc:
+        result = call_mcp_tool("card_count")
+        if isinstance(result, dict) and "error" in result:
+            return mcp_render_json("MCP Tool: card count (error)", result), 503
+        return mcp_render_json("MCP Tool: card count", result), 200
+    except Exception as exc:
         return (
             "<p>MCP card count failed.</p>"
             f"<pre>{exc}</pre>",
             503,
         )
-    
+
+
 @mcp_mode_bp.post("/mcp/card-per-user")
 def mcp_card_per_user():
     if not mcp_mode_is_enabled(request):
         return mcp_disabled_response()
 
-    user_id_raw = request.form.get("card_per_user_id", "").strip()
-    if not user_id_raw:
+    raw_user_id = request.form.get("card_per_user_id", "").strip()
+    if not raw_user_id:
         return "<p>user_id is required.</p>", 400
 
     try:
-        user_id = int(user_id_raw)
+        user_id = int(raw_user_id)
     except ValueError:
         return "<p>user_id must be a number.</p>", 400
 
-    result = call_mcp_tool("cards_by_user", {"user_id": user_id})
-    return mcp_render_json("MCP Tool: cards by user", result), 200
-
-
-
-    
+    try:
+        result = call_mcp_tool("card_per_user", {"user_id": user_id})
+        if isinstance(result, dict) and "error" in result:
+            return mcp_render_json("MCP Tool: card per user (error)", result), 503
+        return mcp_render_json("MCP Tool: card per user", result), 200
+    except Exception as exc:
+        return (
+            "<p>MCP card per user failed.</p>"
+            f"<pre>{exc}</pre>",
+            503,
+        )
