@@ -51,18 +51,6 @@
 
         <hr>
 
-        <form
-            id="mcp-project-form"
-            class="feature-form"
-            hx-post="http://localhost:8201/mcp/project-files"
-            hx-target="#mcp-result"
-            hx-swap="innerHTML"
-        >
-            <label for="mcp_directory_path">MCP: Project Files</label>
-            <input id="mcp_directory_path" name="directory_path" type="text" value="..">
-            <button type="submit" class="mcp-action">Run Tool</button>
-        </form>
-
         <div id="mcp-result" class="panel panel-mcp">
           MCP tool responses will appear here.
         </div>
@@ -70,9 +58,6 @@
     </main>
 
     <script>
-      // What I need to do:
-      // Connect these things to my backend code somehow
-      //  I literally am so lost as to what to actually do here
 
       const mcpModeToggle = document.getElementById("mcp-mode-toggle");
       const mcpModeState = document.getElementById("mcp-mode-state");
