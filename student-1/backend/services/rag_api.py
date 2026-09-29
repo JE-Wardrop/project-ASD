@@ -2,9 +2,6 @@ import os
 
 import requests
 
-# might change where the rag service is to 5501
-
-
 RAG_SERVICE_URL = os.getenv("RAG_SERVICE_URL", "http://rag-server:5003")
 RAG_ENABLED = os.getenv("RAG_ENABLED", "true").strip().lower() in ("1", "true", "yes", "on")
 
