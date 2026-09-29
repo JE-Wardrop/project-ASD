@@ -42,6 +42,7 @@ jobs:
     needs: [tests]
     env:
       MCP_ENABLED: "false" # Disable MCP for CI smoke test
+      RAG_ENABLED: "false" # Disable RAG for CI smoke test
     steps:
       - uses: actions/checkout@v4
 
@@ -79,7 +80,7 @@ jobs:
           check_url "http://localhost:8105/"
           check_url "http://localhost:8205/health"
           check_url "http://localhost:8305/health"
-
+      # MCP
       - name: Confirm MCP is disabled in CI
         run: |
           code=$(curl -sS -o /tmp/mcp_response.json -w "%{http_code}" \
@@ -91,6 +92,19 @@ jobs:
             exit 1
           fi
           echo "PASS - MCP correctly disabled in CI"
+      # RAG
+      - name: Confirm RAG is disabled in CI
+        run: |
+          code=$(curl -sS -o /tmp/rag_response.json -w "%{http_code}" \
+                  -X POST -d "query=test" \
+                  http://localhost:8205/rag/answer)
+          echo "RAG endpoint returned: $code"
+          cat /tmp/rag_response.json
+          if [ "$code" != "403" ]; then
+            echo "Expected 403 (RAG disabled) but got $code"
+            exit 1
+          fi
+          echo "PASS - RAG correctly disabled in CI"
 
       - name: Stop services
         if: always()
