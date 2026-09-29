@@ -266,7 +266,6 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
             "- Accepting proposals without evidence"
             "- Approving changes outside tool scope"
             "- Vague retest steps"
-            ,
         )
 
         review_user_prompt = mcp_pipeline.build_review_prompt(implementation_output, evidence)

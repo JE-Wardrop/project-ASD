@@ -1,6 +1,16 @@
+"""RAG pipeline for the Digital Banking System — adapted from Lab 8.
+
+Same flow and function names as Lab 8:
+    REFRESH  -> refresh_corpus()
+    RETRIEVE -> retrieve_context()
+    ANSWER   -> answer_question()
+
+Every place that differs from Lab 8 is marked with  # CHANGED FROM LAB 8
+"""
+
 import json
 import os
-import sqlite3
+import re
 import time
 import uuid
 import hashlib
@@ -12,81 +22,80 @@ import chromadb
 import requests
 
 BASE_DIR = Path(__file__).resolve().parent
-APP_DIR = BASE_DIR.parent
-REPO_ROOT = APP_DIR.parent
-
-
-REPORTS_DIR = APP_DIR / "reports"
+KNOWLEDGE_DIR = BASE_DIR / "knowledge"  # CHANGED FROM LAB 8: replaces REPORTS_DIR
 CORPUS_PATH = BASE_DIR / "corpus" / "corpus.jsonl"
 AUDIT_PATH = BASE_DIR / "rag-audit.jsonl"
 CHROMA_PATH = BASE_DIR / "chroma"
 
+# CHANGED FROM LAB 8: Lab 8 opened one SQLite file (DB_PATH_CANDIDATES).
+# Here each feature owns its database, so we call its database API over HTTP.
+# The RAG server runs on the host, so it uses the ports published in
+# docker-compose.yml.
+DB_API_URLS = {
+    "cards": os.getenv("STUDENT1_DB_URL", "http://localhost:8301"),
+    "accounts": os.getenv("STUDENT2_DB_URL", "http://localhost:8302"),
+    "users": os.getenv("STUDENT4_DB_URL", "http://localhost:8304"),
+    "transactions": os.getenv("STUDENT5_DB_URL", "http://localhost:8305"),
+}
 
-DATABASE_S1 = os.getenv("DATABASE_S1", "http://database:8301")
-# DATABASE_S2 = os.getenv("DATABASE_S2", "http://database:8302")
-# DATABASE_S3 = os.getenv("DATABASE_S3", "http://database:8303")
-# DATABASE_S4 = os.getenv("DATABASE_S4", "http://database:8304")
-# DATABASE_S5 = os.getenv("DATABASE_S5", "http://database:8305")
+# CHANGED FROM LAB 8: which endpoint to read for each feature, and which
+# fields go into the corpus. Card numbers, account numbers, emails and
+# phone numbers are left out on purpose.
+DB_SOURCES = {
+    "cards": {
+        "path": "/cards",
+        "id_field": "card_id",
+        "fields": ["card_id", "user_id", "card_type", "status", "expiry_date"],
+    },
+    "accounts": {
+        "path": "/accounts",
+        "id_field": "account_id",
+        "fields": ["account_id", "user_id", "account_type", "account_status", "balance"],
+    },
+    "users": {
+        "path": "/users",
+        "id_field": "user_id",
+        "fields": ["user_id", "username", "role"],
+    },
+    "transactions": {
+        "path": "/transactions",
+        "id_field": "transaction_id",
+        "fields": [
+            "transaction_id", "transaction_type", "status", "amount",
+            "sender_account_id", "receiver_account_id", "description", "created_at",
+        ],
+    },
+}
 
-DB_PATH_CANDIDATES = [
-    REPO_ROOT / "student-1" / "database" / "cm.db",
-    # REPO_ROOT / "student-2" / "database" / "database.db",
-    # REPO_ROOT / "student-3" / "database" / "database.db",
-    # REPO_ROOT / "student-4" / "database" / "database.db",
-    # REPO_ROOT / "student-5" / "database" / "database.db",
-]
-
-
-
-
-REPORT_FILES = [
-    "report.json",
-    "run-report.md",
-    "integration-report.md",
-    "tool-review.md",
-    "boundary-analysis.md",
-]
+OLLAMA_GENERATE_URL = os.getenv("OLLAMA_GENERATE_URL", "http://localhost:11434/api/generate")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:0.5b")
 
 COLLECTION_NAME = "bank_system_enterprise_context"
 EMBED_VECTOR_SIZE = 256
 
+INSUFFICIENT_ANSWER = "Insufficient context: no relevant records were found for this question."
+
+# CHANGED FROM LAB 8: common words ignored when checking if a chunk is relevant.
+STOPWORDS = {
+    "a", "an", "the", "is", "are", "was", "were", "be", "what", "which", "who",
+    "why", "how", "when", "where", "do", "does", "did", "can", "i", "me", "my",
+    "you", "your", "it", "of", "in", "on", "at", "to", "for", "from", "by",
+    "with", "about", "and", "or", "there", "this", "that", "any", "all",
+    "show", "list", "tell", "give", "please", "many", "much", "have", "has",
+    "today", "now",
+}
+
 _collection = None
 _last_corpus_chunks: list[dict[str, Any]] = []
-
-def debug_paths():
-    pass
-    # print( f"base dir ", BASE_DIR)
-    # print( f"app directory ", APP_DIR)
-    # print( f"reports directory ", REPORTS_DIR)
-    # print( f"corpus directory ",CORPUS_PATH)
-    # print( f"audit directory ",AUDIT_PATH)
-    # print( f"chromas directory ",CHROMA_PATH )
-    # print(f"db candidates: ", DB_PATH_CANDIDATES)
-    # print (f"db base (repo_root) ", REPO_ROOT)
-
-# base dir  /home/juno/Desktop/ASD 2026/project-ASD/ai-services/rag-server
-# app directory  /home/juno/Desktop/ASD 2026/project-ASD/ai-services
-# reports directory  /home/juno/Desktop/ASD 2026/project-ASD/ai-services/reports
-# corpus directory  /home/juno/Desktop/ASD 2026/project-ASD/ai-services/rag-server/corpus/corpus.jsonl
-# audit directory  /home/juno/Desktop/ASD 2026/project-ASD/ai-services/rag-server/rag-audit.jsonl
-# chromas directory  /home/juno/Desktop/ASD 2026/project-ASD/ai-services/rag-server/chroma
-# db base (repo_root)  /home/juno/Desktop/ASD 2026/project-ASD
-
-
+_unavailable_sources: dict[str, str] = {}
 
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def resolve_db_path() -> Path:
-    for path in DB_PATH_CANDIDATES:
-        if path.exists():
-            return path
-    return DB_PATH_CANDIDATES[0]
-
-
 def embed_texts(texts: list[str]) -> list[list[float]]:
+    # Same as Lab 8: hash each word into a 256-number vector.
     vectors: list[list[float]] = []
 
     for text in texts:
@@ -167,144 +176,73 @@ def chunk_text(text: str, max_words: int = 80) -> list[str]:
     return chunks
 
 
-# Will have to look at the theory regarding this to see how this can be implemented with our databases and microservices
-# It will have to work for all database schema
-
 def load_database_chunks() -> list[dict[str, Any]]:
-    db_path = resolve_db_path()
-    if not db_path.exists():
-        # In containers, rag-server may not have direct filesystem access to SQLite.
-        # Fallback to database-service HTTP API so tier_1 facts remain available.
-        try:
-            response = requests.get(f"{DATABASE_SERVICE_URL}/students", timeout=10)
-            response.raise_for_status()
-            students = response.json()
-
-            chunks: list[dict[str, Any]] = [
-                {
-                    "chunk_id": "db_service_student_count",
-                    "source_id": "database-service:/students",
-                    "authority_tier": "tier_1",
-                    "text": f"Student count is {len(students)}.",
-                    "metadata": {"source_type": "database_service", "metric": "count"},
-                    "indexed_at": now_iso(),
-                }
-            ]
-
-            for row in students[:500]:
-                sid = row.get("student_id", "unknown")
-                sname = row.get("student_name", "unknown")
-                subject = row.get("subject_code", "unknown")
-                chunks.append(
-                    {
-                        "chunk_id": f"db_service_student_{sid}",
-                        "source_id": "database-service:/students",
-                        "authority_tier": "tier_1",
-                        "text": (
-                            f"Student record: student_id={sid}, "
-                            f"student_name={sname}, subject_code={subject}."
-                        ),
-                        "metadata": {"source_type": "database_service", "table": "students"},
-                        "indexed_at": now_iso(),
-                    }
-                )
-
-            return chunks
-        except Exception as exc:
-            return [
-                {
-                    "chunk_id": "db_missing",
-                    "source_id": str(db_path.relative_to(APP_DIR)) if db_path.is_absolute() else str(db_path),
-                    "authority_tier": "tier_1",
-                    "text": (
-                        f"Database file not found: {db_path}. "
-                        f"database-service fallback failed: {exc}"
-                    ),
-                    "metadata": {"source_type": "database", "exists": False},
-                    "indexed_at": now_iso(),
-                }
-            ]
-
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
+    # CHANGED FROM LAB 8: loops over every feature's database API instead of
+    # reading one SQLite file. A database that is down is recorded in
+    # _unavailable_sources and skipped — its error never becomes a chunk.
+    _unavailable_sources.clear()
     chunks: list[dict[str, Any]] = []
-    try:
-        tables = [
-            row["name"]
-            for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
-        ]
+
+    for feature, source in DB_SOURCES.items():
+        url = DB_API_URLS[feature] + source["path"]
+        try:
+            response = requests.get(url, params={"limit": 500}, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+        except Exception as exc:
+            _unavailable_sources[feature] = str(exc)
+            continue
+
+        # /transactions returns {"transactions": [...]}; the others return a list.
+        records = data.get(feature, []) if isinstance(data, dict) else data
+
         chunks.append(
             {
-                "chunk_id": "db_schema",
-                "source_id": str(db_path.relative_to(APP_DIR)),
+                "chunk_id": f"{feature}_count",
+                "source_id": url,
                 "authority_tier": "tier_1",
-                "text": f"Database tables: {', '.join(tables)}",
-                "metadata": {"source_type": "database", "tables": tables},
+                "text": f"{feature.capitalize()} count is {len(records)}.",
+                "metadata": {"source_type": "database", "feature": feature, "metric": "count"},
                 "indexed_at": now_iso(),
             }
         )
 
-        if "students" in tables:
-            row = conn.execute("SELECT COUNT(*) AS count FROM students").fetchone()
-            count = row["count"] if row else 0
+        for record in records[:500]:
+            fields = ", ".join(f"{name}={record.get(name)}" for name in source["fields"])
+            record_id = record.get(source["id_field"])
             chunks.append(
                 {
-                    "chunk_id": "db_student_count",
-                    "source_id": str(db_path.relative_to(APP_DIR)),
+                    "chunk_id": f"{feature}_{record_id}",
+                    "source_id": url,
                     "authority_tier": "tier_1",
-                    "text": f"Student count is {count}.",
-                    "metadata": {"source_type": "database", "table": "students", "metric": "count"},
+                    "text": f"{feature.capitalize()} record: {fields}.",
+                    "metadata": {"source_type": "database", "feature": feature},
                     "indexed_at": now_iso(),
                 }
             )
 
-            for row in conn.execute(
-                "SELECT student_id, student_name, subject_code FROM students ORDER BY student_id LIMIT 500"
-            ).fetchall():
-                r = dict(row)
-                chunks.append(
-                    {
-                        "chunk_id": f"db_student_{r['student_id']}",
-                        "source_id": str(db_path.relative_to(APP_DIR)),
-                        "authority_tier": "tier_1",
-                        "text": (
-                            f"Student record: student_id={r['student_id']}, "
-                            f"student_name={r['student_name']}, subject_code={r['subject_code']}."
-                        ),
-                        "metadata": {"source_type": "database", "table": "students"},
-                        "indexed_at": now_iso(),
-                    }
-                )
-    finally:
-        conn.close()
-
     return chunks
 
 
-def load_report_chunks() -> list[dict[str, Any]]:
+def load_knowledge_chunks() -> list[dict[str, Any]]:
+    # CHANGED FROM LAB 8: replaces load_report_chunks(). Reads the business
+    # rules each student writes in knowledge/<feature>.md (tier_2, like
+    # Lab 8's reports).
     chunks: list[dict[str, Any]] = []
-    for name in REPORT_FILES:
-        path = REPORTS_DIR / name
-        if not path.exists():
-            continue
+    if not KNOWLEDGE_DIR.exists():
+        return chunks
 
-        text = ""
-        try:
-            if path.suffix == ".json":
-                text = json.dumps(json.loads(path.read_text(encoding="utf-8")), indent=2)
-            else:
-                text = path.read_text(encoding="utf-8", errors="ignore")
-        except Exception:
-            text = path.read_text(encoding="utf-8", errors="ignore")
-
+    for path in sorted(KNOWLEDGE_DIR.glob("*.md")):
+        feature = path.stem
+        text = path.read_text(encoding="utf-8", errors="ignore")
         for i, chunk in enumerate(chunk_text(text), start=1):
             chunks.append(
                 {
-                    "chunk_id": f"{path.stem}_{i}",
-                    "source_id": f"reports/{name}",
+                    "chunk_id": f"knowledge_{feature}_{i}",
+                    "source_id": f"knowledge/{path.name}",
                     "authority_tier": "tier_2",
                     "text": chunk,
-                    "metadata": {"source_type": "report", "file": name},
+                    "metadata": {"source_type": "knowledge", "feature": feature},
                     "indexed_at": now_iso(),
                 }
             )
@@ -312,53 +250,12 @@ def load_report_chunks() -> list[dict[str, Any]]:
     return chunks
 
 
-def load_repository_chunks() -> list[dict[str, Any]]:
-    ignored = {".git", ".venv", "__pycache__", "node_modules", "chroma"}
-    files: list[str] = []
-
-    for root, dirs, filenames in os.walk(APP_DIR, topdown=True, followlinks=False, onerror=lambda e: None):
-        # Prune ignored and symlinked directories to avoid scanning protected mounts.
-        pruned_dirs: list[str] = []
-        for directory_name in dirs:
-            if directory_name in ignored:
-                continue
-            directory_path = Path(root) / directory_name
-            try:
-                if directory_path.is_symlink():
-                    continue
-            except OSError:
-                continue
-            pruned_dirs.append(directory_name)
-        dirs[:] = pruned_dirs
-
-        for filename in filenames:
-            file_path = Path(root) / filename
-            try:
-                if file_path.is_symlink():
-                    continue
-                rel = file_path.relative_to(APP_DIR)
-                files.append(str(rel).replace("\\", "/"))
-            except (OSError, ValueError):
-                continue
-
-    text = "Repository files include: " + ", ".join(sorted(files[:400]))
-    return [
-        {
-            "chunk_id": "repo_index",
-            "source_id": "repository",
-            "authority_tier": "tier_3",
-            "text": text,
-            "metadata": {"source_type": "repository", "file_count": len(files)},
-            "indexed_at": now_iso(),
-        }
-    ]
-
-
 def build_corpus() -> list[dict[str, Any]]:
+    # CHANGED FROM LAB 8: load_repository_chunks() was removed. It added one
+    # long list of file names that matched almost any question.
     chunks: list[dict[str, Any]] = []
     chunks.extend(load_database_chunks())
-    chunks.extend(load_report_chunks())
-    chunks.extend(load_repository_chunks())
+    chunks.extend(load_knowledge_chunks())
     return chunks
 
 
@@ -386,41 +283,58 @@ def read_corpus() -> list[dict[str, Any]]:
     return chunks
 
 
-def lexical_fallback_retrieve(query: str, k: int) -> list[dict[str, Any]]:
-    corpus = _last_corpus_chunks or read_corpus()
-    query_tokens = set((query or "").lower().split())
+def keywords(text: str) -> set[str]:
+    # CHANGED FROM LAB 8 (new helper): meaningful words of a text, with a
+    # simple plural strip so "transactions" matches "transaction".
+    words = set()
+    for word in re.findall(r"[a-z0-9]+", (text or "").lower()):
+        if len(word) > 3 and word.endswith("s"):
+            word = word[:-1]
+        if word not in STOPWORDS:
+            words.add(word)
+    return words
+
+
+def keep_relevant(query: str, rows: list[dict[str, Any]], k: int) -> list[dict[str, Any]]:
+    # CHANGED FROM LAB 8 (new helper): Lab 8 always returned the top k chunks,
+    # even for unrelated questions. Here a chunk must share at least one
+    # keyword with the question; the best matches come first.
+    query_words = keywords(query)
     tier_weight = {"tier_1": 3, "tier_2": 2, "tier_3": 1}
 
-    scored = []
-    for chunk in corpus:
-        text = chunk.get("text", "")
-        text_tokens = set(text.lower().split())
-        overlap = len(query_tokens.intersection(text_tokens))
-        scored.append(
-            {
-                "rank": 0,
-                "chunk_id": chunk.get("chunk_id"),
-                "source_id": chunk.get("source_id"),
-                "authority_tier": chunk.get("authority_tier"),
-                "distance": None,
-                "text": text,
-                "_score": overlap,
-            }
-        )
+    relevant = []
+    for row in rows:
+        overlap = len(query_words & keywords(row.get("text", "")))
+        if overlap > 0:
+            relevant.append({**row, "_score": overlap})
 
-    scored.sort(
-        key=lambda r: (
-            tier_weight.get(r.get("authority_tier"), 0),
-            r.get("_score", 0),
-        ),
+    relevant.sort(
+        key=lambda r: (r["_score"], tier_weight.get(r.get("authority_tier"), 0)),
         reverse=True,
     )
 
-    top = scored[: max(k, 1)]
+    top = relevant[: max(k, 1)]
     for i, row in enumerate(top, start=1):
         row["rank"] = i
         row.pop("_score", None)
     return top
+
+
+def lexical_fallback_retrieve(query: str, k: int, feature: str | None = None) -> list[dict[str, Any]]:
+    corpus = _last_corpus_chunks or read_corpus()
+    rows = [
+        {
+            "chunk_id": chunk.get("chunk_id"),
+            "source_id": chunk.get("source_id"),
+            "authority_tier": chunk.get("authority_tier"),
+            "feature": chunk.get("metadata", {}).get("feature"),
+            "distance": None,
+            "text": chunk.get("text", ""),
+        }
+        for chunk in corpus
+        if feature is None or chunk.get("metadata", {}).get("feature") == feature
+    ]
+    return keep_relevant(query, rows, k)
 
 
 def refresh_corpus(caller: str = "student") -> dict[str, Any]:
@@ -444,6 +358,7 @@ def refresh_corpus(caller: str = "student") -> dict[str, Any]:
                     {
                         "source_id": c["source_id"],
                         "authority_tier": c["authority_tier"],
+                        "feature": c["metadata"]["feature"],
                         "indexed_at": c["indexed_at"],
                     }
                     for c in chunks
@@ -458,6 +373,7 @@ def refresh_corpus(caller: str = "student") -> dict[str, Any]:
             "status": "success",
             "caller": caller,
             "chunk_count": len(chunks),
+            "unavailable_sources": dict(_unavailable_sources),  # CHANGED FROM LAB 8
             "collection": COLLECTION_NAME,
             "corpus_path": str(CORPUS_PATH),
             "vector_store_status": vector_store_status,
@@ -472,7 +388,11 @@ def refresh_corpus(caller: str = "student") -> dict[str, Any]:
         return output
 
 
-def retrieve_context(query: str, k: int = 5, caller: str = "student") -> dict[str, Any]:
+def retrieve_context(
+    query: str, k: int = 5, caller: str = "student", feature: str | None = None
+) -> dict[str, Any]:
+    # CHANGED FROM LAB 8: optional `feature` limits the search to one
+    # feature's records (cards, accounts, users, transactions).
     start = time.time()
     try:
         retrieval_mode = "vector"
@@ -484,48 +404,52 @@ def retrieve_context(query: str, k: int = 5, caller: str = "student") -> dict[st
                 refreshed = refresh_corpus(caller="auto_refresh")
                 if refreshed.get("status") != "success":
                     raise RuntimeError("empty_collection")
+                # CHANGED FROM LAB 8: refresh_corpus() deletes and recreates
+                # the collection, so the old reference is stale. Fetch it again.
+                collection = get_collection()
+                if collection.count() == 0:
+                    raise RuntimeError("empty_collection")
 
             query_embedding = embed_texts([query])
-            results = collection.query(query_embeddings=query_embedding, n_results=k)
+            # CHANGED FROM LAB 8: ask Chroma for every chunk, then keep only
+            # the relevant ones. The corpus is small, so this is cheap.
+            query_args = {"query_embeddings": query_embedding, "n_results": collection.count()}
+            if feature:
+                query_args["where"] = {"feature": feature}
+            results = collection.query(**query_args)
 
             ids = (results.get("ids") or [[]])[0]
             docs = (results.get("documents") or [[]])[0]
             metas = (results.get("metadatas") or [[]])[0]
             distances = (results.get("distances") or [[]])[0]
 
+            rows = []
             for i, chunk_id in enumerate(ids):
                 row_meta = metas[i] if i < len(metas) and isinstance(metas[i], dict) else {}
-                ranked.append(
+                rows.append(
                     {
-                        "rank": i + 1,
                         "chunk_id": chunk_id,
                         "source_id": row_meta.get("source_id"),
                         "authority_tier": row_meta.get("authority_tier"),
+                        "feature": row_meta.get("feature"),
                         "distance": distances[i] if i < len(distances) else None,
                         "text": docs[i] if i < len(docs) else "",
                     }
                 )
-
-            tier_weight = {"tier_1": 3, "tier_2": 2, "tier_3": 1}
-            ranked.sort(
-                key=lambda x: (
-                    tier_weight.get(x.get("authority_tier"), 0),
-                    -(x.get("distance") if isinstance(x.get("distance"), (int, float)) else 1e9),
-                ),
-                reverse=True,
-            )
+            ranked = keep_relevant(query, rows, k)
         except Exception:
             retrieval_mode = "lexical_fallback"
             if not _last_corpus_chunks and not CORPUS_PATH.exists():
                 refreshed = refresh_corpus(caller="auto_refresh")
                 if refreshed.get("status") != "success":
                     return {"status": "error", "error": "corpus_unavailable"}
-            ranked = lexical_fallback_retrieve(query, k)
+            ranked = lexical_fallback_retrieve(query, k, feature)
 
         output = {
             "status": "success",
             "query": query,
             "caller": caller,
+            "feature": feature,
             "k": k,
             "retrieval_mode": retrieval_mode,
             "results": ranked,
@@ -533,7 +457,7 @@ def retrieve_context(query: str, k: int = 5, caller: str = "student") -> dict[st
 
         append_audit(
             "retrieve_context",
-            {"query": query, "k": k, "caller": caller},
+            {"query": query, "k": k, "caller": caller, "feature": feature},
             {"result_count": len(ranked), "chunk_ids": [r["chunk_id"] for r in ranked]},
             "pass",
             "context_retrieved",
@@ -554,8 +478,11 @@ def retrieve_context(query: str, k: int = 5, caller: str = "student") -> dict[st
 
 
 def confidence_from_results(results: list[dict[str, Any]]) -> str:
+    # Same rules as Lab 8. CHANGED FROM LAB 8: no results -> "Insufficient"
+    # (Lab 8 said "Unknown"). Because keep_relevant() already removed
+    # unrelated chunks, these rules now only count relevant evidence.
     if not results:
-        return "Unknown"
+        return "Insufficient"
     tier_1 = sum(1 for r in results if r.get("authority_tier") == "tier_1")
     tier_2 = sum(1 for r in results if r.get("authority_tier") == "tier_2")
     if tier_1 >= 2 and len(results) >= 3:
@@ -565,55 +492,22 @@ def confidence_from_results(results: list[dict[str, Any]]) -> str:
     return "Low"
 
 
-def extract_student_records(results: list[dict[str, Any]]) -> list[dict[str, str]]:
-    records: list[dict[str, str]] = []
-    for row in results:
-        text = row.get("text", "")
-        if "Student record:" not in text:
-            continue
-
-        payload = text.split("Student record:", 1)[1].strip().rstrip(".")
-        parts = [p.strip() for p in payload.split(",")]
-        values: dict[str, str] = {}
-        for part in parts:
-            if "=" not in part:
-                continue
-            key, value = part.split("=", 1)
-            values[key.strip()] = value.strip()
-
-        if values.get("student_id") and values.get("subject_code"):
-            records.append(values)
-
-    # Keep stable ordering by numeric student_id when possible.
-    def key_fn(item: dict[str, str]):
-        sid = item.get("student_id", "")
-        return (0, int(sid)) if sid.isdigit() else (1, sid)
-
-    records.sort(key=key_fn)
-    return records
-
-
 def deterministic_answer(query: str, results: list[dict[str, Any]]) -> str | None:
+    # Same idea as Lab 8: answer simple questions in Python, not with the LLM.
+    # CHANGED FROM LAB 8: "how many X" is answered from the "<feature>_count"
+    # chunk, so the model never has to count.
     q = (query or "").lower()
-    records = extract_student_records(results)
-    if not records:
+    if "how many" not in q and "count" not in q and "number of" not in q:
         return None
-
-    if "student ids and subject codes" in q or "student id and subject code" in q:
-        lines = [f"{r.get('student_id')} -> {r.get('subject_code')}" for r in records]
-        return "Answer:\n" + "\n".join(lines)
-
-    if "how many students" in q or "student count" in q:
-        return f"Answer:\nThere are {len(records)} students in the retrieved evidence."
-
+    for r in results:
+        if str(r.get("chunk_id", "")).endswith("_count"):
+            return f"Answer:\n{r.get('text')}"
     return None
 
 
 def generate_with_ollama(query: str, context: str) -> str:
-    model_name = os.getenv("OLLAMA_MODEL", "qwen2.5:0.5b")
-    ollama_generate_url = os.getenv("OLLAMA_GENERATE_URL", "http://host.docker.internal:11434/api/generate")
     prompt = f"""
-You are a retrieval-grounded assistant.
+You are a retrieval-grounded assistant for a digital banking system.
 Use only the provided context.
 If evidence is missing, return exactly: Insufficient evidence.
 
@@ -633,8 +527,8 @@ Evidence:
 
     try:
         resp = requests.post(
-            ollama_generate_url,
-            json={"model": model_name, "prompt": prompt, "stream": False},
+            OLLAMA_GENERATE_URL,
+            json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False},
             timeout=120,
         )
         resp.raise_for_status()
@@ -643,9 +537,11 @@ Evidence:
         return f"Ollama unavailable: {exc}"
 
 
-def answer_question(query: str, k: int = 5, caller: str = "student") -> dict[str, Any]:
+def answer_question(
+    query: str, k: int = 5, caller: str = "student", feature: str | None = None
+) -> dict[str, Any]:
     start = time.time()
-    retrieval = retrieve_context(query=query, k=k, caller=caller)
+    retrieval = retrieve_context(query=query, k=k, caller=caller, feature=feature)
     if retrieval.get("status") != "success":
         output = {"status": "error", "query": query, "error": retrieval.get("error", "retrieval_failed")}
         append_audit(
@@ -659,10 +555,17 @@ def answer_question(query: str, k: int = 5, caller: str = "student") -> dict[str
         return output
 
     results = retrieval.get("results", [])
-    context = "\n\n".join(r.get("text", "") for r in results)
-    answer = deterministic_answer(query, results)
-    if answer is None:
-        answer = generate_with_ollama(query, context)
+    confidence = confidence_from_results(results)
+
+    # CHANGED FROM LAB 8: when nothing relevant was retrieved, return the
+    # insufficient-context answer directly instead of asking the LLM.
+    if confidence == "Insufficient":
+        answer = INSUFFICIENT_ANSWER
+    else:
+        context = "\n\n".join(r.get("text", "") for r in results)
+        answer = deterministic_answer(query, results)
+        if answer is None:
+            answer = generate_with_ollama(query, context)
 
     citations = [
         {
@@ -673,7 +576,6 @@ def answer_question(query: str, k: int = 5, caller: str = "student") -> dict[str
         for r in results
     ]
 
-    confidence = confidence_from_results(results)
     output = {
         "status": "success",
         "query": query,
@@ -682,6 +584,7 @@ def answer_question(query: str, k: int = 5, caller: str = "student") -> dict[str
         "confidence_category": confidence,
         "retrieval_summary": {
             "k": k,
+            "feature": feature,
             "retrieved_count": len(results),
             "top_chunk": results[0].get("chunk_id") if results else None,
         },
@@ -689,7 +592,7 @@ def answer_question(query: str, k: int = 5, caller: str = "student") -> dict[str
 
     append_audit(
         "answer_question",
-        {"query": query, "k": k, "caller": caller},
+        {"query": query, "k": k, "caller": caller, "feature": feature},
         {"confidence_category": confidence, "citation_count": len(citations)},
         "pass",
         "answer_generated",
@@ -699,8 +602,7 @@ def answer_question(query: str, k: int = 5, caller: str = "student") -> dict[str
 
 
 if __name__ == "__main__":
-    print(debug_paths())
-
     print(json.dumps(refresh_corpus(), indent=2))
-    print(json.dumps(retrieve_context("students enrolled in ASD101", 5), indent=2))
-    print(json.dumps(answer_question("Which students are enrolled in ASD101?", 5), indent=2))
+    print(json.dumps(retrieve_context("failed transactions", 5), indent=2))
+    print(json.dumps(answer_question("How many transactions are there?", 5), indent=2))
+    print(json.dumps(answer_question("What is the weather in Sydney today?", 5), indent=2))

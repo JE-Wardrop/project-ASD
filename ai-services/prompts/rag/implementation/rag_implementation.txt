@@ -1,0 +1,20 @@
+Implement local RAG pipeline tools.
+
+Constraints:
+- local open-source stack only
+- Python + chromadb + MCP
+- no hosted commercial APIs
+
+Required tools:
+- refresh_corpus
+- retrieve_context
+- answer_question
+
+Requirements:
+- structured outputs
+- structured errors
+- citations
+- confidence category
+- audit logging
+
+Maximum 60 words.

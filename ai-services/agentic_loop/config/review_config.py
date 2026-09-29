@@ -57,7 +57,7 @@ def build_mode_config() -> dict[str, ModeConfig]:
             prompt_family="mcp",
             implementation_prompts=("implementation/tool_selection_prompt.txt", 
                 ),
-            review_prompts=("review/tool_review_prompts.txt","review/integration_review_prompts.txt",),
+            review_prompts=("review/tool_review_prompt.txt","review/integration_review_prompt.txt",),
         ),
         "rag": ModeConfig(
             key="rag",

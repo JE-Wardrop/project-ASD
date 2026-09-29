@@ -1,8 +1,16 @@
+"""HTTP server for the RAG pipeline — same structure as Lab 8.
+
+Runs on the host (not in Docker). Feature backends call it at
+http://host.docker.internal:5003
+
+Every place that differs from Lab 8 is marked with  # CHANGED FROM LAB 8
+"""
+
 import json
 import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from rag_pipeline import answer_question, refresh_corpus, retrieve_context
+from rag_pipeline import DB_SOURCES, answer_question, refresh_corpus, retrieve_context
 
 
 class RAGHandler(BaseHTTPRequestHandler):
@@ -23,6 +31,14 @@ class RAGHandler(BaseHTTPRequestHandler):
             return {}
         return json.loads(raw.decode("utf-8"))
 
+    def _read_feature(self, payload: dict):
+        # CHANGED FROM LAB 8: optional "feature" limits the search to one
+        # feature. Returns (feature, error_message).
+        feature = (payload.get("feature") or "").strip().lower() or None
+        if feature and feature not in DB_SOURCES:
+            return None, f"feature must be one of {sorted(DB_SOURCES)}"
+        return feature, None
+
     def do_GET(self):
         if self.path == "/health":
             self._send_json(200, {"status": "ok", "service": "rag-server"})
@@ -36,10 +52,6 @@ class RAGHandler(BaseHTTPRequestHandler):
             self._send_json(400, {"status": "error", "error": f"invalid_json: {exc}"})
             return
 
-
-        # Edits will need to made from this section of the code (updating parts that mention the student)
-        
-
         try:
             if self.path == "/refresh":
                 caller = (payload.get("caller") or "student").strip() or "student"
@@ -52,9 +64,13 @@ class RAGHandler(BaseHTTPRequestHandler):
                 if not query:
                     self._send_json(400, {"status": "error", "error": "query is required"})
                     return
+                feature, error = self._read_feature(payload)
+                if error:
+                    self._send_json(400, {"status": "error", "error": error})
+                    return
                 k = int(payload.get("k", 5))
                 caller = (payload.get("caller") or "student").strip() or "student"
-                result = retrieve_context(query=query, k=k, caller=caller)
+                result = retrieve_context(query=query, k=k, caller=caller, feature=feature)
                 self._send_json(200 if result.get("status") == "success" else 500, result)
                 return
 
@@ -63,9 +79,13 @@ class RAGHandler(BaseHTTPRequestHandler):
                 if not query:
                     self._send_json(400, {"status": "error", "error": "query is required"})
                     return
+                feature, error = self._read_feature(payload)
+                if error:
+                    self._send_json(400, {"status": "error", "error": error})
+                    return
                 k = int(payload.get("k", 5))
                 caller = (payload.get("caller") or "student").strip() or "student"
-                result = answer_question(query=query, k=k, caller=caller)
+                result = answer_question(query=query, k=k, caller=caller, feature=feature)
                 self._send_json(200 if result.get("status") == "success" else 500, result)
                 return
 

@@ -1,0 +1,14 @@
+Review RAG output quality.
+
+Check:
+- retrieval quality
+- citation quality
+- confidence justification
+- unsupported claims
+
+Return exactly:
+Risk:
+Correction:
+Retest:
+
+Maximum 35 words.

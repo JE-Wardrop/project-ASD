@@ -2,8 +2,13 @@ from mcp.server.fastmcp import FastMCP, Context
 from flask import Flask, jsonify, request
 from typing import Any
 from tools import (
+<<<<<<< HEAD
     get_card_count,
     get_card_per_user,
+=======
+    card_count as get_card_count,
+    cards_per_user as get_cards_per_user,
+>>>>>>> main
     # list_project_files,
     # read_ci_report,
     # Transaction Management (student-5)
@@ -64,7 +69,11 @@ def card_count() -> dict[str, Any]:
 
 @mcp.tool()
 def card_per_user(user_id: int) -> dict[str, Any]:
+<<<<<<< HEAD
    return get_card_per_user(user_id)
+=======
+    return get_cards_per_user(user_id)
+>>>>>>> main
 
 
 # Transaction Management (student-5)
@@ -83,7 +92,7 @@ def transaction_detail(transaction_id: int) -> dict[str, Any]:
 
 
 @mcp.tool()
-def account_activity_summary(account_id: int):
+def account_activity_summary(account_id: int)-> dict[str, Any]:
     return summarize_account_activity(account_id)
 
 
