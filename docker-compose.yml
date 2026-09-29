@@ -15,8 +15,8 @@
   # student3-*  Ivan  - Notifications  8103 / 8203 / 8303
   # student4-*  Sang  - Users          8104 / 8204 / 8304
 
-  # MCP Server: runs at 8000:5500
-  # RAG Server: runs at 5501
+  # MCP Server: runs on the host at :5500
+  # RAG Server: runs on the host at :5003
 
  
  
@@ -151,6 +151,7 @@ services:
       BACKEND_URL: http://localhost:8205
       REQUIRE_ACCOUNTS: "true"      # waiting for Binh service to run
       MCP_ENABLED: ${MCP_ENABLED:-true}
+      RAG_ENABLED: ${RAG_ENABLED:-true}
     depends_on:
       - student5-db
     extra_hosts:
