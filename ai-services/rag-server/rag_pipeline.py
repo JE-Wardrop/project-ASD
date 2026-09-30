@@ -575,6 +575,15 @@ def answer_question(
         answer = deterministic_answer(query, results)
         if answer is None:
             answer = generate_with_ollama(query, context)
+            # CHANGED FROM LAB 8: confidence was computed from retrieval alone,
+            # so a model reply of "Insufficient evidence" could still be
+            # labelled High. The answer contract says an unsupported answer is
+            # reported as insufficient, and a failed generation as Unknown.
+            if answer.startswith("Ollama unavailable"):
+                confidence = "Unknown"
+            elif "insufficient evidence" in answer.lower():
+                confidence = "Insufficient"
+                answer = INSUFFICIENT_ANSWER
 
     citations = [
         {
