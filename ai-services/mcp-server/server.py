@@ -10,6 +10,10 @@ from tools import (
     list_transactions,
     get_transaction,
     summarize_account_activity,
+    # Bank Account Management (student-2)
+    get_account_balance,
+    list_accounts_by_user,
+    summarize_account_statuses,
 )
 
 #  Gia made change  here
@@ -30,6 +34,11 @@ AVAILABLE_TOOLS = [
     "list_transactions",
     "get_transaction",
     "summarize_account_activity",
+
+    # Bank Account Management (student-2)
+    "account_balance",
+    "accounts_by_user",
+    "account_status_summary",
 ]
 
 
@@ -85,6 +94,22 @@ def transaction_detail(transaction_id: int) -> dict[str, Any]:
 @mcp.tool()
 def account_activity_summary(account_id: int)-> dict[str, Any]:
     return summarize_account_activity(account_id)
+
+
+# Bank Account Management (student-2) - read-only tools
+@mcp.tool()
+def account_balance(account_id: int) -> dict[str, Any]:
+    return get_account_balance(account_id)
+
+
+@mcp.tool()
+def accounts_by_user(user_id: int) -> dict[str, Any]:
+    return list_accounts_by_user(user_id)
+
+
+@mcp.tool()
+def account_status_summary(status: str | None = None) -> dict[str, Any]:
+    return summarize_account_statuses(status)
 
 
 if __name__ == "__main__":

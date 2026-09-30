@@ -161,7 +161,102 @@ def summarize_account_activity(account_id: int) -> dict:
         "by_status": by_status,
     }
  
- 
+
+
+# Bank Account Management (student-2)
+# student-2/database/app.py: GET /accounts, GET /accounts/<id>/balance, GET /accounts/by-user
+#
+# Tool boundary: read-only. Freezing, closing or changing a balance stays in
+# the Normal UI where a human confirms it — no MCP tool can move money or
+# change an account's status. Full account numbers are masked to the last 4
+# digits (same privacy rule as the RAG corpus, which leaves them out).
+
+VALID_ACCOUNT_STATUSES = {"ACTIVE", "FROZEN", "CLOSED"}
+
+
+def _mask_account_number(account_number) -> str:
+    digits = str(account_number or "")
+    return f"****{digits[-4:]}" if len(digits) >= 4 else "****"
+
+
+def get_account_balance(account_id: int) -> dict:
+    """Current balance and status of one account."""
+    result = _get(DB_API_URLS[2], f"/accounts/{account_id}/balance")
+    if "error" in result:
+        return result
+    return {
+        "account_id": result["account_id"],
+        "balance": round(result["balance"], 2),
+        "account_status": result["account_status"],
+        # Only ACTIVE accounts accept balance changes (PATCH /accounts/<id>/balance)
+        "can_transact": result["account_status"] == "ACTIVE",
+    }
+
+
+def list_accounts_by_user(user_id: int) -> dict:
+    """Every account a user owns, plus totals computed here, not by the LLM."""
+    result = _get(DB_API_URLS[2], "/accounts/by-user", params={"user_id": user_id})
+    # The database API answers 404 when the user owns no accounts; that is a
+    # valid empty result for this tool, not a failure.
+    if isinstance(result, dict) and "error" in result:
+        if result["error"] == "Database API returned 404":
+            return {"user_id": user_id, "account_count": 0, "total_balance": 0.0, "accounts": []}
+        return result
+
+    accounts = [
+        {
+            "account_id": acc["account_id"],
+            "account_number": _mask_account_number(acc["account_number"]),
+            "account_type": acc["account_type"],
+            "account_status": acc["account_status"],
+            "balance": round(acc["balance"], 2),
+        }
+        for acc in result
+    ]
+    return {
+        "user_id": user_id,
+        "account_count": len(accounts),
+        "total_balance": round(sum(acc["balance"] for acc in accounts), 2),
+        "accounts": accounts,
+    }
+
+
+def summarize_account_statuses(status: str | None = None) -> dict:
+    """Counts and balance totals per status and per type across all accounts.
+
+    Optional `status` narrows the summary to ACTIVE, FROZEN or CLOSED.
+    """
+    if status is not None and status.upper() not in VALID_ACCOUNT_STATUSES:
+        return {"error": f"status must be one of {sorted(VALID_ACCOUNT_STATUSES)}"}
+
+    accounts = _get(DB_API_URLS[2], "/accounts")
+    if isinstance(accounts, dict) and "error" in accounts:
+        return accounts
+
+    if status is not None:
+        accounts = [acc for acc in accounts if acc["account_status"] == status.upper()]
+
+    by_status: dict[str, int] = {}
+    by_type: dict[str, int] = {}
+    balance_by_status: dict[str, float] = {}
+
+    for acc in accounts:
+        by_status[acc["account_status"]] = by_status.get(acc["account_status"], 0) + 1
+        by_type[acc["account_type"]] = by_type.get(acc["account_type"], 0) + 1
+        balance_by_status[acc["account_status"]] = (
+            balance_by_status.get(acc["account_status"], 0.0) + acc["balance"]
+        )
+
+    return {
+        "status_filter": status.upper() if status else None,
+        "account_count": len(accounts),
+        "by_status": by_status,
+        "by_type": by_type,
+        "balance_by_status": {k: round(v, 2) for k, v in balance_by_status.items()},
+        "total_balance": round(sum(acc["balance"] for acc in accounts), 2),
+    }
+
+
 # ---------------------------------------------------------------------------
 # Manual validation — mirrors the lab's "Terminal B" pattern, but every
 # call here goes over HTTP, so it only proves something when the actual
@@ -173,4 +268,7 @@ if __name__ == "__main__":
     print("DB_API_URLS:", DB_API_URLS)
     print(list_transactions(limit=5))
     print(summarize_account_activity(account_id=1))
+    print(get_account_balance(account_id=1))
+    print(list_accounts_by_user(user_id=1))
+    print(summarize_account_statuses())
  
