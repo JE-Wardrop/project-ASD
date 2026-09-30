@@ -53,9 +53,13 @@ def rag_retrieve():
     if not rag_mode_is_enabled(request):
         return rag_disabled_response()
 
+    query = request.form.get("query", "").strip()
     caller = request.form.get("caller", "student").strip() or "student"
+    k = int(request.form.get("k", "5"))
+
+
     try:
-        payload = call_rag_service("/retrieve", {"caller": caller})
+        payload = call_rag_service("/retrieve", {"query": query, "k": k, "caller": "student"})
         return payload, 200
     except requests.RequestException as exc:
         return {"status": "error", "error": str(exc)}, 503
