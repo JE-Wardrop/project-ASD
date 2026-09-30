@@ -64,7 +64,7 @@ def build_mode_config() -> dict[str, ModeConfig]:
             label="RAG",
             prompt_family="rag",
             implementation_prompts=( "implementation/rag_implementation.txt",),
-            review_prompts=("review/integration_review_prompt.txt",),
+            review_prompts=("review/rag_reasoning_prompt.txt", "review/rag_review.txt"),
         ),
     }
 

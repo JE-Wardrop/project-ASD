@@ -8,7 +8,7 @@ REQUIRED_RAG_TOOLS = [
 ]
 
 def collect(app_dir: Path, repo_root: Path) -> tuple[bool, str]:
-    rag_server_dir = repo_root / "rag-server"
+    rag_server_dir = repo_root / "ai-services/rag-server"
 
     required_paths = [
         rag_server_dir / "rag_pipeline.py",

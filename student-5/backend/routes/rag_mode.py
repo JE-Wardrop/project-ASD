@@ -19,8 +19,6 @@ MAX_K = 20
 
 
 def rag_mode_is_enabled() -> bool:
-    # Two switches, like Lab 8: the environment variable (CI turns it off)
-    # and the X-RAG-Mode header that the tab's toggle sends.
     if not RAG_ENABLED:
         return False
     header = request.headers.get("X-RAG-Mode", "on").strip().lower()

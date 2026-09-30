@@ -505,24 +505,32 @@ def deterministic_answer(query: str, results: list[dict[str, Any]]) -> str | Non
     return None
 
 
-def generate_with_ollama(query: str, context: str) -> str:
-    prompt = f"""
-You are a retrieval-grounded assistant for a digital banking system.
-Use only the provided context.
-If evidence is missing, return exactly: Insufficient evidence.
+# CHANGED FROM LAB 8: small models (qwen2.5:0.5b) echoed the old prompt's
+# <answer>/<summary> placeholders back verbatim instead of filling them in.
+# This strips leftover template artifacts and the "Answer:" label so the
+# field holds just the answer text.
+def clean_ollama_response(text: str) -> str:
+    text = (text or "").strip()
+    for tag in ("<answer>", "</answer>", "<summary>", "</summary>"):
+        text = text.replace(tag, "")
+    text = text.strip()
+    if text.lower().startswith("answer:"):
+        text = text[len("answer:"):].strip()
+    return text
 
-QUESTION:
-{query}
+
+def generate_with_ollama(query: str, context: str) -> str:
+    prompt = f"""You are a retrieval-grounded assistant for a digital banking system.
+Answer the question using only the facts in CONTEXT. Do not guess.
 
 CONTEXT:
 {context}
 
-Return exactly:
-Answer:
-<answer>
+QUESTION:
+{query}
 
-Evidence:
-<summary>
+Reply with one short answer starting with "Answer:". If CONTEXT does not
+contain the facts needed to answer, reply exactly: Answer: Insufficient evidence.
 """
 
     try:
@@ -532,7 +540,8 @@ Evidence:
             timeout=120,
         )
         resp.raise_for_status()
-        return resp.json().get("response", "Insufficient evidence.")
+        raw = resp.json().get("response", "Insufficient evidence.")
+        return clean_ollama_response(raw) or "Insufficient evidence."
     except Exception as exc:
         return f"Ollama unavailable: {exc}"
 

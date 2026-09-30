@@ -111,9 +111,6 @@
         }
         renderRagState();
       }
-
-      // CHANGED FROM LAB 8: textContent instead of innerHTML. The JSON quotes database
-      // text (for example a transaction description) that a user typed.
       function renderJson(title, payload) {
         const heading = document.createElement("h3");
         heading.textContent = title;
@@ -128,7 +125,6 @@
           return { status: "error", error: "RAG Mode is OFF" };
         }
 
-        // CHANGED FROM LAB 8: a stopped backend makes fetch() throw, so catch it.
         let res;
         try {
           res = await fetch(`${apiBase}${path}`, {
