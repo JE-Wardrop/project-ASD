@@ -26,8 +26,8 @@ def _run_tools_for_target(target, tools_module) -> dict | None:
     # student 1
     if target.key == "student-1":
         return {
-            "card_count": tools_module.get_card_count(),
-            "cards_by_user": tools_module.get_cards_by_user(1),
+            "card_count": tools_module.card_count(),
+            "cards_by_user": tools_module.cards_per_user(1),
         }
     # studeny 5
     if target.key == "student-5":
