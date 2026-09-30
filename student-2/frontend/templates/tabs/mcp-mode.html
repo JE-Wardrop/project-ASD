@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>MCP Mode</title>
+    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        body { margin: 0; min-height: auto; background: transparent; }
+        .app-shell { max-width: none; padding: 0; }
+    </style>
+</head>
+<body>
+<main class="app-shell">
+    <section class="card">
+        <h2>MCP Mode</h2>
+        <p class="muted">
+            Calls read-only tools on the shared MCP server. Tools never change an
+            account; freezing, closing and balance changes stay in the Normal UI.
+        </p>
+        <label class="mode-toggle" for="mcp-mode-toggle">
+            <input id="mcp-mode-toggle" type="checkbox" checked>
+            MCP Enabled <span id="mcp-mode-state" class="pill pill-ok">ON</span>
+        </label>
+    </section>
+
+    <section class="card">
+        <h3>Account balance</h3>
+        <p class="muted">Tool: <code>account_balance</code></p>
+        <form id="mcp-balance-form" class="filter-bar">
+            <label>Account ID
+                <input id="mcp-balance-id" type="number" min="1" value="1" required>
+            </label>
+            <button type="submit">Call MCP tool</button>
+        </form>
+        <pre id="mcp-balance-output" class="mcp-json">No result yet.</pre>
+    </section>
+
+    <section class="card">
+        <h3>Accounts owned by a user</h3>
+        <p class="muted">Tool: <code>accounts_by_user</code> (account numbers masked)</p>
+        <form id="mcp-user-form" class="filter-bar">
+            <label>User ID
+                <input id="mcp-user-id" type="number" min="1" value="1" required>
+            </label>
+            <button type="submit">Call MCP tool</button>
+        </form>
+        <pre id="mcp-user-output" class="mcp-json">No result yet.</pre>
+    </section>
+
+    <section class="card">
+        <h3>Account status summary</h3>
+        <p class="muted">Tool: <code>account_status_summary</code></p>
+        <form id="mcp-summary-form" class="filter-bar">
+            <label>Status
+                <select id="mcp-summary-status">
+                    <option value="">All</option>
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="FROZEN">FROZEN</option>
+                    <option value="CLOSED">CLOSED</option>
+                </select>
+            </label>
+            <button type="submit">Call MCP tool</button>
+        </form>
+        <pre id="mcp-summary-output" class="mcp-json">No result yet.</pre>
+    </section>
+</main>
+
+<script>
+const API = "http://localhost:8202";
+const STORAGE_KEY = "student2_mcp_mode_enabled";
+const toggle = document.getElementById("mcp-mode-toggle");
+const stateLabel = document.getElementById("mcp-mode-state");
+
+function isMcpEnabled() {
+    return toggle.checked;
+}
+
+function renderState() {
+    stateLabel.textContent = isMcpEnabled() ? "ON" : "OFF";
+    stateLabel.className = isMcpEnabled() ? "pill pill-ok" : "pill pill-bad";
+}
+
+try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved !== null) toggle.checked = saved === "true";
+} catch (err) { /* storage unavailable: default ON */ }
+renderState();
+
+toggle.addEventListener("change", () => {
+    try { localStorage.setItem(STORAGE_KEY, String(isMcpEnabled())); } catch (err) {}
+    renderState();
+});
+
+async function callTool(outputId, path) {
+    const output = document.getElementById(outputId);
+    if (!isMcpEnabled()) {
+        output.textContent = "MCP Mode is OFF. Enable MCP Mode to run MCP tools.";
+        return;
+    }
+    output.textContent = "Calling…";
+    try {
+        const response = await fetch(`${API}${path}`, { headers: { "X-MCP-Mode": "on" } });
+        const text = await response.text();
+        try {
+            output.textContent = `HTTP ${response.status}\n` + JSON.stringify(JSON.parse(text), null, 2);
+        } catch (err) {
+            output.textContent = `HTTP ${response.status}\n${text}`;
+        }
+    } catch (error) {
+        output.textContent = `Cannot reach the backend on port 8202. Is student2-backend running?\n${error}`;
+    }
+}
+
+document.getElementById("mcp-balance-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const id = document.getElementById("mcp-balance-id").value;
+    callTool("mcp-balance-output", `/mcp/accounts/${encodeURIComponent(id)}/balance`);
+});
+
+document.getElementById("mcp-user-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const id = document.getElementById("mcp-user-id").value;
+    callTool("mcp-user-output", `/mcp/users/${encodeURIComponent(id)}/accounts`);
+});
+
+document.getElementById("mcp-summary-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const status = document.getElementById("mcp-summary-status").value;
+    const query = status ? `?status=${encodeURIComponent(status)}` : "";
+    callTool("mcp-summary-output", `/mcp/accounts/summary${query}`);
+});
+</script>
+</body>
+</html>
