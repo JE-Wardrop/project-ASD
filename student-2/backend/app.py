@@ -10,7 +10,9 @@ if str(BASE_DIR) not in sys.path:
 
 from routes.ai_mode import ai_mode_bp
 from routes.api import api_bp
+from routes.mcp_mode import mcp_mode_bp
 from routes.normal_ui import normal_ui_bp
+from routes.rag_mode import rag_mode_bp
 
 
 def create_app():
@@ -20,6 +22,8 @@ def create_app():
     app.register_blueprint(normal_ui_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(ai_mode_bp)
+    app.register_blueprint(mcp_mode_bp)
+    app.register_blueprint(rag_mode_bp)
 
     return app
 

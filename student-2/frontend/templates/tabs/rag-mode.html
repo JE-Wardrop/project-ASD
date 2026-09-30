@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>RAG Mode</title>
+    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        body { margin: 0; min-height: auto; background: transparent; }
+        .app-shell { max-width: none; padding: 0; }
+    </style>
+</head>
+<body>
+<main class="app-shell">
+    <section class="card">
+        <h2>RAG Mode</h2>
+        <p class="muted">
+            Grounded answers about bank accounts, built only from the accounts
+            database and the approved account rules (knowledge/accounts.md).
+        </p>
+        <label class="mode-toggle" for="rag-mode-toggle">
+            <input id="rag-mode-toggle" type="checkbox" checked>
+            RAG Enabled <span id="rag-mode-state" class="pill pill-ok">ON</span>
+        </label>
+
+        <form id="rag-refresh-form">
+            <button type="submit" class="rag-action">Refresh Corpus</button>
+        </form>
+
+        <form id="rag-retrieve-form">
+            <label for="rag-retrieve-query">Query</label>
+            <input id="rag-retrieve-query" name="query" required value="frozen accounts">
+            <p class="rag-helper">Hint: use short retrieval phrases.</p>
+            <button type="submit" class="rag-action">Retrieve Context</button>
+        </form>
+
+        <form id="rag-answer-form">
+            <label for="rag-answer-query">Question</label>
+            <input id="rag-answer-query" name="query" required value="Can a frozen account receive a deposit?">
+            <p class="rag-helper">Hint: ask a full question for a grounded answer with citations.</p>
+            <button type="submit" class="rag-action">Answer with Citations</button>
+        </form>
+
+        <div id="rag-results" class="panel">RAG responses will appear here.</div>
+    </section>
+</main>
+
+<script>
+const API = "http://localhost:8202";
+const STORAGE_KEY = "student2_rag_mode_enabled";
+const output = document.getElementById("rag-results");
+const toggle = document.getElementById("rag-mode-toggle");
+const stateLabel = document.getElementById("rag-mode-state");
+
+const CONFIDENCE_PILL = {
+    High: "pill pill-ok",
+    Medium: "pill pill-wait",
+    Low: "pill pill-bad",
+    Insufficient: "pill pill-muted",
+};
+
+function isRagEnabled() {
+    return toggle.checked;
+}
+
+function renderState() {
+    stateLabel.textContent = isRagEnabled() ? "ON" : "OFF";
+    stateLabel.className = isRagEnabled() ? "pill pill-ok" : "pill pill-bad";
+}
+
+try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved !== null) toggle.checked = saved === "true";
+} catch (err) { /* storage unavailable: default ON */ }
+renderState();
+
+toggle.addEventListener("change", () => {
+    try { localStorage.setItem(STORAGE_KEY, String(isRagEnabled())); } catch (err) {}
+    renderState();
+    if (!isRagEnabled()) output.textContent = "RAG Mode is OFF. Enable RAG Mode to run RAG tools.";
+});
+
+function el(tag, text, className) {
+    const node = document.createElement(tag);
+    if (text !== undefined) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+}
+
+function rawJson(payload) {
+    const details = el("details");
+    details.append(el("summary", "Raw JSON"), el("pre", JSON.stringify(payload, null, 2)));
+    return details;
+}
+
+function renderError(title, payload) {
+    output.replaceChildren(el("h3", title), el("p", payload.error || "Request failed.", "alert alert-error"), rawJson(payload));
+}
+
+function renderRetrieve(payload) {
+    if (payload.status !== "success") return renderError("RAG Tool: retrieve_context", payload);
+    const nodes = [el("h3", "RAG Tool: retrieve_context")];
+    nodes.push(el("p", `Mode: ${payload.retrieval_mode} · feature: ${payload.feature} · ${payload.results.length} chunk(s)`, "muted"));
+    if (!payload.results.length) {
+        nodes.push(el("p", "No relevant context found for this query.", "alert alert-warn"));
+    } else {
+        const list = el("ol");
+        payload.results.forEach((r) => {
+            const item = el("li");
+            item.append(el("code", r.chunk_id), document.createTextNode(` (${r.authority_tier}) — ${r.text}`));
+            list.append(item);
+        });
+        nodes.push(list);
+    }
+    nodes.push(rawJson(payload));
+    output.replaceChildren(...nodes);
+}
+
+function renderAnswer(payload) {
+    if (payload.status !== "success") return renderError("RAG Tool: answer_question", payload);
+    const confidence = payload.confidence_category;
+    const nodes = [el("h3", "RAG Tool: answer_question")];
+
+    const confidenceRow = el("p");
+    confidenceRow.append(document.createTextNode("Confidence: "), el("span", confidence, CONFIDENCE_PILL[confidence] || "pill pill-muted"));
+    nodes.push(confidenceRow);
+
+    if (confidence === "Insufficient") {
+        nodes.push(el("p", payload.answer, "alert alert-warn"));
+    } else {
+        nodes.push(el("p", payload.answer, "ai-answer"));
+    }
+
+    if (payload.citations && payload.citations.length) {
+        nodes.push(el("h4", "Citations"));
+        const list = el("ul");
+        payload.citations.forEach((c) => {
+            const item = el("li");
+            item.append(el("code", c.chunk_id), document.createTextNode(` — ${c.source_id} (${c.authority_tier})`));
+            list.append(item);
+        });
+        nodes.push(list);
+    }
+
+    const summary = payload.retrieval_summary || {};
+    nodes.push(el("p", `Retrieved ${summary.retrieved_count} of k=${summary.k} · top chunk: ${summary.top_chunk}`, "muted"));
+    nodes.push(rawJson(payload));
+    output.replaceChildren(...nodes);
+}
+
+async function postForm(path, data) {
+    let response;
+    try {
+        response = await fetch(`${API}${path}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-RAG-Mode": "on",
+            },
+            body: new URLSearchParams(data),
+        });
+    } catch (err) {
+        return { status: "error", error: "Cannot reach the backend on port 8202. Is student2-backend running?" };
+    }
+    const text = await response.text();
+    try {
+        return JSON.parse(text);
+    } catch (err) {
+        return { status: "error", error: `Non-JSON reply (HTTP ${response.status})`, raw: text };
+    }
+}
+
+async function run(path, data, render) {
+    if (!isRagEnabled()) {
+        output.textContent = "RAG Mode is OFF. Enable RAG Mode to run RAG tools.";
+        return;
+    }
+    output.textContent = "Working…";
+    render(await postForm(path, data));
+}
+
+document.getElementById("rag-refresh-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    run("/rag/refresh", {}, (payload) => {
+        if (payload.status !== "success") return renderError("RAG Tool: refresh_corpus", payload);
+        output.replaceChildren(
+            el("h3", "RAG Tool: refresh_corpus"),
+            el("p", `Indexed ${payload.chunk_count} chunks · vector store: ${payload.vector_store_status}`),
+            rawJson(payload),
+        );
+    });
+});
+
+document.getElementById("rag-retrieve-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const query = document.getElementById("rag-retrieve-query").value.trim();
+    run("/rag/retrieve", { query, k: "5" }, renderRetrieve);
+});
+
+document.getElementById("rag-answer-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const query = document.getElementById("rag-answer-query").value.trim();
+    run("/rag/answer", { query, k: "5" }, renderAnswer);
+});
+</script>
+</body>
+</html>

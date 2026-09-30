@@ -42,6 +42,24 @@ BENCHMARKS = [
         "expected_relevant": 1,
     },
     {
+        "query": "frozen accounts",
+        "feature": "accounts",
+        "relevant_keywords": ["account_status=FROZEN", "FROZEN account"],
+        "expected_relevant": 2,
+    },
+    {
+        "query": "can a frozen account receive a deposit",
+        "feature": "accounts",
+        "relevant_keywords": ["cannot receive a deposit"],
+        "expected_relevant": 1,
+    },
+    {
+        "query": "how many accounts are there",
+        "feature": "accounts",
+        "relevant_keywords": ["count is"],
+        "expected_relevant": 1,
+    },
+    {
         "query": "weather in Sydney",
         "feature": None,
         "relevant_keywords": [],

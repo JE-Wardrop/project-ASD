@@ -11,6 +11,17 @@
     width: auto;
 }
 
+.mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: auto;
+}
+
+.mcp-json {
+    white-space: pre-wrap;
+}
+
 .rag-helper {
     margin: -0.2rem 0 0;
     font-size: 0.86rem;

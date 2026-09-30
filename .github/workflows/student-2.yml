@@ -40,6 +40,11 @@ jobs:
   build-and-smoke:
     runs-on: ubuntu-latest
     needs: [unit-tests]
+    env:
+      # MCP and RAG stay integrated but are disabled in CI: the shared MCP
+      # (:5500) and RAG (:5003) servers run on a developer's host, not here.
+      MCP_ENABLED: "false"
+      RAG_ENABLED: "false"
 
     steps:
       - uses: actions/checkout@v4
@@ -80,6 +85,31 @@ jobs:
         run: |
           pip install -r student-2/tests/requirements.txt
           FLASK_BASE_URL=http://localhost:8202 pytest student-2/tests/test_backend_e2e.py -v
+
+      - name: Confirm MCP is disabled in CI
+        run: |
+          code=$(curl -sS -o /tmp/mcp_response.json -w "%{http_code}" \
+                 http://localhost:8202/mcp/accounts/summary)
+          echo "MCP endpoint returned: $code"
+          cat /tmp/mcp_response.json
+          if [ "$code" != "403" ]; then
+            echo "Expected 403 (MCP disabled) but got $code"
+            exit 1
+          fi
+          echo "PASS - MCP correctly disabled in CI"
+
+      - name: Confirm RAG is disabled in CI
+        run: |
+          code=$(curl -sS -o /tmp/rag_response.json -w "%{http_code}" \
+                 -X POST -d "query=test" \
+                 http://localhost:8202/rag/answer)
+          echo "RAG endpoint returned: $code"
+          cat /tmp/rag_response.json
+          if [ "$code" != "403" ]; then
+            echo "Expected 403 (RAG disabled) but got $code"
+            exit 1
+          fi
+          echo "PASS - RAG correctly disabled in CI"
 
       - name: Stop services
         if: always()
