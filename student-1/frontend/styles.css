@@ -64,6 +64,28 @@
   color: var(--brand-dark);
 }
 
+.app-shell{
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1.2rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.card{
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1.2rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
 /* tab content */
 .div-inner-tab-content {
   display: flex;
@@ -94,18 +116,4 @@
   background-color: var(--brand);
 }
 
-.toggle-label{
 
-}
-
-.feature-state feature-on{
-
-}
-
-.feature-state feature-off{
-  
-}
-
-.feature-actions{
-  
-}
