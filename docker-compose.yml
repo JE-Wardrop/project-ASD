@@ -158,6 +158,8 @@ services:
       REQUIRE_ACCOUNTS: "true"      # waiting for Binh service to run
       MCP_ENABLED: ${MCP_ENABLED:-true}
       RAG_ENABLED: ${RAG_ENABLED:-true}
+      MCP_SERVER_URL: http://host.docker.internal:5500/mcp
+      RAG_SERVICE_URL: http://host.docker.internal:5003
     depends_on:
       - student5-db
     extra_hosts:
