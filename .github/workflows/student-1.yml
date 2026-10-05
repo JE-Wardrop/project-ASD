@@ -104,6 +104,42 @@ jobs:
           check_url "http://localhost:8201/"
           check_url "http://localhost:8301/"
 
+
+      - name: Confirm MCP is disabled in CI
+        run: |
+          code=$(curl -sS -o /tmp/mcp_response.json -w "%{http_code}" \
+                 http://localhost:8201/mcp/cards)
+          echo "MCP endpoint returned: $code"
+          cat /tmp/mcp_response.json
+          if [ "$code" != "403" ]; then
+            echo "Expected 403 (MCP disabled) but got $code"
+            exit 1
+          fi
+          echo "PASS - MCP correctly disabled in CI"
+
+      - name: Confirm RAG is disabled in CI
+        run: |
+          code=$(curl -sS -o /tmp/rag_response.json -w "%{http_code}" \
+                 -X POST -d "query=test" \
+                 http://localhost:8201/rag/answer)
+          echo "RAG endpoint returned: $code"
+          cat /tmp/rag_response.json
+          if [ "$code" != "403" ]; then
+            echo "Expected 403 (RAG disabled) but got $code"
+            exit 1
+          fi
+          echo "PASS: RAG correctly disabled in CI"
+
+      # - name: Run e2e tests
+      #   run: |
+      #       pip install -r student-1/tests/requirements.txt
+      #       FLASK_BASE_URL=http://localhost:8201 pytest student-1/tests/test_backend_e2e.py -v
+
+      # - name: Run database tests
+      #   run: |
+      #     pip install -r student-1/tests/requirements.txt
+      #     pytest student-1/tests/cm_db_test.py -v
+
       - name: Stop services
         if: always()
         run: docker-compose down -v
