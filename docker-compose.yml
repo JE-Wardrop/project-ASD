@@ -29,8 +29,6 @@ services:
     ports:
       - "8080:8000"
     restart: unless-stopped
-
- 
  
   # Student 1
   student-1-frontend:
@@ -61,6 +59,8 @@ services:
       OLLAMA_MODEL: qwen2.5:0.5b
       MCP_ENABLED: "true"
       RAG_ENABLED: "true"
+      MULTI_AGENT_ENABLED: "true"
+
 
       # connecting MCP to the backend. 
       # this is all that should be needed to connect the files.

@@ -43,6 +43,13 @@ except Exception as e:
     rag_mode_bp = None
 
 
+try:
+    from routes.multi_agent_mode import rag_mode_bp
+except Exception as e:
+    print(f"multi_agent_mode failed to load: {e}")
+    multi_agent_mode_bp = None
+
+
 def get_db_connection():
     conn = sqlite3.connect(DATABASE_NAME)
     conn.row_factory = sqlite3.Row
@@ -56,15 +63,13 @@ def create_app():
     app.register_blueprint(normal_mode_bp)
     app.register_blueprint(ai_mode_bp)
 
-    # Issues with how this is registered. 
-    # These issues make the backend unuseable completely. I'm not sure why but this entire
-    # app.py must not run at all even if only mcp_mode_bp and rag_mode_bp are broken.
-
     if mcp_mode_bp:
         app.register_blueprint(mcp_mode_bp)
     if rag_mode_bp:
         app.register_blueprint(rag_mode_bp)
-        
+    if multi_agent_mode_bp:
+        app.register_blueprint(multi_agent_mode_bp)
+
     print("blueprints are running.")
 
     return app
