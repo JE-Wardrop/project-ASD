@@ -30,12 +30,6 @@ services:
       - "8080:8000"
     restart: unless-stopped
 
-
-  # mcp-server:
-  #   build:
-  #     context: .
-  #     dockerfile: ai-services/mcp-server/dockerfile
-    # networks:
  
  
   # Student 1
