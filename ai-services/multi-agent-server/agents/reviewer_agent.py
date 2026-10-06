@@ -112,13 +112,14 @@ def review_output(
 if __name__ == "__main__":
     sample_worker_result = {
         "status": "success",
-        "subject_code": "ASD101",
+        "card_status": "frozen",
         "evidence_count": 2,
-        "output": "Two students are enrolled in ASD101."
+        "output": "For user_id(1) there are 3 frozen cards"
     }
 
     result = review_output(
-        "Generate a student enrolment summary for ASD101.",
+        "Generate a card status summary for user_id(1).",
+        "Recommend a user delete or update card details",
         sample_worker_result
     )
 

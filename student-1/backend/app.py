@@ -44,7 +44,7 @@ except Exception as e:
 
 
 try:
-    from routes.multi_agent_mode import rag_mode_bp
+    from routes.multi_agent_mode import multi_agent_mode_bp
 except Exception as e:
     print(f"multi_agent_mode failed to load: {e}")
     multi_agent_mode_bp = None

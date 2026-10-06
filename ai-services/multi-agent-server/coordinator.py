@@ -103,7 +103,6 @@ def run_workflow(
             worker_result = {
                 "status": "timeout",
                 "agent": "worker_agent",
-                "subject_code": "ASD101",
                 "evidence_count": 0,
                 "evidence": [],
                 "output": "Worker timed out before generating output.",
@@ -208,7 +207,8 @@ def workflow_status() -> Dict[str, Any]:
 
 if __name__ == "__main__":
     result = run_workflow(
-        "Generate a student enrolment summary for ASD101."
+        "Generate a card status summary for user_id(1).",
+        "Recommend a user delete or update card details"
     )
 
     print(

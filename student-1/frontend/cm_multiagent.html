@@ -7,56 +7,64 @@
 
     <link rel="stylesheet" href="http://localhost:8080/styles.css">
     <link rel="stylesheet" href="shared/styles.css"> 
-
-
-
 </head>
 <body>
-<section class="card">
-    <h2>Multi-Agent Mode</h2>
-    <p>Run planner, worker, and reviewer agents in a coordinated workflow.</p>
 
-    <div class="feature-toggle-row">
-        <label class="toggle-switch" for="multi-agent-toggle">
-            <input id="multi-agent-toggle" type="checkbox" checked>
-            <span class="toggle-label">Multi-Agent Enabled</span>
-        </label>
-        <span id="multi-agent-state" class="feature-state feature-on">ON</span>
-    </div>
+<main class="app-shell">
+    <section class="card">
+        <h2>Multi-Agent Mode</h2>
+        <p>Run planner, worker, and reviewer agents in a coordinated workflow.</p>
 
-    <form id="workflow-form" class="stack-form">
-        <label for="workflow-request">User Request</label>
-        <input
-            id="workflow-request"
-            name="user_request"
-            list="workflow-request-samples"
-            required
-            placeholder="Example: Generate a student enrolment summary for ASD101."
-        >
-        
-        <datalist id="workflow-request-samples">
-            <option value="Generate a student enrolment summary for ASD101."></option>
-            <option value="Build a study plan for cloud fundamentals with 3 milestones and expected outcomes."></option>
-            <option value="Recommend a learning pathway for AI DevOps based on ASD101 prerequisites."></option>
-        </datalist>
-        <div class="feature-actions" aria-label="Sample workflow requests">
-            <button type="button" class="rag-action" data-sample-request="Generate a student enrolment summary for ASD101.">Use Sample 1</button>
-            <button type="button" class="rag-action" data-sample-request="Build a study plan for cloud fundamentals with 3 milestones and expected outcomes.">Use Sample 2</button>
-            <button type="button" class="rag-action" data-sample-request="Recommend a learning pathway for AI DevOps based on ASD101 prerequisites.">Use Sample 3</button>
+        <div class="feature-toggle-row">
+            <label class="toggle-switch" for="multi-agent-toggle">
+                <input id="multi-agent-toggle" type="checkbox" checked>
+                <span class="toggle-label">Multi-Agent Enabled</span>
+            </label>
+
+            <span id="multi-agent-state" class="feature-state feature-on">ON</span>
         </div>
-        <p class="rag-helper">Hint: use a full task request for planner-worker-reviewer flow.</p>
-        <button type="submit" class="rag-action">Run Workflow</button>
-    </form>
 
-    <form id="status-form" class="stack-form">
-        <button type="submit" class="rag-action">Get Workflow Status</button>
-    </form>
+        <form id="workflow-form" class="stack-form">
+            <label for="workflow-request">User Request</label>
+            <input
+                id="workflow-request"
+                name="user_request"
+                list="workflow-request-samples"
+                required
+                placeholder="Example: Generate a card status summary for user_id(1)."
+            >
+            
+            <datalist id="workflow-request-samples">
+                <option value="Generate a card status summary for user_id(1)"></option>
+                <option value="Recommend a user delete or update card details"></option>
+            </datalist>
+            <div class="feature-actions" aria-label="Sample workflow requests">
 
-    <div id="multi-agent-results" class="panel panel-mcp">Multi-agent responses will appear here.</div>
-</section>
+                <p>Sample 1:Generate a card status summary for user_id(1).</p>
+                <button type="button" class="rag-action" data-sample-request="Generate a card status summary for user_id(1).">Use Sample 1</button>
+
+                <p>Sample 2:Recommend a user delete or update card details.</p>
+                <button type="button" class="rag-action" data-sample-request="Recommend a user delete or update card details">Use Sample 2</button>
+
+            </div>
+            <p class="rag-helper">Hint: use a full task request for planner-worker-reviewer flow.</p>
+            <button type="submit" class="rag-action">Run Workflow</button>
+        </form>
+
+        <form id="status-form" class="stack-form">
+            <button type="submit" class="rag-action">Get Workflow Status</button>
+        </form>
+
+        <div id="multi-agent-results" class="panel panel-mcp">Multi-agent responses will appear here.</div>
+    </section>
+</main>
 
 <script>
-const apiBase = "http://localhost:5001";
+// This was in the lab code
+// const apiBase = "http://localhost:5001";
+
+
+const apiBase = "http://localhost:8201";
 const output = document.getElementById("multi-agent-results");
 const modeToggle = document.getElementById("multi-agent-toggle");
 const modeState = document.getElementById("multi-agent-state");

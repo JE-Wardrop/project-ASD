@@ -6,10 +6,6 @@ from openai import OpenAI
 
 
 
-
-# Will have to determine what the workflow of the plan should actually be
-
-# This path might not be correct for our project. I'll have a look at this on Thursday
 BASE_DIR = Path(__file__).resolve().parents[1]
 PROMPT_PATH = BASE_DIR / "prompts" / "planner_prompt.txt"
 
@@ -112,7 +108,7 @@ User Request:
         return (
             "Objective: Process the user request.\n"
             "Steps: Plan, work, review, human decision.\n"
-            "Evidence Required: CRUD evidence from each student's database.\n"
+            "Evidence Required: Database evidence from each student's database.\n"
             "Human Approval: Required.\n"
             f"Fallback Reason: {exc}"
         )
@@ -138,7 +134,8 @@ if __name__ == "__main__":
     import json
 
     result = plan_workflow(
-        "Generate a student enrolment summary for ASD101."
+        "Generate a card status summary for user_id(1).",
+        "Recommend a user delete or update card details"
     )
 
     print(

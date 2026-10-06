@@ -5,8 +5,8 @@ from coordinator import run_workflow
 
 def main() -> None:
     result = run_workflow(
-        # "Generate a summary for" + student
-        "Generate a summary for each microservice."
+        "Generate a card status summary for user_id(1).",
+        "Recommend a user delete or update card details"
     )
 
     print(
