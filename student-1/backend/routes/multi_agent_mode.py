@@ -4,7 +4,7 @@ from flask import Blueprint, request
 import requests
 
 
-multi_agent_bp = Blueprint("multi_agent_mode", __name__)
+multi_agent_mode_bp = Blueprint("multi_agent_mode", __name__)
 
 MULTI_AGENT_SERVICE_URL = os.getenv("MULTI_AGENT_SERVICE_URL", "http://localhost:5004")
 

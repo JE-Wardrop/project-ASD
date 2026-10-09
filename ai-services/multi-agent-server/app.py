@@ -20,35 +20,60 @@ def health():
     )
 
 # Doesn't work on my end: 405 error
+# Try testing this as a normal POST reuquest and see what happens
 
 @app.post("/workflow")
 def workflow():
-    data = request.get_json(
-        silent=True
-    ) or {}
 
-    user_request = data.get(
-        "user_request",
-        ""
-    ).strip()
 
-    if not user_request:
-        return jsonify(
-            {
-                "status": "error",
-                "error": "user_request is required"
-            }
-        ), 400
-
-    result = run_workflow(
-        user_request
-    )
-
+    # DEBUG 1
     return jsonify(
-        result
+        workflow_status()
     ), 200
 
 
+    # DEBUG 2
+    # data = request.get_json(
+    #     silent=True
+    # ) or {}
+
+    # user_request = data.get(
+    #     "user_request",
+    #     ""
+    # ).strip()
+
+    # return user_request
+
+
+    # CODE
+
+    # data = request.get_json(
+    #     silent=True
+    # ) or {}
+
+    # user_request = data.get(
+    #     "user_request",
+    #     ""
+    # ).strip()
+
+    # if not user_request:
+    #     return jsonify(
+    #         {
+    #             "status": "error",
+    #             "error": "user_request is required"
+    #         }
+    #     ), 400
+
+    # result = run_workflow(
+    #     user_request
+    # )
+
+    # return jsonify(
+    #     result
+    # ), 200
+
+
+# This route is working
 @app.get("/workflow/status")
 def status():
     return jsonify(
