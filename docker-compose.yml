@@ -52,18 +52,12 @@ services:
       - "8201:5001"
     environment:
       DATABASE_SERVICE_URL: http://student-1-database:5002
-
-      # This for reason stopped working and idk why
-      # I think this is an issue with the docker as I have qwen installed on my machine
       OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
       OLLAMA_MODEL: qwen2.5:0.5b
       MCP_ENABLED: "true"
       RAG_ENABLED: "true"
+      MULTI_AGENT_SERVER_URL: http://host.docker.internal:5004
       MULTI_AGENT_ENABLED: "true"
-
-
-      # connecting MCP to the backend. 
-      # this is all that should be needed to connect the files.
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

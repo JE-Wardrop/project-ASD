@@ -45,6 +45,7 @@ def multi_agent_workflow():
             timeout=MULTI_AGENT_SERVICE_TIMEOUT_SECONDS,
         )
         return response.json(), response.status_code
+    
     except requests.RequestException as exc:
         return {"status": "error", "error": str(exc)}, 503
 

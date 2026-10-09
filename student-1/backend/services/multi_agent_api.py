@@ -2,14 +2,13 @@ import os
 
 import requests
 
-# Will call whatever agents are running on 5004. Should have a planner, worker and executor.
 MULTI_AGENT_SERVER_URL = os.getenv("MULTI_AGENT_SERVER_URL", "http://host.docker.internal:5004")
 MULTI_AGENT_ENABLED = os.getenv("MULTI_AGENT_ENABLED", "true").strip().lower() in ("1", "true", "yes", "on")
 
 try:
-    MULTI_AGENT_TIMEOUT_SECONDS = int(os.getenv("MULTI_AGENT_TIMEOUT_SECONDS", "180"))
+    MULTI_AGENT_TIMEOUT_SECONDS = int(os.getenv("MULTI_AGENT_TIMEOUT_SECONDS", "900"))
 except ValueError:
-    MULTI_AGENT_TIMEOUT_SECONDS = 180
+    MULTI_AGENT_TIMEOUT_SECONDS = 900
 
 
 def multi_agent_mode_is_enabled(req) -> bool:
