@@ -27,7 +27,7 @@ def multi_agent_disabled_response():
     return {"status": "error", "error": "Multi-Agent mode is disabled."}, 403
 
 
-@multi_agent_bp.post("/multi-agent/workflow")
+@multi_agent_mode_bp.post("/multi-agent/workflow")
 def multi_agent_workflow():
     if not multi_agent_mode_is_enabled(request):
         return multi_agent_disabled_response()
@@ -49,7 +49,7 @@ def multi_agent_workflow():
         return {"status": "error", "error": str(exc)}, 503
 
 
-@multi_agent_bp.get("/multi-agent/workflow/status")
+@multi_agent_mode_bp.get("/multi-agent/workflow/status")
 def multi_agent_workflow_status():
     if not multi_agent_mode_is_enabled(request):
         return multi_agent_disabled_response()

@@ -2,6 +2,7 @@ import os
 
 import requests
 
+# Will call whatever agents are running on 5004. Should have a planner, worker and executor.
 MULTI_AGENT_SERVER_URL = os.getenv("MULTI_AGENT_SERVER_URL", "http://host.docker.internal:5004")
 MULTI_AGENT_ENABLED = os.getenv("MULTI_AGENT_ENABLED", "true").strip().lower() in ("1", "true", "yes", "on")
 
@@ -43,3 +44,12 @@ def call_multi_agent_service(path: str, payload: dict):
         )
 
     return data
+
+
+def multi_agent_workflow(user_request: str):
+    payload = {"user_request": user_request}
+    return call_multi_agent_service("/workflow", payload)
+
+
+def multi_agent_workflow_status():
+    return call_multi_agent_service("/workflow/status", {})
