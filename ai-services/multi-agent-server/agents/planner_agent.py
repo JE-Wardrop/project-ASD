@@ -1,9 +1,15 @@
 import os
+import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from openai import OpenAI
 
+# Allows `python agents/planner_agent.py` as well as `from agents.planner_agent import ...`
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from agents.feature_sources import FEATURES, describe_source
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -35,10 +41,12 @@ PLANNER_MAX_TOKENS = int(
     )
 )
 
+# No silent retries: the coordinator's step timeout must cover a single call.
 client = OpenAI(
     base_url=OLLAMA_BASE_URL,
     api_key="ollama",
-    timeout=OLLAMA_TIMEOUT_SECONDS
+    timeout=OLLAMA_TIMEOUT_SECONDS,
+    max_retries=0
 )
 
 
@@ -73,9 +81,22 @@ def default_steps() -> List[Dict[str, Any]]:
     ]
 
 
-def call_model(
-    user_request: str
+def describe_context(
+    feature: Optional[str]
 ) -> str:
+    if feature not in FEATURES:
+        return "Feature: not specified\nEvidence Source: not specified"
+
+    return (
+        f"Feature: {FEATURES[feature]['label']} ({feature})\n"
+        f"Evidence Source: {describe_source(feature)}"
+    )
+
+
+def call_model(
+    user_request: str,
+    feature: Optional[str] = None
+) -> tuple[str, Optional[str]]:
     prompt = f"""
 {load_prompt()}
 
@@ -83,6 +104,10 @@ Constraints:
 - Keep output concise.
 - Provide exactly 3 milestones.
 - Keep response under 140 words.
+
+Context:
+
+{describe_context(feature)}
 
 User Request:
 
@@ -102,32 +127,41 @@ User Request:
             max_tokens=PLANNER_MAX_TOKENS
         )
 
-        return response.choices[0].message.content.strip()
+        return response.choices[0].message.content.strip(), None
 
     except Exception as exc:
         return (
             "Objective: Process the user request.\n"
             "Steps: Plan, work, review, human decision.\n"
-            "Evidence Required: Database evidence from each student's database.\n"
+            "Evidence Required: Records from the feature's database API.\n"
             "Human Approval: Required.\n"
             f"Fallback Reason: {exc}"
-        )
+        ), str(exc)
 
 
 def plan_workflow(
-    user_request: str
+    user_request: str,
+    feature: Optional[str] = None
 ) -> Dict[str, Any]:
-    return {
-        "status": "success",
+    plan, model_error = call_model(
+        user_request,
+        feature
+    )
+
+    result = {
+        "status": "fallback" if model_error else "success",
         "agent": "planner_agent",
         "model": OLLAMA_MODEL,
         "objective": user_request,
-        "plan": call_model(
-            user_request
-        ),
+        "feature": feature,
+        "plan": plan,
         "steps": default_steps(),
         "human_approval_required": True
     }
+    if model_error:
+        result["error"] = model_error
+
+    return result
 
 
 if __name__ == "__main__":
@@ -135,7 +169,7 @@ if __name__ == "__main__":
 
     result = plan_workflow(
         "Generate a card status summary for user_id(1).",
-        "Recommend a user delete or update card details"
+        "cards"
     )
 
     print(

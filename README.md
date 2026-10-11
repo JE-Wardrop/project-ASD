@@ -217,6 +217,34 @@ Choose a review type from the menu (1 Database, 2 Endpoints, 3 Architecture, 4 D
 
 Any student folder can be reviewed by changing `REVIEW_TARGET`.
 
+## Multi-Agent Server (Release 2)
+
+One shared, non-containerised server coordinates three agents: Planner and Worker run
+in parallel, then the Reviewer checks the Worker's output against the plan, and a human
+records the final decision (Accept / Partially Accept / Reject). The Worker reads evidence
+from the feature's database API (`localhost:830N`), never from a `.db` file, so the
+containers must be running.
+
+```bash
+pip install -r ai-services/multi-agent-server/requirements.txt
+cd ai-services/multi-agent-server
+python app.py                      # http://localhost:5004
+```
+
+| Endpoint | Body / query |
+|---|---|
+| `POST /workflow` | `{"user_request", "feature", "caller"}`; `feature` is `cards`, `accounts`, `users` or `transactions` (inferred from `caller` or the request text if omitted) |
+| `POST /workflow/<id>/decision` | `{"decision", "reason", "correction", "reviewer"}`; `correction` is required for Partially Accept; one decision per workflow |
+| `GET /workflow/status` | optional `?feature=` / `?caller=` filters |
+
+From a terminal: `python workflow_runner.py "Summarise account statuses for user_id 2." --feature accounts`
+(prompts for the human decision; `--decision`, `--reason`, `--correction` skip the prompt).
+Runs are appended to `workflow_history.jsonl`; workflow runs and human decisions to
+`coordination_audit.jsonl`. Review them with agentic-loop option **8 - Multi-Agent**.
+
+If `llama3.1:8b` cannot load on your machine, the Reviewer falls back to `qwen2.5:0.5b`
+(`OLLAMA_REVIEW_FALLBACK_MODEL`).
+
 ## Continuous integration
 
 Each student maintains their own workflow file in `.github/workflows/`. A push that

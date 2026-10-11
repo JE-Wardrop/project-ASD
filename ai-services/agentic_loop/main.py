@@ -27,7 +27,11 @@ MENU = {
     "4": "devops",
     "5": "mcp",
     "6": "rag",
+    "8": "multi_agent",
 }
+
+# Option 7 runs the Release 0/1 modes together, as it did before Multi-Agent was added.
+RUN_ALL = ["db", "endpoints", "architecture", "devops", "mcp", "rag"]
 
 
 def _resolve_roots() -> tuple[Path, Path]:
@@ -59,6 +63,7 @@ def _print_mode_mapping(app_dir: Path) -> None:
         "DevOps":       str(app_dir / "prompts" / "devops" / "implementation" / "devops_task_prompt.txt"),
         "MCP":          str(app_dir / "prompts" / "mcp" / "review" / "tool_review_prompt.txt"),
         "RAG":          str(app_dir / "prompts" / "rag" / "review" / "integration_review_prompt.txt"),
+        "Multi-Agent":  str(app_dir / "prompts" / "multi-agent" / "implementation" / "multi_agent_implementation_prompt.txt"),
     })
 
 
@@ -96,9 +101,9 @@ def main() -> None:
             print("Loop closed.")
             break
 
-        keys = list(MENU.values()) if choice == "7" else [MENU.get(choice)]
+        keys = RUN_ALL if choice == "7" else [MENU.get(choice)]
         if keys == [None]:
-            print("Invalid choice. Select 0 to 7.")
+            print("Invalid choice. Select 0 to 8.")
             continue
 
         for key in keys:

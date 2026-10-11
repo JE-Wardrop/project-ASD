@@ -1,0 +1,16 @@
+Review the Multi-Agent workflow assessment.
+
+Check:
+- agent sequencing (Planner, Worker, Reviewer, Human)
+- evidence grounding (Worker evidence count, data source)
+- reviewer coverage (model used, fallback, timeout)
+- human approval gating (decision recorded and justified)
+- unsupported claims
+
+Return exactly:
+Risk:
+Correction:
+Retest:
+Recommendation:
+
+Maximum 45 words.

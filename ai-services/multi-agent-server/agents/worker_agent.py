@@ -1,15 +1,26 @@
+import json
 import os
-import sqlite3
+import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, Optional
 
 from openai import OpenAI
 
+# Allows `python agents/worker_agent.py` as well as `from agents.worker_agent import ...`
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from agents.feature_sources import (
+    FEATURES,
+    EvidenceError,
+    describe_source,
+    fetch_evidence,
+    resolve_feature,
+)
+
 
 BASE_DIR = Path(__file__).resolve().parents[1]
-APP_DIR = BASE_DIR.parent
 PROMPT_PATH = BASE_DIR / "prompts" / "worker_prompt.txt"
-DATABASE_PATH = APP_DIR / "enrolment.db"
 
 OLLAMA_BASE_URL = os.getenv(
     "OLLAMA_BASE_URL",
@@ -37,10 +48,12 @@ WORKER_MAX_TOKENS = int(
     )
 )
 
+# No silent retries: the coordinator's step timeout must cover a single call.
 client = OpenAI(
     base_url=OLLAMA_BASE_URL,
     api_key="ollama",
-    timeout=OLLAMA_TIMEOUT_SECONDS
+    timeout=OLLAMA_TIMEOUT_SECONDS,
+    max_retries=0
 )
 
 
@@ -50,91 +63,49 @@ def load_prompt() -> str:
     ).strip()
 
 
-def extract_subject_code(
-    user_request: str
-) -> str:
-    request_upper = user_request.upper()
-
-    for token in request_upper.replace(".", " ").replace(",", " ").split():
-        if token.startswith("ASD"):
-            return token
-
-    return "ASD101"
-
-
-def _connect_db() -> sqlite3.Connection:
-    if not DATABASE_PATH.exists():
-        raise FileNotFoundError(f"Database not found: {DATABASE_PATH}")
-
-    conn = sqlite3.connect(DATABASE_PATH)
-    conn.row_factory = sqlite3.Row
-
-    return conn
-
-
-def get_students_by_subject(
-    subject_code: str
-) -> List[Dict[str, Any]]:
-    conn = _connect_db()
-
-    try:
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            SELECT student_id, student_name, subject_code
-            FROM students
-            WHERE subject_code = ?
-            ORDER BY student_id
-            """,
-            (subject_code,),
-        )
-
-        return [dict(row) for row in cursor.fetchall()]
-    finally:
-        conn.close()
-
-
 def format_evidence(
-    students: List[Dict[str, Any]],
-    subject_code: str
+    evidence: Dict[str, Any]
 ) -> str:
-    if not students:
-        return f"No students found for {subject_code}."
+    records = evidence["records"]
+    if not records:
+        return f"No records found in {evidence['source']} for the requested filters."
 
-    lines = []
+    lines = [
+        f"Source: {evidence['source']}",
+        f"Records shown: {len(records)} of {evidence['matched_records']} matching "
+        f"({evidence['total_records']} total)",
+    ]
+    if evidence["filters_applied"]:
+        lines.append(f"Filters applied: {evidence['filters_applied']}")
 
-    for student in students:
-        lines.append(
-            f"- {student['student_id']} | "
-            f"{student['student_name']} | "
-            f"{student['subject_code']}"
-        )
+    for record in records:
+        lines.append(f"- {json.dumps(record)}")
 
     return "\n".join(lines)
 
 
 def call_model(
     user_request: str,
-    subject_code: str,
+    feature: str,
     evidence_text: str
-) -> str:
+) -> tuple[str, Optional[str]]:
     prompt = f"""
 {load_prompt()}
 
 Constraints:
-- Use only the provided Student Evidence.
-- Do not invent students or fields.
+- Use only the provided Feature Evidence.
+- Do not invent records or fields.
 - Return concise output under 180 words.
 
 User Request:
 
 {user_request}
 
-Subject Code:
+Feature:
 
-{subject_code}
+{FEATURES[feature]['label']} ({feature})
 
-Student Evidence:
+Feature Evidence:
 
 {evidence_text}
 """
@@ -152,7 +123,7 @@ Student Evidence:
             max_tokens=WORKER_MAX_TOKENS
         )
 
-        return response.choices[0].message.content.strip()
+        return response.choices[0].message.content.strip(), None
 
     except Exception as exc:
         return (
@@ -162,48 +133,42 @@ Student Evidence:
             f"{evidence_text}\n\n"
             "Limitations:\n"
             f"Model call failed. Human review required. Error: {exc}"
-        )
+        ), str(exc)
 
 
 def generate_output(
-    user_request: str
+    user_request: str,
+    feature: Optional[str] = None
 ) -> Dict[str, Any]:
-    subject_code = extract_subject_code(
-        user_request
-    )
-
     try:
-        students = get_students_by_subject(
-            subject_code
+        feature = resolve_feature(
+            feature,
+            None,
+            user_request
         )
-
-        evidence_text = format_evidence(
-            students,
-            subject_code
-        )
-
-        output = call_model(
-            user_request,
-            subject_code,
-            evidence_text
-        )
-
-        return {
-            "status": "success",
-            "agent": "worker_agent",
-            "model": OLLAMA_MODEL,
-            "subject_code": subject_code,
-            "evidence_count": len(students),
-            "evidence": students,
-            "output": output,
-            "human_approval_required": True
-        }
-
-    except (FileNotFoundError, sqlite3.Error) as exc:
+    except ValueError as exc:
         return {
             "status": "error",
             "agent": "worker_agent",
-            "subject_code": subject_code,
+            "feature": feature,
+            "evidence_count": 0,
+            "evidence": [],
+            "output": "No feature evidence source could be selected.",
+            "error": str(exc),
+            "human_approval_required": True
+        }
+
+    try:
+        evidence = fetch_evidence(
+            feature,
+            user_request
+        )
+    except EvidenceError as exc:
+        return {
+            "status": "error",
+            "agent": "worker_agent",
+            "feature": feature,
+            "evidence_source": describe_source(feature),
             "evidence_count": 0,
             "evidence": [],
             "output": "Database evidence could not be retrieved.",
@@ -211,12 +176,37 @@ def generate_output(
             "human_approval_required": True
         }
 
+    output, model_error = call_model(
+        user_request,
+        feature,
+        format_evidence(evidence)
+    )
+
+    result = {
+        "status": "fallback" if model_error else "success",
+        "agent": "worker_agent",
+        "model": OLLAMA_MODEL,
+        "feature": feature,
+        "evidence_source": evidence["source"],
+        "evidence_count": len(evidence["records"]),
+        "matched_records": evidence["matched_records"],
+        "total_records": evidence["total_records"],
+        "filters_applied": evidence["filters_applied"],
+        "filters_ignored": evidence["filters_ignored"],
+        "evidence": evidence["records"],
+        "output": output,
+        "human_approval_required": True
+    }
+    if model_error:
+        result["error"] = model_error
+
+    return result
+
 
 if __name__ == "__main__":
-    import json
-
     result = generate_output(
-        "Generate a student enrolment summary for ASD101."
+        "Generate a card status summary for user_id(1).",
+        "cards"
     )
 
     print(

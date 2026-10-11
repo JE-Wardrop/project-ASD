@@ -66,6 +66,13 @@ def build_mode_config() -> dict[str, ModeConfig]:
             implementation_prompts=( "implementation/rag_implementation.txt",),
             review_prompts=("review/rag_reasoning_prompt.txt", "review/rag_review.txt"),
         ),
+        "multi_agent": ModeConfig(
+            key="multi_agent",
+            label="Multi-Agent",
+            prompt_family="multi-agent",
+            implementation_prompts=("implementation/multi_agent_implementation_prompt.txt",),
+            review_prompts=("review/multi_agent_review_prompt.txt",),
+        ),
     }
 
 
