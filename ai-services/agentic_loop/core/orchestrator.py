@@ -31,7 +31,6 @@ from pipelines import (
     rag_pipeline,
 )
 
-# Once RAG is being implemented we can comment out this line
 COLLECTORS = {
     "db": db_collector.collect,
     "endpoints": endpoints_collector.collect,
@@ -319,7 +318,6 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
             f"IMPLEMENTATION: {implementation_output}\n"
             f"REVIEW: {review_output}"
         )
-
-
+    
 
     return "Unknown mode."

@@ -29,14 +29,6 @@ services:
     ports:
       - "8080:8000"
     restart: unless-stopped
-
-
-  # mcp-server:
-  #   build:
-  #     context: .
-  #     dockerfile: ai-services/mcp-server/dockerfile
-    # networks:
- 
  
   # Student 1
   student-1-frontend:
@@ -64,9 +56,8 @@ services:
       OLLAMA_MODEL: qwen2.5:0.5b
       MCP_ENABLED: "true"
       RAG_ENABLED: "true"
-
-      # connecting MCP to the backend. 
-      # this is all that should be needed to connect the files.
+      MULTI_AGENT_SERVICE_URL: http://host.docker.internal:5004
+      MULTI_AGENT_ENABLED: "true"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
