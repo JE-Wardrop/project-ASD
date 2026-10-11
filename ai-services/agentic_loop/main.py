@@ -27,6 +27,7 @@ MENU = {
     "4": "devops",
     "5": "mcp",
     "6": "rag",
+    "8": "multi_agent",
 }
 
 
@@ -59,6 +60,7 @@ def _print_mode_mapping(app_dir: Path) -> None:
         "DevOps":       str(app_dir / "prompts" / "devops" / "implementation" / "devops_task_prompt.txt"),
         "MCP":          str(app_dir / "prompts" / "mcp" / "review" / "tool_review_prompt.txt"),
         "RAG":          str(app_dir / "prompts" / "rag" / "review" / "integration_review_prompt.txt"),
+        "Multi-Agent":  str(app_dir / "prompts" / "multi-agent" / "review" / "multi_agent_review_prompt.txt"),
     })
 
 
@@ -98,7 +100,7 @@ def main() -> None:
 
         keys = list(MENU.values()) if choice == "7" else [MENU.get(choice)]
         if keys == [None]:
-            print("Invalid choice. Select 0 to 7.")
+            print("Invalid choice. Select 0 to 8.")
             continue
 
         for key in keys:

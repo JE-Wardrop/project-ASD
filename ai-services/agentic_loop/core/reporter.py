@@ -19,6 +19,7 @@ def print_menu(target_label: str) -> None:
     print("5 - MCP")
     print("6 - RAG")
     print("7 - Run top four (db, endpoints, architecture, devOps)")
+    print("8 - Run Multi-agent server")
     print("0 - Exit")
     print("=" * 72)
 
