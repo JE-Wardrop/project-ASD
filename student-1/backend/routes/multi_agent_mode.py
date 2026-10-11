@@ -2,11 +2,12 @@ import os
 
 from flask import Blueprint, request
 import requests
+from services.multi_agent_api import call_multi_agent_service
 
 
 multi_agent_mode_bp = Blueprint("multi_agent_mode", __name__)
 
-MULTI_AGENT_SERVICE_URL = os.getenv("MULTI_AGENT_SERVICE_URL", "http://localhost:5004")
+MULTI_AGENT_SERVICE_URL = os.getenv("MULTI_AGENT_SERVICE_URL", "http://host.docker.internal:5004")
 
 try:
     MULTI_AGENT_SERVICE_TIMEOUT_SECONDS = int(os.getenv("MULTI_AGENT_SERVICE_TIMEOUT_SECONDS", "60"))
@@ -27,6 +28,7 @@ def multi_agent_disabled_response():
     return {"status": "error", "error": "Multi-Agent mode is disabled."}, 403
 
 
+
 @multi_agent_mode_bp.post("/multi-agent/workflow")
 def multi_agent_workflow():
     if not multi_agent_mode_is_enabled(request):
@@ -35,17 +37,25 @@ def multi_agent_workflow():
     data = request.get_json(silent=True) or {}
     user_request = data.get("user_request", "").strip()
 
-    if not user_request:
-        return {"status": "error", "error": "user_request is required"}, 400
+    # if not user_request:
+    #     return {"status": "error", "error": "user_request is required, multi_agent_mode.py"}, 400
 
-    try:
-        response = requests.post(
-            f"{MULTI_AGENT_SERVICE_URL}/workflow",
-            json={"user_request": user_request},
-            timeout=MULTI_AGENT_SERVICE_TIMEOUT_SECONDS,
-        )
-        return response.json(), response.status_code
+    # try:
+    #     response = requests.post(
+    #         f"{MULTI_AGENT_SERVICE_URL}/workflow",
+    #         json={"user_request": user_request},
+    #         timeout=MULTI_AGENT_SERVICE_TIMEOUT_SECONDS,
+    #     )
+    #     return response.json(), response.status_code
     
+    # except requests.RequestException as exc:
+    #     return {"status": "error", "error": str(exc)}, 503
+    
+
+    # user_request = request.form.get("user_request", "student").strip() or "student"
+    try:
+        payload = call_multi_agent_service("/workflow", {"user_request": user_request})
+        return payload, 200
     except requests.RequestException as exc:
         return {"status": "error", "error": str(exc)}, 503
 

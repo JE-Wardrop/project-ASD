@@ -23,9 +23,10 @@ def health():
 # /workflow -> Not accepting a GET request
 # Was originally POST and logically it should be POST 
 
-# user_request is not being recieved from student-1/backend/services/multi_agent_api.py
+# user_request is not being recieved from student-1/backend/services/multi_agent_api.py. 
+# this is an issue with student-1
 
-@app.get("/workflow")
+@app.post("/workflow")
 def workflow():
     data = request.get_json(
         silent=True

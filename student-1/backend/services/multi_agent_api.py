@@ -44,11 +44,3 @@ def call_multi_agent_service(path: str, payload: dict):
 
     return data
 
-
-def multi_agent_workflow(user_request: str):
-    payload = {"user_request": user_request}
-    return call_multi_agent_service("/workflow", payload)
-
-
-def multi_agent_workflow_status():
-    return call_multi_agent_service("/workflow/status", {})
