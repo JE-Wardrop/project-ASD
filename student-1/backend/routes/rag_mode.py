@@ -1,8 +1,10 @@
-from flask import Blueprint, request
 import requests
-
-from services.rag_api import call_rag_service, rag_disabled_response, rag_mode_is_enabled
-
+from flask import Blueprint, request
+from services.rag_api import (
+    call_rag_service,
+    rag_disabled_response,
+    rag_mode_is_enabled,
+)
 
 rag_mode_bp = Blueprint("rag_mode", __name__)
 

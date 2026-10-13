@@ -4,14 +4,13 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeoutError
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from agents.planner_agent import plan_workflow
-from agents.worker_agent import generate_output
 from agents.reviewer_agent import review_output
-
+from agents.worker_agent import generate_output
 
 BASE_DIR = Path(__file__).resolve().parent
 HISTORY_PATH = BASE_DIR / "workflow_history.jsonl"
@@ -23,13 +22,13 @@ AGENT_STEP_TIMEOUT_SECONDS = float(
 
 def now_iso() -> str:
     return datetime.now(
-        timezone.utc
+        UTC
     ).isoformat()
 
 
 def append_jsonl(
     path: Path,
-    record: Dict[str, Any]
+    record: dict[str, Any]
 ) -> None:
     with path.open(
         "a",
@@ -42,7 +41,7 @@ def append_jsonl(
 
 def read_jsonl(
     path: Path
-) -> list[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     if not path.exists():
         return []
 
@@ -63,7 +62,7 @@ def read_jsonl(
 
 def run_workflow(
     user_request: str
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     start_time = time.time()
     workflow_id = str(
         uuid.uuid4()
@@ -188,7 +187,7 @@ def run_workflow(
     return workflow_result
 
 
-def workflow_status() -> Dict[str, Any]:
+def workflow_status() -> dict[str, Any]:
     history = read_jsonl(
         HISTORY_PATH
     )

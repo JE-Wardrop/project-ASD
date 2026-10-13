@@ -7,10 +7,7 @@ Choose whose microservices to review with an environment variable:
 If it is not set, the loop asks at startup.
 """
 
-import os
 from pathlib import Path
-
-from dotenv import load_dotenv
 
 from config.review_config import build_mode_config
 from config.targets import available_targets, resolve_target
@@ -18,7 +15,7 @@ from core.ai_runner import AIRunner
 from core.orchestrator import run_mode
 from core.prompt_registry import PromptRegistry
 from core.reporter import print_menu, print_prompt_map, print_result, save_log
-
+from dotenv import load_dotenv
 
 MENU = {
     "1": "db",

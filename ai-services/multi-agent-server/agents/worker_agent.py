@@ -1,10 +1,9 @@
 import os
 import sqlite3
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from openai import OpenAI
-
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 APP_DIR = BASE_DIR.parent
@@ -74,7 +73,7 @@ def _connect_db() -> sqlite3.Connection:
 
 def get_students_by_subject(
     subject_code: str
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     conn = _connect_db()
 
     try:
@@ -95,7 +94,7 @@ def get_students_by_subject(
 
 
 def format_evidence(
-    students: List[Dict[str, Any]],
+    students: list[dict[str, Any]],
     subject_code: str
 ) -> str:
     if not students:
@@ -167,7 +166,7 @@ Student Evidence:
 
 def generate_output(
     user_request: str
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     subject_code = extract_subject_code(
         user_request
     )

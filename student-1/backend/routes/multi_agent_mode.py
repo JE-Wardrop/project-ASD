@@ -1,9 +1,8 @@
 import os
 
-from flask import Blueprint, request
 import requests
+from flask import Blueprint, request
 from services.multi_agent_api import call_multi_agent_service
-
 
 multi_agent_mode_bp = Blueprint("multi_agent_mode", __name__)
 

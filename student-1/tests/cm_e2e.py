@@ -7,7 +7,6 @@ post-deployment evidence after `docker-compose up`.
 """
 
 import os
-import re
 
 import pytest
 import requests

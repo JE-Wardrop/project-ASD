@@ -10,7 +10,6 @@ Every place that differs from Lab 8 is marked with  # CHANGED FROM LAB 8
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
-
 from rag_pipeline import answer_question as answer_question_impl
 from rag_pipeline import refresh_corpus as refresh_corpus_impl
 from rag_pipeline import retrieve_context as retrieve_context_impl

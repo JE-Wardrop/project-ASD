@@ -1,7 +1,9 @@
-from flask import Blueprint, request, jsonify
 from html import escape
-from services.llm_client import call_transaction_agent
+
+from flask import Blueprint, request
 from services import database_api as db
+from services.llm_client import call_transaction_agent
+
 ai_mode_bp = Blueprint("ai_mode", __name__)
 
 SYSTEM_PROMPT = "transaction_system_prompt.txt"
@@ -112,7 +114,7 @@ def explain_transaction(txn_id):
     
     txn = db.get_transaction(txn_id)
     if txn is None:
-        return _alert(f"Database service not working"), 503
+        return _alert("Database service not working"), 503
     if txn.status_code == 404:
         return _alert("Transaction not found.", "error"), 404
     
@@ -125,7 +127,7 @@ def explain_transaction(txn_id):
             max_tokens=300
         )
     except Exception as e:
-        return _alert(f"AI explanation failed: {str(e)}", "error"), 500
+        return _alert(f"AI explanation failed: {e!s}", "error"), 500
     return _panel(answer), 200
 
 @ai_mode_bp.post("/ai/analyse")

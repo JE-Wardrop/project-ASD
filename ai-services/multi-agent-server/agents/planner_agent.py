@@ -1,10 +1,8 @@
 import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from openai import OpenAI
-
-
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 PROMPT_PATH = BASE_DIR / "prompts" / "planner_prompt.txt"
@@ -48,7 +46,7 @@ def load_prompt() -> str:
     ).strip()
 
 
-def default_steps() -> List[Dict[str, Any]]:
+def default_steps() -> list[dict[str, Any]]:
     return [
         {
             "step": 1,
@@ -116,7 +114,7 @@ User Request:
 
 def plan_workflow(
     user_request: str
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     return {
         "status": "success",
         "agent": "planner_agent",

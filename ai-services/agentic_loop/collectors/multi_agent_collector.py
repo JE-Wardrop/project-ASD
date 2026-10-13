@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 REQUIRED_AGENT_FUNCTIONS = {
     "planner_agent.py": "plan_workflow",
     "worker_agent.py": "generate_output",

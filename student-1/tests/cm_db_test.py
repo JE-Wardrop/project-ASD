@@ -7,11 +7,8 @@ so it can be used as pre-testing evidence before deploying the service.
 import os
 import sys
 import tempfile
-from pathlib import Path
 
 import pytest
-
-
 
 DATABASE_DIR = os.getenv("FLASK_BASE_URL", "http://localhost:8301")
 # DATABASE_DIR = Path(__file__).resolve().parent.parent / "cm"

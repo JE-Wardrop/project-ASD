@@ -1,12 +1,10 @@
-from flask import Flask, render_template, request, send_from_directory
-from dotenv import load_dotenv
-from openai import OpenAI
-import sqlite3
 import os
+import sqlite3
 
-from pathlib import Path
+from dotenv import load_dotenv
+from flask import Flask
 from flask_cors import CORS
-
+from openai import OpenAI
 
 load_dotenv()
 
@@ -28,7 +26,6 @@ client = OpenAI(
 
 from routes.ai_mode import ai_mode_bp
 from routes.normal_mode import normal_mode_bp
-
 
 try:
     from routes.mcp_mode import mcp_mode_bp
@@ -78,4 +75,6 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    app.run(host="0.0.0.0", port=5001, debug=debug_mode)
+    # app.run(host="0.0.0.0", port=5001, debug=True)

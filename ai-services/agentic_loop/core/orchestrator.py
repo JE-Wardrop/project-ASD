@@ -10,7 +10,6 @@ Python gathered, which is what stops it inventing findings.
 """
 
 from pathlib import Path
-from turtle import mode
 
 from collectors import (
     architecture_collector,
@@ -18,8 +17,8 @@ from collectors import (
     devops_collector,
     endpoints_collector,
     mcp_collector,
-    rag_collector,
     multi_agent_collector,
+    rag_collector,
 )
 from config.review_config import ModeConfig
 from core.ai_runner import AIRunner
@@ -30,8 +29,8 @@ from pipelines import (
     devops_pipeline,
     endpoints_pipeline,
     mcp_pipeline,
-    rag_pipeline,
     multi_agent_pipeline,
+    rag_pipeline,
 )
 
 COLLECTORS = {
@@ -192,7 +191,6 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
     # -------------------------------------------------------- MCP ADAPT
 
     if mode.key in {"mcp"}:
-        pass
 
         # Causing errors (full error message):
             #   File "/home/juno/Desktop/ASD 2026/project-ASD/ai-services/agentic_loop/core/orchestrator.py", line 245, in run_mode

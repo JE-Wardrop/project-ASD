@@ -3,7 +3,6 @@ import re
 import sqlite3
 
 from flask import Flask, jsonify, request
-
 from init_db import DATABASE_NAME, VALID_ACCOUNT_TYPES, VALID_STATUSES, init_db
 
 app = Flask(__name__)

@@ -103,4 +103,6 @@ def main():
 
 
 if __name__ == "__main__":
+    # # line 74
+    # host = "0.0.0.0"  # noqa: S104 - container needs to bind all interfaces
     main()

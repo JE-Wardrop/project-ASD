@@ -1,20 +1,20 @@
-from mcp.server.fastmcp import FastMCP, Context
-from flask import Flask, jsonify, request
 from typing import Any
+
+from mcp.server.fastmcp import FastMCP
 from tools import (
+    # Bank Account Management (student-2)
+    get_account_balance,
     # card_count as get_card_count,
     # cards_per_user as get_cards_per_user,
     get_card_count,
     get_card_per_user,
+    get_transaction,
+    list_accounts_by_user,
     # list_project_files,
     # read_ci_report,
     # Transaction Management (student-5)
     list_transactions,
-    get_transaction,
     summarize_account_activity,
-    # Bank Account Management (student-2)
-    get_account_balance,
-    list_accounts_by_user,
     summarize_account_statuses,
 )
 

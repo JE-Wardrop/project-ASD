@@ -1,5 +1,7 @@
 import os
+
 import requests
+
 DB_URL = os.environ.get("DB_URL", "http://localhost:8305")
 
 TIMEOUT = 5
