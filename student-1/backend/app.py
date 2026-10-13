@@ -27,6 +27,8 @@ client = OpenAI(
 from routes.ai_mode import ai_mode_bp
 from routes.normal_mode import normal_mode_bp
 
+from routes.auth_mode import auth_bp
+
 try:
     from routes.mcp_mode import mcp_mode_bp
 except Exception as e:
@@ -47,6 +49,8 @@ except Exception as e:
     multi_agent_mode_bp = None
 
 
+
+
 def get_db_connection():
     conn = sqlite3.connect(DATABASE_NAME)
     conn.row_factory = sqlite3.Row
@@ -59,6 +63,10 @@ def create_app():
 
     app.register_blueprint(normal_mode_bp)
     app.register_blueprint(ai_mode_bp)
+
+    
+    app.register_blueprint(auth_bp)
+
 
     if mcp_mode_bp:
         app.register_blueprint(mcp_mode_bp)
