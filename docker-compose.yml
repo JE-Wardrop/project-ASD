@@ -90,7 +90,7 @@ services:
   student2-backend:
     build:
       context: ./student-2
-      dockerfile: backend/dockerfile
+      dockerfile: backend/Dockerfile
     container_name: student2-backend
     ports:
       - "8202:5001"
