@@ -43,57 +43,57 @@ jobs:
           name: lab11-azure-test-evidence
           path: /docs/testing/
 
-#   deploy_azure:
-#     runs-on: ubuntu-latest
-#     needs: [post_commit_tests]
-#     if: github.event_name == 'workflow_dispatch'
+  deploy_azure:
+    runs-on: ubuntu-latest
+    needs: [post_commit_tests]
+    if: github.event_name == 'workflow_dispatch'
 
-#     steps:
-#       - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-#       - name: Azure login
-#         uses: azure/login@v2
-#         with:
-#           client-id: ${{ secrets.AZURE_CLIENT_ID }}
-#           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-#           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-#       - name: Set up deployment environment
-#         working-directory: enrolment-app-open-ai
-#         run: bash scripts/lab11/env-setup.sh
+      - name: Set up deployment environment
+        working-directory: project-ASD
+        run: bash scripts/lab11/env-setup.sh
 
-#       - name: Build and push images
-#         working-directory: enrolment-app-open-ai
-#         run: bash scripts/lab11/build-images.sh
+      - name: Build and push images
+        working-directory: enrolment-app-open-ai
+        run: bash scripts/lab11/build-images.sh
 
-#       - name: Azure login (refresh)
-#         uses: azure/login@v2
-#         with:
-#           client-id: ${{ secrets.AZURE_CLIENT_ID }}
-#           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-#           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Azure login (refresh)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-#       - name: Create Container Apps environment
-#         working-directory: enrolment-app-open-ai
-#         run: bash scripts/lab11/deploy-azure-env.sh
+      - name: Create Container Apps environment
+        working-directory: enrolment-app-open-ai
+        run: bash scripts/lab11/deploy-azure-env.sh
 
-#       - name: Azure login (refresh again)
-#         uses: azure/login@v2
-#         with:
-#           client-id: ${{ secrets.AZURE_CLIENT_ID }}
-#           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-#           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Azure login (refresh again)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-#       - name: Deploy to Azure Container Apps
-#         working-directory: enrolment-app-open-ai
-#         run: bash scripts/lab11/deploy-azure.sh
+      - name: Deploy to Azure Container Apps
+        working-directory: enrolment-app-open-ai
+        run: bash scripts/lab11/deploy-azure.sh
 
-#       - name: Validate deployment and generate evidence
-#         working-directory: enrolment-app-open-ai
-#         run: bash scripts/lab11/deployment-testing.sh
+      - name: Validate deployment and generate evidence
+        working-directory: enrolment-app-open-ai
+        run: bash scripts/lab11/deployment-testing.sh
 
-#       - name: Upload deployment evidence
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: lab11-azure-deployment-evidence
-#           path: enrolment-app-open-ai/reports/lab11/deployment-results.md
+      - name: Upload deployment evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab11-azure-deployment-evidence
+          path: enrolment-app-open-ai/reports/lab11/deployment-results.md
