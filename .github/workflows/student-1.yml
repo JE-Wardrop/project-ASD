@@ -36,8 +36,11 @@ jobs:
       # Diasbled MCP
       MCP_ENABLED: "false"
 
-      # # Disables RAG 
+      # Disables RAG 
       RAG_ENABLED: "false"
+
+      # Disables Multi-agent 
+      MULTI_AGENT_ENABLED: "false"
       
     steps:
       - uses: actions/checkout@v4

@@ -8,7 +8,7 @@ set -e
 # Prevents Git Bash on Windows from rewriting --scope "/subscriptions/..." into a local file path.
 export MSYS_NO_PATHCONV=1
 
-APP_DISPLAY_NAME="lab11-github-oidc"
+APP_DISPLAY_NAME="cloud-dev-github-oidc"
 
 echo "=== Cloud Development GitHub Secrets Setup ==="
 
