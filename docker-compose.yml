@@ -99,11 +99,13 @@ services:
       OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
       OLLAMA_MODEL: qwen2.5:0.5b
       OLLAMA_REVIEW_MODEL: llama3.1:8b
-      # Shared MCP (:5500) and RAG (:5003) servers run on the host, not in Docker
+      # Shared MCP (:5500), RAG (:5003) and Multi-Agent (:5004) servers run on the host, not in Docker
       MCP_SERVER_URL: http://host.docker.internal:5500/mcp
       RAG_SERVICE_URL: http://host.docker.internal:5003
+      MULTI_AGENT_SERVICE_URL: http://host.docker.internal:5004
       MCP_ENABLED: ${MCP_ENABLED:-true}
       RAG_ENABLED: ${RAG_ENABLED:-true}
+      MULTI_AGENT_ENABLED: ${MULTI_AGENT_ENABLED:-true}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
