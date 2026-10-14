@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-# One-time, local-only: 
-# - creates the Azure OIDC app registration (if missing) 
+# One-time, local-only:
+# - creates the Azure OIDC app registration (if missing)
 # - pushes its identifiers to GitHub Actions secrets.
 
 # Prevents Git Bash on Windows from rewriting --scope "/subscriptions/..." into a local file path.
@@ -55,7 +55,7 @@ OWNER_ID=$(gh api "repos/${REPO_SLUG}" --jq '.owner.id')
 REPO_ID=$(gh api "repos/${REPO_SLUG}" --jq '.id')
 SUBJECT="repo:${OWNER_NAME}@${OWNER_ID}/${REPO_NAME}@${REPO_ID}:ref:refs/heads/${BRANCH}"
 
-FED_CRED_NAME="lab11-github-actions"
+FED_CRED_NAME="cloud-github-actions"
 EXISTING_FED_CRED=$(az ad app federated-credential list --id "$CLIENT_ID" --query "[?name=='$FED_CRED_NAME'].id" -o tsv 2>/dev/null || true)
 
 FED_CRED_PARAMS="{\"name\":\"${FED_CRED_NAME}\",\"issuer\":\"https://token.actions.githubusercontent.com\",\"subject\":\"${SUBJECT}\",\"audiences\":[\"api://AzureADTokenExchange\"]}"
@@ -82,7 +82,8 @@ else
     echo "Contributor role already assigned."
 fi
 
-# Contributor alone isn't enough for AcrPull auto-grant — see Purpose above.
+# Contributor alone isn't enough: deploy-azure.sh uses '--registry-identity system', which makes
+# the Azure CLI grant AcrPull to each new app's identity, and that needs permission to create role assignments.
 EXISTING_UAA=$(az role assignment list --assignee "$CLIENT_ID" --role "User Access Administrator" --scope "/subscriptions/$SUBSCRIPTION_ID" --query "[0].id" -o tsv 2>/dev/null || true)
 
 if [ -z "$EXISTING_UAA" ]; then
