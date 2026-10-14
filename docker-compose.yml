@@ -30,7 +30,50 @@ services:
       - "8080:8000"
     restart: unless-stopped
  
-  # Student 1
+  # # Student 1
+  # student-1-frontend:
+  #   build:
+  #     context: ./student-1/frontend
+  #   container_name: frontend
+  #   ports:
+  #     - "8101:80"
+  
+  #   depends_on:
+  #     - student-1-backend
+  #   restart: unless-stopped
+ 
+  # student-1-backend:
+  #   build:
+  #     context: ./student-1/backend
+  #     dockerfile: dockerfile
+  #   container_name: backend
+    
+  #   ports:
+  #     - "8201:5001"
+  #   environment:
+  #     DATABASE_SERVICE_URL: http://student-1-database:5002
+  #     OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+  #     OLLAMA_MODEL: qwen2.5:0.5b
+  #     MCP_ENABLED: "true"
+  #     RAG_ENABLED: "true"
+  #     MULTI_AGENT_SERVICE_URL: http://host.docker.internal:5004
+  #     MULTI_AGENT_ENABLED: "true"
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
+  #   depends_on:
+  #     - student-1-database
+  #   restart: unless-stopped
+
+  # student-1-database:
+  #   build:
+  #     context: ./student-1/database
+  #   container_name: database
+  #   ports:
+  #     - "8301:5002"
+  #   volumes:
+  #     - database_data:/student-1/database/data
+  #   restart: unless-stopped
+    # Student 1
   student-1-frontend:
     build:
       context: ./student-1/frontend
@@ -52,12 +95,15 @@ services:
       - "8201:5001"
     environment:
       DATABASE_SERVICE_URL: http://student-1-database:5002
+      MULTI_AGENT_SERVICE_URL: http://host.docker.internal:5004
+
       OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
       OLLAMA_MODEL: qwen2.5:0.5b
+
       MCP_ENABLED: "true"
       RAG_ENABLED: "true"
-      MULTI_AGENT_SERVICE_URL: http://host.docker.internal:5004
       MULTI_AGENT_ENABLED: "true"
+      
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

@@ -4,7 +4,7 @@ import time
 import jwt
 import pytest
 
-JWT_SECRET = os.getenv("JWT_SECRET", "lab11-test-secret-padded-to-32-bytes!!")
+JWT_SECRET = os.getenv("JWT_SECRET", "s1-test-secret-padded-to-32-bytes!!")
 
 
 def make_token(exp_offset_seconds):

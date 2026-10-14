@@ -7,7 +7,7 @@ from flask import Blueprint, jsonify, request
 
 auth_bp = Blueprint("auth_mode", __name__)
 
-JWT_SECRET = os.getenv("JWT_SECRET", "lab11-test-secret-padded-to-32-bytes!!")  # must match test_token_auth.py; >=32 bytes avoids PyJWT's InsecureKeyLengthWarning
+JWT_SECRET = os.getenv("JWT_SECRET", "s1-test-secret-padded-to-32-bytes!!")  # must match test_token_auth.py; >=32 bytes avoids PyJWT's InsecureKeyLengthWarning
 
 
 @auth_bp.post("/auth/token")
