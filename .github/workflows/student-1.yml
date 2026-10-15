@@ -46,6 +46,7 @@ jobs:
       # Disables RAG 
       RAG_ENABLED: "false"
 
+      # Diabales multi-agent
       MULTI_AGENT_ENABLED: "false"
       
     steps:

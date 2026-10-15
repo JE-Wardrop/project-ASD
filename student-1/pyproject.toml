@@ -1,1 +1,10 @@
 [tool.ruff]
+select = ["S"]
+
+# Post commit ------------------------------------
+# Doesn't run through post-commit tests
+# We dont want it to run through post commit because it "breaks" security but it is needed.
+# -------------------------------------------------
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S603"]

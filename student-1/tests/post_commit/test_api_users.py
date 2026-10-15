@@ -2,7 +2,7 @@ import os
 
 import requests
 
-DATABASE_SERVICE_URL = os.getenv("DATABASE_SERVICE_URL", "http://localhost:8201")
+DATABASE_SERVICE_URL = os.getenv("DATABASE_SERVICE_URL", "http://localhost:8301")
 
 
 def test_service_health():

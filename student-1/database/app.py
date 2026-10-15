@@ -6,6 +6,12 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 
+# Pre-commit Testing: Create card function -----------------------
+# For cryptographic randomness in card generator and card_id generator
+# ----------------------------------------------------------------
+import secrets
+
+
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -120,26 +126,49 @@ def _validate_payload(payload, partial=False):
 # CREATE
 # ---------------------------------------------------------------------------
 
-#helper function for randomly genterating a card_id and card_number for when users 
-# create a new card
+
+# Pre-commit Testing: Create card function -----------------------
+# _get_rand functions: functions needs to be updated to make it cryptographic and not pseudo-random
+#-----------------------------------------------------------------
+
+# ------------- Pseudo-random
+#helper function for randomly genterating a card_id and card_number for when users create a new card
+# def _get_rand_card_id(card_id):
+#     while True:
+#         random_id = random.randint(1, 100)
+
+#         if random_id != card_id:
+#             return random_id
+#         else:
+#             random_id = random.randint(1, 100)
+
+
+# def _get_rand_card_numbers(card_number):
+#     while True:
+#         random_id = random.randint(0000000000000000, 9999999999999999)
+
+#         if random_id != card_number:
+#             return random_id
+#         else:
+#             random_id = random.randint(1000000000000000, 9999999999999999)
+
+
+# ------ Cryptographic
+#helper function for randomly genterating a card_id and card_number for when users create a new card
 def _get_rand_card_id(card_id):
     while True:
-        random_id = random.randint(1, 100)
+        random_id = secrets.randbelow(100) + 1 
 
         if random_id != card_id:
             return random_id
-        else:
-            random_id = random.randint(1, 100)
 
 
 def _get_rand_card_numbers(card_number):
     while True:
-        random_id = random.randint(0000000000000000, 9999999999999999)
+        random_id = secrets.randbelow(10**16) 
 
         if random_id != card_number:
             return random_id
-        else:
-            random_id = random.randint(1000000000000000, 9999999999999999)
 
 
 
@@ -387,6 +416,19 @@ def unfreeze_card():
 
 
 if __name__ == "__main__":
-    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-    app.run(host="0.0.0.0", port=5002, debug=debug_mode)
+
+    # Previous code ------------------------------------------------
     # app.run(host="0.0.0.0", port=5002, debug=True)
+
+
+    # Lab 11 code --------------------------------------------------
+    # debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    # app.run(host="0.0.0.0", port=5002, debug=debug_mode)
+
+
+    # Code for pre-commit testing ------------------------------------
+    # Passes pre-commit tests, copied from backend/app.py, should work the same way, just with a diff port
+    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    host_ip = os.getenv("FLASK_HOST", "127.0.0.1")
+    port_num = int(os.getenv("PORT", "5002"))
+    app.run(host=host_ip, port=port_num, debug=debug_mode)
