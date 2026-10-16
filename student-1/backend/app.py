@@ -84,7 +84,7 @@ app = create_app()
 
 if __name__ == "__main__":
     # Original Code (prior to lab 11) --------------------------------
-    # app.run(host="0.0.0.0", port=5001, debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)
 
     # Code update from Lab 11 ----------------------------------------
     # Causing errors in test_ruff_scan_passes: Assesrtion error
@@ -95,10 +95,12 @@ if __name__ == "__main__":
 
     # Code for pre-commit testing ------------------------------------
     # Passes pre-commit tests
-    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-    host_ip = os.getenv("FLASK_HOST", "127.0.0.1")
-    port_num = int(os.getenv("PORT", "5001"))
-    app.run(host=host_ip, port=port_num, debug=debug_mode)
+    # This code worked originally then broke after a commit
+
+    # debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    # host_ip = os.getenv("FLASK_HOST", "127.0.0.1")
+    # port_num = int(os.getenv("PORT", "5001"))
+    # app.run(host=host_ip, port=port_num, debug=debug_mode)
 
 
 
