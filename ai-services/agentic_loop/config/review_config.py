@@ -71,7 +71,7 @@ def build_mode_config() -> dict[str, ModeConfig]:
             label="Multi-Agent",
             prompt_family="multi-agent",
             implementation_prompts=( "implementation/multi_agent_implementation_prompt.txt",),
-            review_prompts=("review/rag_reasoning_prompt.txt", "review/multi_agent_review_prompt.txt"),
+            review_prompts=("review/multi_agent_review_prompt.txt",),
         ),
     }
 
