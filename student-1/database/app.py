@@ -244,6 +244,17 @@ def get_cards():
     conn.close()
     return jsonify([dict(row) for row in cards])
 
+@app.get("/users")
+def get_users():
+    conn = get_db_connection()
+    cards = conn.execute(
+        "SELECT user_id FROM cards"
+    ).fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in cards])
+
+
+
 
 @app.get("/cards/<int:card_id>")
 def get_card(card_id):

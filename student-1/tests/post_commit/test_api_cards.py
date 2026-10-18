@@ -22,10 +22,11 @@ def test_card_by_id():
     assert response.status_code == 200
 
 
-def test_cards_by_status():
-    response = requests.get(
-        f"{DATABASE_SERVICE_URL}/cards/status",
-        params={"status": "FROZEN"},
+def test_freeze_card():
+    response = requests.post(
+        f"{DATABASE_SERVICE_URL}/cards/freeze",
+        data={"card_id": "1"},
         timeout=5,
     )
     assert response.status_code == 200
+    assert response.json()["status"] == "Frozen"
