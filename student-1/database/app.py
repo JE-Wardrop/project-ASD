@@ -418,7 +418,7 @@ def unfreeze_card():
 if __name__ == "__main__":
 
     # Previous code ------------------------------------------------
-    app.run(host="0.0.0.0", port=5002, debug=True)
+    # app.run(host="0.0.0.0", port=5002, debug=True)
 
 
     # Lab 11 code --------------------------------------------------
@@ -431,7 +431,7 @@ if __name__ == "__main__":
 
     # This code worked originally then broke after a commit
     
-    # debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-    # host_ip = os.getenv("FLASK_HOST", "127.0.0.1")
-    # port_num = int(os.getenv("PORT", "5002"))
-    # app.run(host=host_ip, port=port_num, debug=debug_mode)
+    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    host_ip = os.getenv("FLASK_HOST", "0.0.0.0")
+    port_num = int(os.getenv("PORT", "5002"))
+    app.run(host=host_ip, port=port_num, debug=debug_mode)
