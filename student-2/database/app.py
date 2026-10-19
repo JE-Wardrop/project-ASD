@@ -10,9 +10,28 @@ app = Flask(__name__)
 
 ACCOUNT_NUMBER_PATTERN = re.compile(r"^\d{8}$")
 
-ACCOUNT_COLUMNS = (
-    "account_id, user_id, account_number, account_type, "
-    "balance, account_status, created_at"
+# Lab 11 (Ruff S608): every query is a complete literal string with "?" placeholders,
+# so no SQL is built with f-strings or string concatenation.
+SELECT_ACCOUNTS = (
+    "SELECT account_id, user_id, account_number, account_type, "
+    "balance, account_status, created_at FROM accounts"
+)
+SELECT_ACCOUNT_BY_ID = (
+    "SELECT account_id, user_id, account_number, account_type, "
+    "balance, account_status, created_at FROM accounts WHERE account_id = ?"
+)
+SELECT_ACCOUNTS_BY_USER = (
+    "SELECT account_id, user_id, account_number, account_type, "
+    "balance, account_status, created_at FROM accounts WHERE user_id = ?"
+)
+SELECT_ACCOUNTS_BY_STATUS = (
+    "SELECT account_id, user_id, account_number, account_type, "
+    "balance, account_status, created_at FROM accounts WHERE account_status = ?"
+)
+# NULL keeps the current value, so one fixed statement covers every field combination.
+UPDATE_ACCOUNT_INFO = (
+    "UPDATE accounts SET account_number = COALESCE(?, account_number), "
+    "account_type = COALESCE(?, account_type) WHERE account_id = ?"
 )
 
 
@@ -42,7 +61,7 @@ def health():
 @app.get("/accounts")
 def get_accounts():
     conn = get_db_connection()
-    accounts = conn.execute(f"SELECT {ACCOUNT_COLUMNS} FROM accounts").fetchall()
+    accounts = conn.execute(SELECT_ACCOUNTS).fetchall()
     conn.close()
     return jsonify([row_to_dict(row) for row in accounts])
 
@@ -50,10 +69,7 @@ def get_accounts():
 @app.get("/accounts/<int:account_id>")
 def get_account(account_id):
     conn = get_db_connection()
-    account = conn.execute(
-        f"SELECT {ACCOUNT_COLUMNS} FROM accounts WHERE account_id = ?",
-        (account_id,),
-    ).fetchone()
+    account = conn.execute(SELECT_ACCOUNT_BY_ID, (account_id,)).fetchone()
     conn.close()
 
     if account is None:
@@ -70,10 +86,7 @@ def get_accounts_by_user():
         return jsonify({"error": "user_id required"}), 400
 
     conn = get_db_connection()
-    accounts = conn.execute(
-        f"SELECT {ACCOUNT_COLUMNS} FROM accounts WHERE user_id = ?",
-        (user_id,),
-    ).fetchall()
+    accounts = conn.execute(SELECT_ACCOUNTS_BY_USER, (user_id,)).fetchall()
     conn.close()
 
     if not accounts:
@@ -90,10 +103,7 @@ def get_accounts_by_status():
         return jsonify({"error": f"status must be one of {VALID_STATUSES}"}), 400
 
     conn = get_db_connection()
-    accounts = conn.execute(
-        f"SELECT {ACCOUNT_COLUMNS} FROM accounts WHERE account_status = ?",
-        (status,),
-    ).fetchall()
+    accounts = conn.execute(SELECT_ACCOUNTS_BY_STATUS, (status,)).fetchall()
     conn.close()
 
     if not accounts:
@@ -159,9 +169,7 @@ def create_account():
         conn.close()
         return jsonify({"error": "account_number already exists"}), 409
 
-    account = conn.execute(
-        f"SELECT {ACCOUNT_COLUMNS} FROM accounts WHERE account_id = ?", (new_id,)
-    ).fetchone()
+    account = conn.execute(SELECT_ACCOUNT_BY_ID, (new_id,)).fetchone()
     conn.close()
 
     return jsonify(row_to_dict(account)), 201
@@ -175,24 +183,20 @@ def create_account():
 def update_account(account_id):
     data = request.get_json(silent=True) or {}
 
-    fields = []
-    params = []
+    account_number = None
+    account_type = None
 
     if "account_number" in data:
         account_number = str(data["account_number"]).strip()
         if not ACCOUNT_NUMBER_PATTERN.match(account_number):
             return jsonify({"error": "account_number must be exactly 8 digits"}), 400
-        fields.append("account_number = ?")
-        params.append(account_number)
 
     if "account_type" in data:
         account_type = str(data["account_type"]).strip().upper()
         if account_type not in VALID_ACCOUNT_TYPES:
             return jsonify({"error": f"account_type must be one of {VALID_ACCOUNT_TYPES}"}), 400
-        fields.append("account_type = ?")
-        params.append(account_type)
 
-    if not fields:
+    if account_number is None and account_type is None:
         return jsonify({"error": "At least one of account_number, account_type is required"}), 400
 
     conn = get_db_connection()
@@ -204,20 +208,14 @@ def update_account(account_id):
         conn.close()
         return jsonify({"error": "Account not found"}), 404
 
-    params.append(account_id)
-
     try:
-        conn.execute(
-            f"UPDATE accounts SET {', '.join(fields)} WHERE account_id = ?", params
-        )
+        conn.execute(UPDATE_ACCOUNT_INFO, (account_number, account_type, account_id))
         conn.commit()
     except sqlite3.IntegrityError:
         conn.close()
         return jsonify({"error": "account_number already exists"}), 409
 
-    account = conn.execute(
-        f"SELECT {ACCOUNT_COLUMNS} FROM accounts WHERE account_id = ?", (account_id,)
-    ).fetchone()
+    account = conn.execute(SELECT_ACCOUNT_BY_ID, (account_id,)).fetchone()
     conn.close()
 
     return jsonify(row_to_dict(account))
@@ -259,9 +257,7 @@ def adjust_account_balance(account_id):
         "UPDATE accounts SET balance = ? WHERE account_id = ?", (new_balance, account_id)
     )
     conn.commit()
-    updated = conn.execute(
-        f"SELECT {ACCOUNT_COLUMNS} FROM accounts WHERE account_id = ?", (account_id,)
-    ).fetchone()
+    updated = conn.execute(SELECT_ACCOUNT_BY_ID, (account_id,)).fetchone()
     conn.close()
 
     return jsonify(row_to_dict(updated))
@@ -294,9 +290,7 @@ def _set_status(account_id, new_status, allowed_from):
         (new_status, account_id),
     )
     conn.commit()
-    updated = conn.execute(
-        f"SELECT {ACCOUNT_COLUMNS} FROM accounts WHERE account_id = ?", (account_id,)
-    ).fetchone()
+    updated = conn.execute(SELECT_ACCOUNT_BY_ID, (account_id,)).fetchone()
     conn.close()
 
     return row_to_dict(updated), None
@@ -350,4 +344,10 @@ def delete_account(account_id):
 
 if __name__ == "__main__":
     init_db()
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5002)), debug=True)
+    # Lab 11 (Ruff S201): debug mode is opt-in through FLASK_DEBUG instead of always on.
+    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    app.run(
+        host="0.0.0.0",  # noqa: S104 - container needs to bind all interfaces
+        port=int(os.environ.get("PORT", 5002)),
+        debug=debug_mode,
+    )

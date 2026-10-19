@@ -1,8 +1,9 @@
 """Client for the shared Multi-Agent Server (ai-services/multi-agent-server).
 
-The Multi-Agent Server runs on the host (not in Docker), so this backend
-container reaches it through host.docker.internal, the same way it reaches
-Ollama, the MCP server and the RAG server.
+Same contract as student-1's services/multi_agent_api.py. The Multi-Agent
+Server runs on the host (not in Docker), so this backend container reaches it
+through host.docker.internal, the same way it reaches Ollama, the MCP server
+and the RAG server.
 """
 
 import os
@@ -12,7 +13,7 @@ import requests
 MULTI_AGENT_SERVICE_URL = os.getenv("MULTI_AGENT_SERVICE_URL", "http://host.docker.internal:5004")
 
 # One workflow runs Planner + Worker, then the Reviewer, and each step may wait
-# on Ollama (the reviewer can try two models), so allow well over a few minutes.
+# on Ollama, so allow well over a few minutes.
 try:
     MULTI_AGENT_TIMEOUT_SECONDS = int(os.getenv("MULTI_AGENT_SERVICE_TIMEOUT_SECONDS", "300"))
 except ValueError:
@@ -62,7 +63,7 @@ def _request(method: str, path: str, **kwargs) -> dict:
     if not isinstance(data, dict):
         return {"status": "error", "error": "Multi-Agent Server sent an unexpected reply."}
     if resp.status_code >= 400:
-        # Kept so the route can pass 400/404/409 (bad decision input) back to the browser.
+        # Kept so the route can pass a 4xx (bad input) back to the browser.
         return {
             "status": "error",
             "http_status": resp.status_code,
@@ -72,18 +73,12 @@ def _request(method: str, path: str, **kwargs) -> dict:
 
 
 def run_workflow(user_request: str) -> dict:
+    # "feature" and "caller" let a feature-aware server read the accounts
+    # database API; a server that does not know them simply ignores them.
     return _request(
         "POST",
         "/workflow",
         json={"user_request": user_request, "feature": FEATURE, "caller": CALLER},
-    )
-
-
-def record_decision(workflow_id: str, decision: str, reason: str, correction: str, reviewer: str) -> dict:
-    return _request(
-        "POST",
-        f"/workflow/{workflow_id}/decision",
-        json={"decision": decision, "reason": reason, "correction": correction, "reviewer": reviewer},
     )
 
 

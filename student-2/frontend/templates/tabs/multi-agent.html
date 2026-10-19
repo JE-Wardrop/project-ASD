@@ -2,242 +2,193 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Multi-Agent Mode</title>
+    <title>Multi-Agent Tab</title>
     <link rel="stylesheet" href="http://localhost:8080/styles.css">
-    <link rel="stylesheet" href="/css/styles.css">
-    <style>
-        body { margin: 0; min-height: auto; background: transparent; }
-        .app-shell { max-width: none; padding: 0; }
-    </style>
 </head>
 <body>
 <main class="app-shell">
     <section class="card">
         <h2>Multi-Agent Mode</h2>
-        <p class="muted">
-            Planner and Worker agents run together on the accounts database API,
-            the Reviewer checks the Worker's output against the plan, and a human
-            makes the final decision.
-        </p>
-        <label class="mode-toggle" for="ma-mode-toggle">
-            <input id="ma-mode-toggle" type="checkbox" checked>
-            Multi-Agent Enabled <span id="ma-mode-state" class="pill pill-ok">ON</span>
-        </label>
+        <p>Run planner, worker, and reviewer agents in a coordinated workflow.</p>
 
-        <form id="ma-workflow-form">
-            <label for="ma-request">Request</label>
-            <input id="ma-request" name="user_request" required value="Summarise account statuses for user_id(1).">
-            <p class="rag-helper">Hint: name an id, e.g. user_id(1) or account_id(3), to narrow the evidence.</p>
+        <div class="feature-toggle-row">
+            <label class="toggle-switch" for="multi-agent-toggle">
+                <input id="multi-agent-toggle" type="checkbox" checked>
+                <span class="toggle-label">Multi-Agent Enabled</span>
+            </label>
+
+            <span id="multi-agent-state" class="feature-state feature-on">ON</span>
+        </div>
+
+        <form id="workflow-form" class="stack-form">
+            <label for="workflow-request">User Request</label>
+            <input
+                id="workflow-request"
+                name="user_request"
+                list="workflow-request-samples"
+                required
+                placeholder="Example: Summarise account statuses for user_id(1)."
+            >
+            <datalist id="workflow-request-samples">
+                <option value="Summarise account statuses for user_id(1)."></option>
+                <option value="List frozen or closed accounts and recommend next steps."></option>
+                <option value="Check the balance and status of account_id(3)."></option>
+            </datalist>
+            <div class="feature-actions" aria-label="Sample workflow requests">
+                <button type="button" class="rag-action" data-sample-request="Summarise account statuses for user_id(1).">Use Sample 1</button>
+                <button type="button" class="rag-action" data-sample-request="List frozen or closed accounts and recommend next steps.">Use Sample 2</button>
+                <button type="button" class="rag-action" data-sample-request="Check the balance and status of account_id(3).">Use Sample 3</button>
+            </div>
+            <p class="rag-helper">Hint: use a full task request for planner-worker-reviewer flow.</p>
             <button type="submit" class="rag-action">Run Workflow</button>
         </form>
 
-        <form id="ma-decision-form" class="is-hidden">
-            <h3>Human Review</h3>
-            <label for="ma-decision">Decision</label>
-            <select id="ma-decision" name="decision">
-                <option>Accept</option>
-                <option>Partially Accept</option>
-                <option>Reject</option>
-            </select>
-            <label for="ma-reason">Reason</label>
-            <input id="ma-reason" name="reason" required placeholder="Why you accept or reject the output">
-            <label for="ma-correction">Correction (required for Partially Accept)</label>
-            <input id="ma-correction" name="correction">
-            <button type="submit" class="rag-action">Submit Decision</button>
-            <div id="ma-decision-result"></div>
+        <form id="status-form" class="stack-form">
+            <button type="submit" class="rag-action">Get Workflow Status</button>
         </form>
 
-        <form id="ma-status-form">
-            <button type="submit" class="rag-action">Workflow History</button>
-        </form>
-
-        <div id="ma-results" class="panel">Multi-Agent responses will appear here.</div>
+        <div id="multi-agent-results" class="panel panel-mcp">Multi-agent responses will appear here.</div>
     </section>
 </main>
 
 <script>
-const API = "http://localhost:8202";
+// Same pattern as student-1's cm_multiagent.html (lab code used http://localhost:5001)
+const apiBase = "http://localhost:8202";
+const output = document.getElementById("multi-agent-results");
+const modeToggle = document.getElementById("multi-agent-toggle");
+const modeState = document.getElementById("multi-agent-state");
+const workflowRequestInput = document.getElementById("workflow-request");
 const STORAGE_KEY = "student2_multi_agent_mode_enabled";
-const output = document.getElementById("ma-results");
-const toggle = document.getElementById("ma-mode-toggle");
-const stateLabel = document.getElementById("ma-mode-state");
-const decisionForm = document.getElementById("ma-decision-form");
-const decisionResult = document.getElementById("ma-decision-result");
-let currentWorkflowId = null;
-
-const STATUS_PILL = {
-    completed: "pill pill-ok",
-    success: "pill pill-ok",
-    degraded: "pill pill-wait",
-    fallback: "pill pill-wait",
-    timeout: "pill pill-bad",
-    failed: "pill pill-bad",
-};
 
 function isEnabled() {
-    return toggle.checked;
+    return modeToggle.checked;
 }
 
 function renderState() {
-    stateLabel.textContent = isEnabled() ? "ON" : "OFF";
-    stateLabel.className = isEnabled() ? "pill pill-ok" : "pill pill-bad";
-}
-
-try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved !== null) toggle.checked = saved === "true";
-} catch (err) { /* storage unavailable: default ON */ }
-renderState();
-
-toggle.addEventListener("change", () => {
-    try { localStorage.setItem(STORAGE_KEY, String(isEnabled())); } catch (err) {}
-    renderState();
-    if (!isEnabled()) {
-        decisionForm.classList.add("is-hidden");
-        output.textContent = "Multi-Agent Mode is OFF. Enable Multi-Agent Mode to run workflows.";
-    }
-});
-
-function el(tag, text, className) {
-    const node = document.createElement(tag);
-    if (text !== undefined) node.textContent = text;
-    if (className) node.className = className;
-    return node;
-}
-
-function pill(status) {
-    return el("span", status || "unknown", STATUS_PILL[status] || "pill pill-muted");
-}
-
-function rawJson(payload) {
-    const details = el("details");
-    details.append(el("summary", "Raw JSON"), el("pre", JSON.stringify(payload, null, 2)));
-    return details;
-}
-
-function renderError(title, payload, target = output) {
-    target.replaceChildren(el("h3", title), el("p", payload.error || "Request failed.", "alert alert-error"), rawJson(payload));
-}
-
-function agentSection(title, result, text) {
-    const heading = el("h4");
-    heading.append(document.createTextNode(`${title} `), pill(result.status));
-    const nodes = [heading];
-    if (result.model) nodes.push(el("p", `Model: ${result.model}`, "muted"));
-    if (result.fallback_from) nodes.push(el("p", `${result.fallback_from} unavailable, used ${result.model}.`, "alert alert-warn"));
-    nodes.push(el("pre", text || "(no output)", "mcp-json"));
-    return nodes;
-}
-
-function renderWorkflow(payload) {
-    if (payload.status === "error") {
-        decisionForm.classList.add("is-hidden");
-        return renderError("Multi-Agent Workflow", payload);
-    }
-
-    const planner = payload.planner_result || {};
-    const worker = payload.worker_result || {};
-    const reviewer = payload.reviewer_result || {};
-
-    const summary = el("p");
-    summary.append(document.createTextNode("Workflow: "), pill(payload.status),
-        document.createTextNode(` · ${payload.duration_ms} ms · id ${payload.workflow_id}`));
-
-    const nodes = [el("h3", "Multi-Agent Workflow"), summary];
-    nodes.push(el("p", `Evidence: ${worker.evidence_count || 0} of ${worker.matched_records ?? "?"} matching record(s) from ${worker.evidence_source || "unknown source"}`, "muted"));
-    nodes.push(...agentSection("Planner Agent", planner, planner.plan));
-    nodes.push(...agentSection("Worker Agent", worker, worker.output));
-    nodes.push(...agentSection("Reviewer Agent", reviewer, reviewer.review));
-    nodes.push(el("p", "Human decision: pending. Submit it below.", "alert alert-info"));
-    nodes.push(rawJson(payload));
-    output.replaceChildren(...nodes);
-
-    currentWorkflowId = payload.workflow_id;
-    decisionForm.reset();
-    decisionResult.replaceChildren();
-    decisionForm.classList.remove("is-hidden");
-}
-
-function renderStatus(payload) {
-    if (payload.status !== "success") return renderError("Workflow History", payload);
-
-    const nodes = [el("h3", "Workflow History (accounts)")];
-    nodes.push(el("p", `${payload.matching_workflow_count} run(s) · ${payload.human_decision_count} with a human decision`, "muted"));
-
-    const runs = payload.recent_workflows || [];
-    if (!runs.length) {
-        nodes.push(el("p", "No workflows recorded yet. Run one above.", "alert alert-warn"));
+    if (isEnabled()) {
+        modeState.textContent = "ON";
+        modeState.classList.add("feature-on");
+        modeState.classList.remove("feature-off");
     } else {
-        const list = el("ol");
-        runs.slice().reverse().forEach((run) => {
-            const item = el("li");
-            item.append(pill(run.status), document.createTextNode(
-                ` ${run.timestamp} · evidence ${run.evidence_count} · reviewer ${run.reviewer_model} · decision: ${run.human_decision}`));
-            list.append(item);
-        });
-        nodes.push(list);
+        modeState.textContent = "OFF";
+        modeState.classList.add("feature-off");
+        modeState.classList.remove("feature-on");
     }
-    nodes.push(rawJson(payload));
-    output.replaceChildren(...nodes);
 }
 
-async function send(method, path, data) {
-    const options = { method, headers: { "X-Multi-Agent-Mode": "on" } };
-    if (data) {
-        options.headers["Content-Type"] = "application/x-www-form-urlencoded";
-        options.body = new URLSearchParams(data);
-    }
+function renderDisabledMessage() {
+    output.innerHTML = "<p>Multi-Agent Mode is OFF. Enable Multi-Agent Mode to run workflows.</p>";
+}
 
-    let response;
-    try {
-        response = await fetch(`${API}${path}`, options);
-    } catch (err) {
-        return { status: "error", error: "Cannot reach the backend on port 8202. Is student2-backend running?" };
+function saveMode() {
+    localStorage.setItem(STORAGE_KEY, String(isEnabled()));
+}
+
+function loadMode() {
+    const persisted = localStorage.getItem(STORAGE_KEY);
+    if (persisted === null) {
+        modeToggle.checked = true;
+    } else {
+        modeToggle.checked = persisted === "true";
     }
-    const text = await response.text();
+    renderState();
+}
+
+// Same output format as student-1's cm_multiagent.html: endpoint title + pretty-printed JSON.
+function renderJson(title, payload) {
+    output.innerHTML = `<h3>${title}</h3><pre>${JSON.stringify(payload, null, 2)}</pre>`;
+}
+
+function renderError(title, error) {
+    const message = error && error.message ? error.message : String(error);
+    output.innerHTML = `<h3>${title}</h3><pre>${message}</pre>`;
+}
+
+async function postJson(path, data) {
+    const res = await fetch(`${apiBase}${path}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Multi-Agent-Mode": isEnabled() ? "on" : "off",
+        },
+        body: JSON.stringify(data),
+    });
+    const text = await res.text();
     try {
         return JSON.parse(text);
-    } catch (err) {
-        return { status: "error", error: `Non-JSON reply (HTTP ${response.status})`, raw: text };
+    } catch {
+        return { raw: text };
     }
 }
 
-function guard() {
-    if (isEnabled()) return true;
-    output.textContent = "Multi-Agent Mode is OFF. Enable Multi-Agent Mode to run workflows.";
-    return false;
+async function getJson(path) {
+    const res = await fetch(`${apiBase}${path}`, {
+        headers: {
+            "X-Multi-Agent-Mode": isEnabled() ? "on" : "off",
+        },
+    });
+    const text = await res.text();
+    try {
+        return JSON.parse(text);
+    } catch {
+        return { raw: text };
+    }
 }
 
-document.getElementById("ma-workflow-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!guard()) return;
-    decisionForm.classList.add("is-hidden");
-    output.textContent = "Running Planner, Worker and Reviewer agents… this can take a minute.";
-    const userRequest = document.getElementById("ma-request").value.trim();
-    renderWorkflow(await send("POST", "/multi-agent/workflow", { user_request: userRequest }));
+modeToggle.addEventListener("change", () => {
+    saveMode();
+    renderState();
+
+    if (!isEnabled()) {
+        renderDisabledMessage();
+    }
 });
 
-decisionForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!guard() || !currentWorkflowId) return;
-    const payload = await send("POST", "/multi-agent/decision", {
-        workflow_id: currentWorkflowId,
-        decision: document.getElementById("ma-decision").value,
-        reason: document.getElementById("ma-reason").value.trim(),
-        correction: document.getElementById("ma-correction").value.trim(),
-        reviewer: "student-2",
+document.querySelectorAll("[data-sample-request]").forEach((button) => {
+    button.addEventListener("click", () => {
+        workflowRequestInput.value = button.dataset.sampleRequest || "";
+        workflowRequestInput.focus();
     });
-    if (payload.status !== "success") return renderError("Human Decision", payload, decisionResult);
-    const record = payload.human_decision;
-    decisionResult.replaceChildren(el("p", `Recorded: ${record.decision} by ${record.reviewer} at ${record.timestamp}.`, "alert alert-info"));
 });
 
-document.getElementById("ma-status-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!guard()) return;
-    output.textContent = "Loading…";
-    renderStatus(await send("GET", "/multi-agent/status"));
+document.getElementById("workflow-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (!isEnabled()) {
+        renderDisabledMessage();
+        return;
+    }
+
+    try {
+        const user_request = workflowRequestInput.value.trim();
+        const payload = await postJson("/multi-agent/workflow", { user_request });
+        renderJson("Multi-Agent API: /multi-agent/workflow", payload);
+    } catch (error) {
+        renderError("Multi-Agent API Error: /multi-agent/workflow", error);
+    }
 });
+
+document.getElementById("status-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (!isEnabled()) {
+        renderDisabledMessage();
+        return;
+    }
+
+    try {
+        const payload = await getJson("/multi-agent/workflow/status");
+        renderJson("Multi-Agent API: /multi-agent/workflow/status", payload);
+    } catch (error) {
+        renderError("Multi-Agent API Error: /multi-agent/workflow/status", error);
+    }
+});
+
+loadMode();
+if (!isEnabled()) {
+    renderDisabledMessage();
+}
 </script>
+
 </body>
 </html>
