@@ -13,7 +13,7 @@
  * published port.
  */
 
-const API_BASE_URL = "http://localhost:8204";
+const API_BASE_URL = "";
 
 function escapeHtml(value) {
 

@@ -138,7 +138,7 @@ for S in $STUDENTS; do
     echo "Deploying $S frontend..."
     deploy_app "$FRONTEND_APP_NAME" "${REGISTRY_SERVER}/$S/frontend:${IMAGE_TAG}" \
         "$(get_port "$S" frontend "$(find_dockerfile "$S" frontend)")" external 0.25 0.5Gi 1 3 \
-        BACKEND_SERVICE_URL="https://$BACKEND_FQDN"
+        BACKEND_URL="https://$BACKEND_FQDN"
     FRONTEND_FQDN=$(app_fqdn "$FRONTEND_APP_NAME")
 
     SUMMARY+="  $S frontend: https://$FRONTEND_FQDN"$'\n'
