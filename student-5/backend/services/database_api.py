@@ -1,6 +1,6 @@
 import os
 import requests
-DB_URL = os.environ.get("DB_URL", "http://localhost:8305")
+DB_URL = os.environ.get("DB_URL") or os.environ.get("DATABASE_SERVICE_URL", "http://localhost:8305")
 
 TIMEOUT = 5
 def _request(method, path, **kwargs):

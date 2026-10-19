@@ -62,15 +62,21 @@
         <label for="decision-value">Decision</label>
         <select id="decision-value" name="decision">
           <option>Accept</option>
-          <option>Correct</option>
           <option>Partially Accept</option>
           <option>Reject</option>
         </select>
-        <label for="decision-reason">Reason (required unless Accept)</label>
+        <label for="decision-reason">Reason (required)</label>
         <input
           id="decision-reason"
           name="reason"
+          required
           placeholder="Why this decision?"
+        />
+        <label for="decision-correction">Correction (optional)</label>
+        <input
+          id="decision-correction"
+          name="correction"
+          placeholder="What the correct answer should be"
         />
         <button type="submit" class="rag-action">Record Decision</button>
       </form>
@@ -82,7 +88,7 @@
 
     <script>
       // student-5's backend port
-      const apiBase = "http://localhost:8205";
+      const apiBase = "";
       const output = document.getElementById("multi-agent-results");
       const toggle = document.getElementById("multi-agent-toggle");
       const stateLabel = document.getElementById("multi-agent-state");

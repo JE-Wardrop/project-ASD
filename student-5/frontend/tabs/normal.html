@@ -17,7 +17,7 @@
     <div class="form-grid">
 
       <form class="txn-form"
-            hx-post="http://localhost:8205/ui/transactions/deposit"
+            hx-post="/ui/transactions/deposit"
             hx-target="#table-area" hx-swap="innerHTML">
         <h3>Deposit</h3>
         <label>To account
@@ -33,7 +33,7 @@
       </form>
 
       <form class="txn-form"
-            hx-post="http://localhost:8205/ui/transactions/withdraw"
+            hx-post="/ui/transactions/withdraw"
             hx-target="#table-area" hx-swap="innerHTML">
         <h3>Withdrawal</h3>
         <label>From account
@@ -49,7 +49,7 @@
       </form>
 
       <form class="txn-form"
-            hx-post="http://localhost:8205/ui/transactions/transfer"
+            hx-post="/ui/transactions/transfer"
             hx-target="#table-area" hx-swap="innerHTML">
         <h3>Transfer</h3>
         <label>From account
@@ -74,7 +74,7 @@
     <h2>Transaction history</h2>
 
     <form class="filter-bar"
-          hx-get="http://localhost:8205/ui/transactions"
+          hx-get="/ui/transactions"
           hx-target="#table-area" hx-swap="innerHTML"
           hx-trigger="change, submit">
       <label>Account
@@ -102,7 +102,7 @@
 
     <!-- Auto-load the table as soon as the tab opens -->
     <div id="table-area"
-         hx-get="http://localhost:8205/ui/transactions?limit=100"
+         hx-get="/ui/transactions?limit=100"
          hx-trigger="load"
          hx-swap="innerHTML">
       <p class="muted">Loading transactions&hellip;</p>

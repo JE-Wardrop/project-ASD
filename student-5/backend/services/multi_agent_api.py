@@ -18,8 +18,13 @@ try:
 except ValueError:
     MULTI_AGENT_TIMEOUT_SECONDS = 900
 
-# Tells the shared server whose data to use. Must match a key in features.py.
-FEATURE = "student-5"
+# The shared server's contract (ai-services/multi-agent-server/app.py):
+#   POST /workflow                 {"user_request", "feature", "caller"}
+#   POST /workflow/<id>/decision   {"decision", "reason", "correction", "reviewer"}
+#   GET  /workflow/status          ?feature=...&caller=...
+# FEATURE must match a key in agents/feature_sources.py.
+FEATURE = "transactions"
+CALLER = "student-5"
 
 
 def call_multi_agent(method: str, path: str, payload: dict | None = None) -> dict:
@@ -29,15 +34,19 @@ def call_multi_agent(method: str, path: str, payload: dict | None = None) -> dic
     {"status": "error", "error": "...", "unreachable": True/False}
     so the route can turn it into a message instead of crashing.
     """
+    url = f"{MULTI_AGENT_SERVICE_URL}{path}"
     body = dict(payload or {})
     if path == "/workflow":
         body["feature"] = FEATURE
+        body["caller"] = CALLER
 
     try:
         if method == "GET":
-            resp = requests.get(f"{MULTI_AGENT_SERVICE_URL}{path}", timeout=MULTI_AGENT_TIMEOUT_SECONDS)
+            # Only this feature's workflows, so the tab never shows another student's runs.
+            resp = requests.get(url, params={"feature": FEATURE, "caller": CALLER},
+                                timeout=MULTI_AGENT_TIMEOUT_SECONDS)
         else:
-            resp = requests.post(f"{MULTI_AGENT_SERVICE_URL}{path}", json=body, timeout=MULTI_AGENT_TIMEOUT_SECONDS)
+            resp = requests.post(url, json=body, timeout=MULTI_AGENT_TIMEOUT_SECONDS)
     except requests.exceptions.ConnectionError:
         return {
             "status": "error",
