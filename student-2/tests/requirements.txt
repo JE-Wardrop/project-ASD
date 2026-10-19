@@ -1,3 +1,2 @@
-pytest==9.1.1
-requests==2.34.2
-PyJWT==2.15.1  # Lab 11: post_commit/test_token_auth.py
+pytest==8.3.3
+requests==2.32.3
