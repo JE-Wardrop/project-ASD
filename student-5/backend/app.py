@@ -1,13 +1,12 @@
 import os
+
 from flask import Flask
 from flask_cors import CORS
-
-from routes.normal_ui import bp as normal_ui_bp
 from routes.ai_mode import ai_mode_bp
 from routes.mcp_mode import mcp_mode_bp
+from routes.normal_ui import bp as normal_ui_bp
 from routes.rag_mode import rag_mode_bp
 from services import database_api as db
-
 
 SERVICE_NAME = "student5-backend"
 def create_app():
@@ -21,7 +20,7 @@ def create_app():
     def health():
         try:
             db_ok = db.health().status_code == 200
-        except Exception as exc:
+        except Exception:
             db_ok = False
         return ({"status": "ok" if db_ok else "degraded",
                  "service": SERVICE_NAME,

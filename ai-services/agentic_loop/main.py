@@ -7,10 +7,7 @@ Choose whose microservices to review with an environment variable:
 If it is not set, the loop asks at startup.
 """
 
-import os
 from pathlib import Path
-
-from dotenv import load_dotenv
 
 from config.review_config import build_mode_config
 from config.targets import available_targets, resolve_target
@@ -18,7 +15,7 @@ from core.ai_runner import AIRunner
 from core.orchestrator import run_mode
 from core.prompt_registry import PromptRegistry
 from core.reporter import print_menu, print_prompt_map, print_result, save_log
-
+from dotenv import load_dotenv
 
 MENU = {
     "1": "db",
@@ -27,6 +24,7 @@ MENU = {
     "4": "devops",
     "5": "mcp",
     "6": "rag",
+    "8": "multi_agent",
 }
 
 
@@ -59,6 +57,7 @@ def _print_mode_mapping(app_dir: Path) -> None:
         "DevOps":       str(app_dir / "prompts" / "devops" / "implementation" / "devops_task_prompt.txt"),
         "MCP":          str(app_dir / "prompts" / "mcp" / "review" / "tool_review_prompt.txt"),
         "RAG":          str(app_dir / "prompts" / "rag" / "review" / "integration_review_prompt.txt"),
+        "Multi-Agent":  str(app_dir / "prompts" / "multi-agent" / "review" / "multi_agent_review_prompt.txt"),
     })
 
 
@@ -98,7 +97,7 @@ def main() -> None:
 
         keys = list(MENU.values()) if choice == "7" else [MENU.get(choice)]
         if keys == [None]:
-            print("Invalid choice. Select 0 to 7.")
+            print("Invalid choice. Select 0 to 8.")
             continue
 
         for key in keys:

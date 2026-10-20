@@ -2,7 +2,6 @@ import os
 
 import requests
 
-
 NOTIFICATIONS_URL = os.environ.get("NOTIFICATIONS_URL", "http://localhost:8203")
 TIMEOUT = 5
 

@@ -1,10 +1,8 @@
 import os
 
+from coordinator import run_workflow, workflow_status
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-
-from coordinator import run_workflow, workflow_status
-
 
 app = Flask(__name__)
 CORS(app)
@@ -19,12 +17,6 @@ def health():
         }
     )
 
-
-# /workflow -> Not accepting a GET request
-# Was originally POST and logically it should be POST 
-
-# user_request is not being recieved from student-1/backend/services/multi_agent_api.py. 
-# this is an issue with student-1
 
 @app.post("/workflow")
 def workflow():
@@ -54,7 +46,6 @@ def workflow():
     ), 200
 
 
-# This route is working
 @app.get("/workflow/status")
 def status():
     return jsonify(
@@ -63,8 +54,15 @@ def status():
 
 
 if __name__ == "__main__":
+    # app.run(
+    #     host="0.0.0.0",
+    #     port=int(os.getenv("PORT", "5004")),
+    #     debug=True
+    # )
+    
+    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
     app.run(
-        host="0.0.0.0",
+        host="0.0.0.0",  # noqa: S104 - container needs to bind all interfaces
         port=int(os.getenv("PORT", "5004")),
-        debug=True
+        debug=debug_mode,
     )

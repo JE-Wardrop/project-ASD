@@ -1,10 +1,9 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from openai import OpenAI
-
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 PROMPT_PATH = BASE_DIR / "prompts" / "reviewer_prompt.txt"
@@ -50,7 +49,7 @@ def load_prompt() -> str:
 
 def call_model(
     user_request: str,
-    worker_result: Dict[str, Any]
+    worker_result: dict[str, Any]
 ) -> str:
     prompt = f"""
 {load_prompt()}
@@ -95,8 +94,8 @@ Worker Result:
 
 def review_output(
     user_request: str,
-    worker_result: Dict[str, Any]
-) -> Dict[str, Any]:
+    worker_result: dict[str, Any]
+) -> dict[str, Any]:
     return {
         "status": "success",
         "agent": "reviewer_agent",

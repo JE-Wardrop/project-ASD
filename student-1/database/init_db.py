@@ -1,5 +1,4 @@
 import sqlite3
-import os
 
 DATABASE_NAME = "cm.db"
 users = [

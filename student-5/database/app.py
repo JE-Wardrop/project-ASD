@@ -1,7 +1,7 @@
 import os
-import sqlite3  
-from flask import Flask, request, jsonify
+import sqlite3
 
+from flask import Flask, jsonify, request
 
 # .../student-5/database
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

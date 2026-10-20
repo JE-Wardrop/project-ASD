@@ -1,7 +1,8 @@
-from flask import Blueprint, jsonify
-from services.mcp_client import call_mcp_tool
-from flask import request
 import os
+
+from flask import Blueprint, jsonify, request
+from services.mcp_client import call_mcp_tool
+
 mcp_mode_bp = Blueprint("mcp_mode", __name__)
 
 MCP_ENABLED = os.getenv("MCP_ENABLED", "true").lower() == "true"

@@ -3,7 +3,6 @@ from pathlib import Path
 
 import requests
 
-
 REQUIRED_RAG_TOOLS = [
     "refresh_corpus",
     "retrieve_context",

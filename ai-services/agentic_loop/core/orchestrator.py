@@ -17,6 +17,7 @@ from collectors import (
     devops_collector,
     endpoints_collector,
     mcp_collector,
+    multi_agent_collector,
     rag_collector,
 )
 from config.review_config import ModeConfig
@@ -28,6 +29,7 @@ from pipelines import (
     devops_pipeline,
     endpoints_pipeline,
     mcp_pipeline,
+    multi_agent_pipeline,
     rag_pipeline,
 )
 
@@ -38,6 +40,7 @@ COLLECTORS = {
     "devops": devops_collector.collect,
     "mcp": mcp_collector.collect,
     "rag": rag_collector.collect,
+    "multi_agent": multi_agent_collector.collect,
 }
 
 DUAL_MODEL_MODES = {"architecture", "devops"}
@@ -47,6 +50,7 @@ REVIEW_PIPELINES = {
     "devops": devops_pipeline,
     "mcp": mcp_pipeline,
     "rag": rag_pipeline,
+    "multi_agent": multi_agent_pipeline,
 }
 
 
@@ -79,6 +83,14 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
             task_prompt = prompts.read(mode.prompt_family, mode.implementation_prompts[0])
             system_prompt = (
                 "You are a precise RAG pipeline validator. "
+                "Use only supplied evidence and reply in at most 40 words."
+            )
+
+        elif mode.key == "multi_agent":
+            _stage(mode.label, "PROMPTS", f"Loading prompt family: {mode.prompt_family}")
+            task_prompt = prompts.read(mode.prompt_family, mode.implementation_prompts[0])
+            system_prompt = (
+                "You are a precise multi-agent workflow validator. "
                 "Use only supplied evidence and reply in at most 40 words."
             )
 
@@ -118,7 +130,6 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
 
         # ------------------------------------------------------------- RAG ACT
     if mode.key == 'rag':
-        # Causing same issues with RAG pipeline.
         implementation_user_prompt = rag_pipeline.build_implementation_prompt(task_prompt, evidence)
         _stage(mode.label, "PROMPTS", "Loaded RAG implementation prompt")
 
@@ -128,6 +139,25 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
             _stage(mode.label, "LLM", "Failed")
             return f"MODEL FAILED: {err}"
         _stage(mode.label, "LLM", "RAG implementation model complete")
+
+    # ----------------------------------------------------------------- MULTI-AGENT ACT
+    if mode.key == 'multi_agent':
+            _stage(mode.label, "PROMPTS", f"Loading prompt family: {mode.prompt_family}")
+            task_prompt = prompts.read(mode.prompt_family, mode.implementation_prompts[0])
+            system_prompt = (
+                "You are a precise multi-agent workflow validator. "
+                "Use only supplied evidence and reply in at most 40 words."
+            )
+            implementation_user_prompt = multi_agent_pipeline.build_implementation_prompt(task_prompt, evidence)
+            _stage(mode.label, "PROMPTS", "Loaded multi-agent implementation prompt")
+
+            _stage(mode.label, "LLM", "Running multi-agent implementation model")
+            implementation_output, err = ai.call(system_prompt, implementation_user_prompt, review=False)
+            if err:
+                _stage(mode.label, "LLM", "Failed")
+                return f"MODEL FAILED: {err}"
+            _stage(mode.label, "LLM", "Multi-agent implementation model complete")
+
 
     # ------------------------------------------------------------ OBSERVE
     _stage(mode.label, "OBSERVE", evidence)
@@ -179,30 +209,6 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
     # -------------------------------------------------------- MCP ADAPT
 
     if mode.key in {"mcp"}:
-        pass
-
-        # Causing errors (full error message):
-            #   File "/home/juno/Desktop/ASD 2026/project-ASD/ai-services/agentic_loop/core/orchestrator.py", line 245, in run_mode
-            # review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
-            #           File "/home/juno/Desktop/ASD 2026/project-ASD/ai-services/agentic_loop/core/prompt_registry.py", line 17, in read
-            #     return self.resolve(family, relative_file).read_text(encoding="utf-8").strip()
-            #            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-            #   File "/home/juno/Desktop/ASD 2026/project-ASD/ai-services/agentic_loop/core/prompt_registry.py", line 13, in resolve
-            #     raise FileNotFoundError(f"Missing prompt file: {rel}")
-            # FileNotFoundError: Missing prompt file: prompts/mcp/review/tool_review_prompts.txt
-
-        # This is a file path error. 
-            # It could be that for whatever reason the file path is:
-            # {repo_root}/prompts/mcp/review/tool_review_prompts.txt
-            # and not
-            # {repo_root}/ai-services/prompts/mcp/review/tool_review_prompts.txt
-
-
-        # This needs to be fixed to make it so it goes to the review_prompt_text using the file paths.
-        # So instead of copying and pasting the entire txt file it should be:
-        # review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
-
-
         # Debugging
         # print(f"mode.prompt_family: ", {mode.prompt_family} 
         #       , "mode.review_prompts[0]: ", {mode.review_prompts[0]}
@@ -293,8 +299,6 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
 
 
     if mode.key == "rag":
-        # These lines will give the same errors as MCP, as they are programmed in the same way. 
-
         review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
         reasoning_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[1])
 
@@ -305,6 +309,31 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
         _stage(mode.label, "PROMPTS", "Loaded RAG review and reasoning prompts")
         _stage(mode.label, "LLM", "Running RAG review model")
         review_output, review_err = ai.call(review_system_prompt, review_user_prompt, review=True)
+        if review_err:
+            review_output = review_err
+            _stage(mode.label, "LLM", "Review model failed")
+        else:
+            _stage(mode.label, "LLM", "Review model complete")
+
+        _stage(mode.label, "DONE", "Review complete")
+
+        return (
+            f"OBSERVE: {evidence}\n\n"
+            f"IMPLEMENTATION: {implementation_output}\n"
+            f"REVIEW: {review_output}"
+        )
+
+    if mode.key == "multi_agent":
+        try:
+            review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
+        except (FileNotFoundError, IndexError) as exc:
+            _stage(mode.label, "ADAPT", "Failed")
+            return f"REVIEW PROMPT FAILED: {exc!r}"
+
+        review_user_prompt = multi_agent_pipeline.build_review_prompt(implementation_output, evidence)
+        _stage(mode.label, "PROMPTS", "Loaded multi-agent review prompt")
+        _stage(mode.label, "LLM", "Running multi-agent review model")
+        review_output, review_err = ai.call(review_prompt_text, review_user_prompt, review=True)
         if review_err:
             review_output = review_err
             _stage(mode.label, "LLM", "Review model failed")

@@ -1,6 +1,5 @@
-from flask import Blueprint, request
 import requests
-
+from flask import Blueprint, request
 from services.database_api import (
     close_account_response,
     create_account_response,
@@ -14,7 +13,11 @@ from services.database_api import (
     unfreeze_account_response,
     update_account_response,
 )
-from views.html_formatters import format_account_html, format_accounts_html, format_balance_html
+from views.html_formatters import (
+    format_account_html,
+    format_accounts_html,
+    format_balance_html,
+)
 
 normal_ui_bp = Blueprint("normal_ui", __name__)
 

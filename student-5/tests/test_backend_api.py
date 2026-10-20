@@ -9,6 +9,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+
 # monkeypatch.setattr(1,2,3)
 # 1. The module or object to patch.
 # 2. The attribute/function name to patch.

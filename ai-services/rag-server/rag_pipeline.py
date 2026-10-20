@@ -8,13 +8,13 @@ Same flow and function names as Lab 8:
 Every place that differs from Lab 8 is marked with  # CHANGED FROM LAB 8
 """
 
+import hashlib
 import json
 import os
 import re
 import time
 import uuid
-import hashlib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -91,7 +91,7 @@ _unavailable_sources: dict[str, str] = {}
 
 
 def now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def embed_texts(texts: list[str]) -> list[list[float]]:

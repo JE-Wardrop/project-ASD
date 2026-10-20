@@ -72,10 +72,9 @@ def client(backend_module):
 
 @pytest.fixture
 def services(backend_module):
-    import services.accounts_api as accounts_api
-    import services.database_api as database_api
-    import services.notifications_api as notifications_api
     from types import SimpleNamespace
+
+    from services import accounts_api, database_api, notifications_api
 
     # Pack 3 module into 1 object -> services.db, services.accounts, services.notify
     return SimpleNamespace(
