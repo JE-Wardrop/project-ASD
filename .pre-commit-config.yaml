@@ -17,7 +17,7 @@ repos:
         language: python
         additional_dependencies: ["pytest==9.1.1", "ruff==0.16.8"]
         pass_filenames: false
-        stages: [manual]
+        stages: [pre-commit]
 
       - id: student-1-detect-secrets-scan
         name: detect-secrets Scan
@@ -25,7 +25,7 @@ repos:
         language: python
         additional_dependencies: ["pytest==9.1.1", "detect-secrets==1.5.0"]
         pass_filenames: false
-        stages: [manual]
+        stages: [pre-commit]
 
       - id: student-1-pip-audit-scan
         name: pip-audit Scan
@@ -33,7 +33,7 @@ repos:
         language: python
         additional_dependencies: ["pytest==9.1.1", "pip-audit==2.10.1"]
         pass_filenames: false
-        stages: [manual]
+        stages: [pre-commit]
 
 
   # #Student-2 Hooks

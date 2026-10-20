@@ -39,7 +39,8 @@ jobs:
   
       - uses: pre-commit/action@v3.0.1
         with:
-          extra_args: --hook-stage manual run --files $(git diff-tree --no-commit-id --name-only -r ${{ github.sha }}) student-1-ruff-scan student-1-detect-secrets-scan student-1-pip-audit-scan
+          extra_args: --hook-stage pre-commit run --files $(git diff-tree --no-commit-id --name-only -r ${{ github.sha }}) student-1-ruff-scan student-1-detect-secrets-scan student-1-pip-audit-scan
+          # extra_args: --hook-stage pre-commit run student-1-ruff-scan student-1-detect-secrets-scan student-1-pip-audit-scan
 
   smoke-check:
     runs-on: ubuntu-latest
