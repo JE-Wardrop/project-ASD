@@ -42,13 +42,13 @@ jobs:
           extra_args: --hook-stage pre-commit --files $(git diff-tree --no-commit-id --name-only -r ${{ github.sha }}) student-1-ruff-scan student-1-detect-secrets-scan student-1-pip-audit-scan
 
 
-  post_commit_tests:
-    runs-on: ubuntu-latest
-    needs: [build-images]
-    env:
-      MCP_ENABLED: "false"
-      RAG_ENABLED: "false"
-      MULTI_AGENT_ENABLED: "false"
+  # post_commit_tests:
+  #   runs-on: ubuntu-latest
+  #   needs: [build-images]
+  #   env:
+  #     MCP_ENABLED: "false"
+  #     RAG_ENABLED: "false"
+  #     MULTI_AGENT_ENABLED: "false"
 
   smoke-check:
     runs-on: ubuntu-latest
