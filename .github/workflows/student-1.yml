@@ -1,12 +1,5 @@
-# Student 1 - Juno Wardrop - Card Management
-# Builds and validates ONLY student-1 microservices.
-
-
-# Not working anymore, but nothing changed between the commit where it worked and the current commit
-# I do not know where this error could be coming from.
-
-# Apparent failure of MCP_ENABLED and RAG_ENABLED casuing 404 not 403 error.
-
+# # Student 1 - Juno Wardrop - Card Management
+# # Builds and validates ONLY student-1 microservices.
 name: student-1-ci
 
 on:
@@ -35,18 +28,30 @@ jobs:
 
       - name: Build services
         run: docker-compose build
+    
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+  
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --hook-stage manual run --files $(git diff-tree --no-commit-id --name-only -r ${{ github.sha }}) student-1-ruff-scan student-1-detect-secrets-scan student-1-pip-audit-scan
 
   smoke-check:
     runs-on: ubuntu-latest
     needs: [build-images]
     env:
-      # Diasbled MCP
+      # Disabled MCP
       MCP_ENABLED: "false"
 
       # Disables RAG 
       RAG_ENABLED: "false"
 
-      # Diabales multi-agent
+      # Disables multi-agent
       MULTI_AGENT_ENABLED: "false"
       
     steps:
