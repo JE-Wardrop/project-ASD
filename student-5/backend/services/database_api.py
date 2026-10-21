@@ -2,7 +2,10 @@ import os
 
 import requests
 
-DB_URL = os.environ.get("DB_URL", "http://localhost:8305")
+# Cloud (deploy-azure.sh) sets DATABASE_SERVICE_URL. Compose and the backend Dockerfile
+# set DB_URL=http://student5-db:8000, a name that only exists inside Docker Compose,
+# so the cloud value must win.
+DB_URL = os.environ.get("DATABASE_SERVICE_URL") or os.environ.get("DB_URL", "http://localhost:8305")
 
 TIMEOUT = 5
 def _request(method, path, **kwargs):

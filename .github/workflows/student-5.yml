@@ -81,6 +81,7 @@ jobs:
           }
 
           check_url "http://localhost:8105/"
+          check_url "http://localhost:8105/health" 
           check_url "http://localhost:8205/health"
           check_url "http://localhost:8305/health"
 
