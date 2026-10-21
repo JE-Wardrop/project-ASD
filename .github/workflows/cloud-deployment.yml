@@ -1,0 +1,143 @@
+name: cloud-deployment
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  RESOURCE_GROUP: clouddeployment-rg
+  # Students whose services are cloud-ready (nginx proxy, relative API paths,
+  # backend reads DATABASE_SERVICE_URL, tests/post_commit/). Add yourself here
+  # once your changes are merged; your post-commit tests then gate the deploy too.
+  STUDENTS: "student-2"
+  # Every student gets app-name tags on the first run, so students can be
+  # added to STUDENTS later without recreating the resource group.
+  ALL_STUDENTS: "student-1 student-2 student-4 student-5"
+
+jobs:
+  post_commit_tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependencies
+        run: pip install pytest requests "PyJWT>=2.11.0"
+
+      - name: Start services
+        env:
+          # Ollama, MCP, RAG and the multi-agent server only run on a developer's machine
+          MCP_ENABLED: "false"
+          RAG_ENABLED: "false"
+          MULTI_AGENT_ENABLED: "false"
+        run: docker compose up -d --build
+
+      - name: Wait for each student's database (host port 830N)
+        run: |
+          for S in $STUDENTS; do
+            PORT="830${S#student-}"
+            for i in $(seq 1 30); do
+              code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "http://localhost:$PORT/" || true)
+              if [ "$code" != "000" ]; then echo "$S database up on :$PORT (HTTP $code)"; break; fi
+              sleep 2
+            done
+          done
+          sleep 5   # give the backends a moment after their databases
+
+      - name: Run post-commit tests
+        run: |
+          set +e
+          overall=0
+          for S in $STUDENTS; do
+            if [ ! -d "$S/tests/post_commit" ]; then
+              echo "::error::$S has no tests/post_commit/ folder"
+              overall=1
+              continue
+            fi
+            mkdir -p "$S/tests/reports"
+            (cd "$S" && python -m pytest tests/post_commit/ -v > tests/reports/post-commit-report.md)
+            status=$?
+            echo "{\"status\": \"$([ $status -eq 0 ] && echo PASS || echo FAIL)\", \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" >> "$S/tests/reports/test-audit.jsonl"
+            echo "===== $S (exit $status) ====="
+            cat "$S/tests/reports/post-commit-report.md"
+            [ $status -eq 0 ] || overall=1
+          done
+          exit $overall
+
+      - name: Stop services
+        if: always()
+        run: docker compose down -v
+
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-commit-test-evidence
+          path: student-*/tests/reports/
+
+  deploy_azure:
+    runs-on: ubuntu-latest
+    needs: [post_commit_tests]
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Allow Azure CLI extensions to install without prompting
+        run: az config set extension.use_dynamic_install=yes_without_prompt
+
+      - name: Set up deployment environment
+        env:
+          STUDENTS: ${{ env.ALL_STUDENTS }}
+        run: bash scripts/clouddeployment/env-setup.sh
+
+      - name: Build and push images
+        run: bash scripts/clouddeployment/build-images.sh
+
+      # The OIDC assertion is only valid for ~5 minutes; refresh before each slow step.
+      - name: Azure login (refresh)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create Container Apps environment
+        run: bash scripts/clouddeployment/deploy-azure-env.sh
+
+      - name: Azure login (refresh again)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Container Apps
+        run: bash scripts/clouddeployment/deploy-azure.sh
+
+      - name: Validate deployment and generate evidence
+        run: bash scripts/clouddeployment/deployment-testing.sh
+
+      - name: Upload deployment evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: azure-deployment-evidence
+          path: docs/report/deployment-results.md

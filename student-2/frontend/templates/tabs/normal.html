@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <title>Normal UI</title>
-    <link rel="stylesheet" href="http://localhost:8080/styles.css">
+    <!-- Local deployment: <link rel="stylesheet" href="http://localhost:8080/styles.css"> -->
+    <link rel="stylesheet" href="/css/shared.css"> <!-- Cloud deployment: shared theme bundled with this frontend -->
     <link rel="stylesheet" href="/css/styles.css">
     <style>
         body { margin: 0; min-height: auto; background: transparent; }
@@ -149,7 +150,8 @@
 </main>
 
 <script>
-const API = "http://localhost:8202";
+// Local deployment: const API = "http://localhost:8202";
+const API = ""; // Cloud deployment: relative path, proxied by nginx to student2-backend
 
 async function renderIntoPanel(panelId, url, options = {}) {
     const panel = document.getElementById(panelId);

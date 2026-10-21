@@ -1,8 +1,7 @@
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-APP_DIR = BASE_DIR.parent
-PROMPT_DIR = APP_DIR / "prompts"
+PROMPT_DIR = BASE_DIR / "prompts"  # Cloud deployment: prompts live inside backend/ so it builds on its own
 IMPLEMENTATION_PROMPT_DIR = PROMPT_DIR / "service" / "implementation"
 REVIEW_PROMPT_DIR = PROMPT_DIR / "service" / "review"
 
