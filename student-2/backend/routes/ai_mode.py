@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+
 from services.llm_client import OLLAMA_MODEL, create_chat_completion
 from services.prompt_loader import load_service_prompt
 

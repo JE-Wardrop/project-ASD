@@ -7,7 +7,7 @@ server {
     listen 80;
 
     # API routes proxied to the student-2 backend
-    location ~ ^/(accounts|ask|ask-with-context|health|mcp|rag|multi-agent)(/|$) {
+    location ~ ^/(accounts|ask|ask-with-context|health|mcp|rag|multi-agent|auth)(/|$) {
         proxy_pass ${BACKEND_URL};
         proxy_ssl_server_name on;
         proxy_set_header Host $proxy_host;

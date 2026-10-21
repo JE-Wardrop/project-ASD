@@ -49,15 +49,11 @@ find_dockerfile() { # <student> <service>
     return 1
 }
 
-# Build context for a service. Usually its own folder, but student-2's backend
-# Dockerfile copies both backend/ and prompts/, so docker-compose.yml builds it
-# from student-2/ (context: ./student-2, dockerfile: backend/dockerfile).
+# Build context for a service: its own folder, the same as docker-compose.yml.
+# (student-2's backend keeps prompts/ inside student-2/backend/, so it no longer
+# needs the parent folder as its context.)
 build_context() { # <student> <service>
-    if [[ "$1" == "student-2" && "$2" == "backend" ]]; then
-        echo "$REPO_ROOT/$1"
-    else
-        echo "$REPO_ROOT/$1/$2"
-    fi
+    echo "$REPO_ROOT/$1/$2"
 }
 
 # Port comes from <STUDENT>_<SERVICE>_PORT (e.g. STUDENT_1_BACKEND_PORT) if set,

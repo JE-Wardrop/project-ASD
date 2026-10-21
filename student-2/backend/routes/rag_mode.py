@@ -7,6 +7,7 @@ tabs/rag-mode.html renders it.
 import os
 
 from flask import Blueprint, request
+
 from services.rag_api import call_rag
 
 rag_mode_bp = Blueprint("rag_mode", __name__)
