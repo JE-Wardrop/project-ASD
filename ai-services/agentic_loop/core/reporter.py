@@ -20,6 +20,9 @@ def print_menu(target_label: str) -> None:
     print("6 - RAG")
     print("7 - Run top four (db, endpoints, architecture, devOps)")
     print("8 - Run Multi-agent server")
+    print("9 - Run Pre-test collector")
+    print("10 - Run deployment collector")
+    print("11 - CICD Collector")
     print("0 - Exit")
     print("=" * 72)
 
