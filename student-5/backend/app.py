@@ -22,7 +22,7 @@ def create_app():
     def health():
         try:
             db_ok = db.health().status_code == 200
-        except Exception:
+        except Exception:  # noqa: BLE001 - any failure means the DB is unreachable
             db_ok = False
         return ({"status": "ok" if db_ok else "degraded",
                  "service": SERVICE_NAME,
@@ -38,4 +38,4 @@ def create_app():
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8000)), debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "8000")), debug=True)

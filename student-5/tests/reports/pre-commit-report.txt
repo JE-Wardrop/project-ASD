@@ -1,0 +1,97 @@
+student-1 Ruff Scan......................................................Passed
+- hook id: student-1-ruff-scan
+- duration: 0.2s
+
+============================= test session starts ==============================
+platform darwin -- Python 3.13.5, pytest-9.1.1, pluggy-1.7.0 -- /Users/briantran396/.cache/pre-commit/repo2xiav5zv/py_env-python3.13/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/briantran396/project-ASD/student-1
+configfile: pyproject.toml
+collecting ... collected 1 item
+
+student-1/tests/pre_commit/test_ruff_scan.py::test_ruff_scan_passes PASSED [100%]
+
+============================== 1 passed in 0.07s ===============================
+
+student-1 detect-secrets Scan............................................Passed
+- hook id: student-1-detect-secrets-scan
+- duration: 0.34s
+
+============================= test session starts ==============================
+platform darwin -- Python 3.13.5, pytest-9.1.1, pluggy-1.7.0 -- /Users/briantran396/.cache/pre-commit/repowztp63vo/py_env-python3.13/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/briantran396/project-ASD/student-1
+configfile: pyproject.toml
+collecting ... collected 1 item
+
+student-1/tests/pre_commit/test_secrets_scan.py::test_detect_secrets_scan_passes PASSED [100%]
+
+============================== 1 passed in 0.21s ===============================
+
+student-1 pip-audit Scan.................................................Passed
+- hook id: student-1-pip-audit-scan
+- duration: 10.24s
+
+============================= test session starts ==============================
+platform darwin -- Python 3.13.5, pytest-9.1.1, pluggy-1.7.0 -- /Users/briantran396/.cache/pre-commit/repobaytcug6/py_env-python3.13/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/briantran396/project-ASD/student-1
+configfile: pyproject.toml
+plugins: platformdirs-4.13.5
+collecting ... collected 4 items
+
+student-1/tests/pre_commit/test_dependency_audit.py::test_requirements_files_found PASSED [ 25%]
+student-1/tests/pre_commit/test_dependency_audit.py::test_pip_audit_passes[backend/requirements.txt] PASSED [ 50%]
+student-1/tests/pre_commit/test_dependency_audit.py::test_pip_audit_passes[database/requirements.txt] PASSED [ 75%]
+student-1/tests/pre_commit/test_dependency_audit.py::test_pip_audit_passes[frontend/requirements.txt] PASSED [100%]
+
+============================== 4 passed in 10.11s ==============================
+
+student-5 Ruff Scan......................................................Passed
+- hook id: student-5-ruff-scan
+- duration: 0.2s
+
+============================= test session starts ==============================
+platform darwin -- Python 3.13.5, pytest-9.1.1, pluggy-1.7.0 -- /Users/briantran396/.cache/pre-commit/repo2xiav5zv/py_env-python3.13/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/briantran396/project-ASD/student-5
+configfile: pyproject.toml
+collecting ... collected 1 item
+
+student-5/tests/pre_commit/test_ruff_scan.py::test_ruff_scan_passes PASSED [100%]
+
+============================== 1 passed in 0.06s ===============================
+
+student-5 detect-secrets Scan............................................Passed
+- hook id: student-5-detect-secrets-scan
+- duration: 1.35s
+
+============================= test session starts ==============================
+platform darwin -- Python 3.13.5, pytest-9.1.1, pluggy-1.7.0 -- /Users/briantran396/.cache/pre-commit/repowztp63vo/py_env-python3.13/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/briantran396/project-ASD/student-5
+configfile: pyproject.toml
+collecting ... collected 1 item
+
+student-5/tests/pre_commit/test_secrets_scan.py::test_detect_secrets_scan_passes PASSED [100%]
+
+============================== 1 passed in 1.10s ===============================
+
+student-5 pip-audit Scan.................................................Passed
+- hook id: student-5-pip-audit-scan
+- duration: 7.39s
+
+============================= test session starts ==============================
+platform darwin -- Python 3.13.5, pytest-9.1.1, pluggy-1.7.0 -- /Users/briantran396/.cache/pre-commit/repobaytcug6/py_env-python3.13/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/briantran396/project-ASD/student-5
+configfile: pyproject.toml
+plugins: platformdirs-4.13.5
+collecting ... collected 3 items
+
+student-5/tests/pre_commit/test_dependency_audit.py::test_requirements_files_found PASSED [ 33%]
+student-5/tests/pre_commit/test_dependency_audit.py::test_pip_audit_passes[backend/requirements.txt] PASSED [ 66%]
+student-5/tests/pre_commit/test_dependency_audit.py::test_pip_audit_passes[database/requirements.txt] PASSED [100%]
+
+============================== 3 passed in 7.21s ===============================
+
