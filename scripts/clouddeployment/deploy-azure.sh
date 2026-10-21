@@ -1,11 +1,9 @@
 #!/bin/bash
 set -e
 
-# Deploys the frontend, backend and database of every student in STUDENTS
+# Builds and deploys the frontend, backend and database of every student in STUDENTS
 # (default: student-1 student-2 student-4 student-5 = 12 apps) to an existing Container Apps
-# environment. Run env-setup.sh, build-images.sh and deploy-azure-env.sh
-# (all in scripts/clouddeployment/) first. IMAGE_TAG must match the tag build-images.sh used
-# (both default to the current git commit).
+# environment. Run scripts/cloud/env-setup.sh and scripts/cloud/deploy-azure-env.sh first.
 #
 # Per student, from  <repo-root>/<student>/{frontend,backend,database}/Dockerfile :
 #   database -> internal ingress only
@@ -47,18 +45,18 @@ REGISTRY_NAME=$(tag registryName)
 ENV_NAME=$(tag envName)
 
 if [[ -z "$REGISTRY_NAME" || -z "$ENV_NAME" ]]; then
-    echo "Resource group $RESOURCE_GROUP is missing deployment tags. Run scripts/clouddeployment/env-setup.sh first." >&2
+    echo "Resource group $RESOURCE_GROUP is missing deployment tags. Run scripts/cloud/env-setup.sh first." >&2
     exit 1
 fi
 
 REGISTRY_SERVER=$(az acr show --name "$REGISTRY_NAME" --resource-group "$RESOURCE_GROUP" --query loginServer -o tsv)
 
-# Step 2: Validate every student before deploying anything (fail fast)
+# Step 2: Validate every student before building anything (fail fast)
 for S in $STUDENTS; do
     for SVC in frontend backend database; do
         DF=$(find_dockerfile "$S" "$SVC") || { echo "Missing Dockerfile: $S/$SVC" >&2; exit 1; }
         [[ -n "$(get_port "$S" "$SVC" "$DF")" ]] || { echo "No port for $S/$SVC: add an EXPOSE line to its Dockerfile or set $(echo "${S}_${SVC}_PORT" | tr 'a-z-' 'A-Z_')." >&2; exit 1; }
-        [[ -n "$(tag "$S-$SVC")" ]] || { echo "No app name tag for $S-$SVC. Run scripts/clouddeployment/env-setup.sh first." >&2; exit 1; }
+        [[ -n "$(tag "$S-$SVC")" ]] || { echo "No app name tag for $S-$SVC. Run scripts/cloud/env-setup.sh first." >&2; exit 1; }
     done
 done
 
@@ -110,13 +108,24 @@ for S in $STUDENTS; do
     BACKEND_APP_NAME=$(tag "$S-backend")
     FRONTEND_APP_NAME=$(tag "$S-frontend")
 
-    # Step 3: Database (internal only, no public access)
+    # Step 3: Build images in ACR (no local Docker needed)
+    for SVC in database backend frontend; do
+        DF=$(find_dockerfile "$S" "$SVC")
+        echo "Building $S/$SVC:$IMAGE_TAG..."
+        az acr build \
+            --registry "$REGISTRY_NAME" \
+            --image "$S/$SVC:$IMAGE_TAG" \
+            --file "$(basename "$DF")" \
+            "$REPO_ROOT/$S/$SVC"
+    done
+
+    # Step 4: Database (internal only, no public access)
     echo "Deploying $S database..."
     deploy_app "$DB_APP_NAME" "${REGISTRY_SERVER}/$S/database:${IMAGE_TAG}" \
         "$(get_port "$S" database "$(find_dockerfile "$S" database)")" internal 0.5 1.0Gi 1 1
     DB_FQDN=$(app_fqdn "$DB_APP_NAME")
 
-    # Step 4: Backend (internal only, talks to this student's database)
+    # Step 5: Backend (internal only, talks to this student's database)
     # The AI-feature flags are explicitly disabled: no MCP, RAG or multi-agent in the cloud deployment.
     echo "Deploying $S backend..."
     deploy_app "$BACKEND_APP_NAME" "${REGISTRY_SERVER}/$S/backend:${IMAGE_TAG}" \
@@ -125,11 +134,11 @@ for S in $STUDENTS; do
         AI_MODE_ENABLED=false MCP_ENABLED=false RAG_ENABLED=false MULTI_AGENT_ENABLED=false
     BACKEND_FQDN=$(app_fqdn "$BACKEND_APP_NAME")
 
-    # Step 5: Frontend (the only public-facing app for this student)
+    # Step 6: Frontend (the only public-facing app for this student)
     echo "Deploying $S frontend..."
     deploy_app "$FRONTEND_APP_NAME" "${REGISTRY_SERVER}/$S/frontend:${IMAGE_TAG}" \
         "$(get_port "$S" frontend "$(find_dockerfile "$S" frontend)")" external 0.25 0.5Gi 1 3 \
-        BACKEND_SERVICE_URL="https://$BACKEND_FQDN"
+        BACKEND_URL="https://$BACKEND_FQDN"
     FRONTEND_FQDN=$(app_fqdn "$FRONTEND_APP_NAME")
 
     SUMMARY+="  $S frontend: https://$FRONTEND_FQDN"$'\n'
@@ -139,4 +148,4 @@ echo ""
 echo "=== Deployment Complete ==="
 printf '%s' "$SUMMARY"
 echo ""
-echo "Validate with: bash scripts/clouddeployment/deployment-testing.sh"
+echo "Validate with: scripts/cloud/deployment-testing.sh"

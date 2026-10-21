@@ -1,95 +1,63 @@
+# Cloud deployment - Azure Container Apps
+# Deploys the integrated application (frontend, backend, database of every
+# student in STUDENTS) after the required student CI/CD workflows have passed.
+# AI-Mode, MCP, RAG and Multi-Agent stay disabled (deploy-azure.sh sets the flags).
+#
+# Run it: GitHub -> Actions -> cloud-deployment -> Run workflow.
+# Needs the AZURE_CLIENT_ID, AZURE_TENANT_ID and AZURE_SUBSCRIPTION_ID secrets
+# (created once by scripts/clouddeployment/gh-secrets-setup.sh).
+
 name: cloud-deployment
 
 on:
-  # push:
-  #   branches:
-  #     - main
   workflow_dispatch:
+    inputs:
+      students:
+        description: "Students to deploy"
+        default: "student-1 student-2 student-4 student-5"
 
 permissions:
-  id-token: write
+  id-token: write   # Azure login with OIDC
   contents: read
+  actions: read     # read the student workflow results in the CI gate
 
 env:
   RESOURCE_GROUP: clouddeployment-rg
-  # Students whose services are cloud-ready (nginx proxy, relative API paths,
-  # backend reads DATABASE_SERVICE_URL, tests/post_commit/). Add yourself here
-  # once your changes are merged; your post-commit tests then gate the deploy too.
-  STUDENTS: "student-2"
-  # Every student gets app-name tags on the first run, so students can be
-  # added to STUDENTS later without recreating the resource group.
-  ALL_STUDENTS: "student-1 student-2 student-4 student-5"
+  LOCATION: australiaeast
+  STUDENTS: ${{ github.event.inputs.students || 'student-1 student-2 student-4 student-5' }}
+  # Workflows that must have passed on this branch before anything is deployed.
+  # student-3.yml and student-4.yml are empty, so they cannot be required yet.
+  REQUIRED_WORKFLOWS: "student-1.yml student-2.yml student-5.yml"
 
 jobs:
-  post_commit_tests:
+  # 1. Gate: the latest run of every required student workflow on this branch succeeded
+  ci-gate:
+    name: Required CI/CD validation
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install test dependencies
-        run: pip install pytest requests "PyJWT>=2.11.0"
-
-      - name: Start services
+      - name: Check student workflow results
         env:
-          # Ollama, MCP, RAG and the multi-agent server only run on a developer's machine
-          MCP_ENABLED: "false"
-          RAG_ENABLED: "false"
-          MULTI_AGENT_ENABLED: "false"
-        run: docker compose up -d --build
-
-      - name: Wait for each student's database (host port 830N)
+          GH_TOKEN: ${{ github.token }}
         run: |
-          for S in $STUDENTS; do
-            PORT="830${S#student-}"
-            for i in $(seq 1 30); do
-              code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "http://localhost:$PORT/" || true)
-              if [ "$code" != "000" ]; then echo "$S database up on :$PORT (HTTP $code)"; break; fi
-              sleep 2
-            done
+          failed=0
+          for wf in $REQUIRED_WORKFLOWS; do
+            result=$(gh run list --repo "${{ github.repository }}" --workflow "$wf" \
+                       --branch "${{ github.ref_name }}" --limit 1 \
+                       --json conclusion,headSha,url \
+                       -q '.[0] | "\(.conclusion) \(.headSha[0:7]) \(.url)"' || true)
+            echo "$wf -> ${result:-no run on ${{ github.ref_name }}}"
+            [[ "$result" == success* ]] || failed=1
           done
-          sleep 5   # give the backends a moment after their databases
+          if [[ $failed -ne 0 ]]; then
+            echo "A required workflow has not passed. Fix it before deploying."
+          fi
+          exit $failed
 
-      - name: Run post-commit tests
-        run: |
-          set +e
-          overall=0
-          for S in $STUDENTS; do
-            if [ ! -d "$S/tests/post_commit" ]; then
-              echo "::error::$S has no tests/post_commit/ folder"
-              overall=1
-              continue
-            fi
-            mkdir -p "$S/tests/reports"
-            (cd "$S" && python -m pytest tests/post_commit/ -v > tests/reports/post-commit-report.md)
-            status=$?
-            echo "{\"status\": \"$([ $status -eq 0 ] && echo PASS || echo FAIL)\", \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" >> "$S/tests/reports/test-audit.jsonl"
-            echo "===== $S (exit $status) ====="
-            cat "$S/tests/reports/post-commit-report.md"
-            [ $status -eq 0 ] || overall=1
-          done
-          exit $overall
-
-      - name: Stop services
-        if: always()
-        run: docker compose down -v
-
-      - name: Upload test evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: post-commit-test-evidence
-          path: student-*/tests/reports/
-
-  deploy_azure:
+  # 2. Deploy with the reusable scripts, then validate and keep the evidence
+  deploy-azure:
+    name: Deploy to Azure Container Apps
     runs-on: ubuntu-latest
-    needs: [post_commit_tests]
-    if: github.event_name == 'workflow_dispatch'
-
+    needs: [ci-gate]
     steps:
       - uses: actions/checkout@v4
 
@@ -100,18 +68,9 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Allow Azure CLI extensions to install without prompting
-        run: az config set extension.use_dynamic_install=yes_without_prompt
-
-      - name: Set up deployment environment
-        env:
-          STUDENTS: ${{ env.ALL_STUDENTS }}
+      - name: Resource group and deployment names
         run: bash scripts/clouddeployment/env-setup.sh
 
-      - name: Build and push images
-        run: bash scripts/clouddeployment/build-images.sh
-
-      # The OIDC assertion is only valid for ~5 minutes; refresh before each slow step.
       - name: Azure login (refresh)
         uses: azure/login@v2
         with:
@@ -119,7 +78,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Create Container Apps environment
+      - name: Container registry and Container Apps environment
         run: bash scripts/clouddeployment/deploy-azure-env.sh
 
       - name: Azure login (refresh again)
@@ -129,10 +88,17 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deploy to Azure Container Apps
+      - name: Build images and deploy every student's services
         run: bash scripts/clouddeployment/deploy-azure.sh
 
-      - name: Validate deployment and generate evidence
+      - name: Azure login (refresh before testing)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Validate deployment and write the report
         run: bash scripts/clouddeployment/deployment-testing.sh
 
       - name: Upload deployment evidence
@@ -140,4 +106,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: azure-deployment-evidence
-          path: docs/report/deployment-results.md
+          path: docs/cloud-deployment/
