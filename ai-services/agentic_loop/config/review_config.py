@@ -77,23 +77,23 @@ def build_mode_config() -> dict[str, ModeConfig]:
 
         "pre_test": ModeConfig(
             key="pre_test",
-            label="pre_test",
+            label="Testing: Pre",
             prompt_family="pre_test",
             implementation_prompts=( "implementation/pre_test_implementation.txt",),
-            review_prompts=("review/pre_test_implementation.txt",),
+            review_prompts=("review/pre_test_review.txt",),
         ),
         "deployment": ModeConfig(
             key="deployment",
-            label="deployment",
+            label="Deployment",
             prompt_family="deployment",
             implementation_prompts=( "implementation/deployment_implementation.txt",),
             review_prompts=("review/deployment_review.txt",),
         ),
         "cicd": ModeConfig(
             key="cicd",
-            label="cicd",
+            label="Testing: CICD",
             prompt_family="cicd",
-            implementation_prompts=( "implementation/cicd_implementation_review.txt",),
+            implementation_prompts=("implementation/cicd_implementation_prompt.txt",),
             review_prompts=("review/cicd_implementation_review.txt",),
         ),
     }

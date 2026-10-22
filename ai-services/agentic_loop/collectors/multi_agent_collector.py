@@ -43,6 +43,8 @@
 #     )
 
 
+import json
+from collections import Counter
 from pathlib import Path
 
 REQUIRED_AGENT_FUNCTIONS = {
@@ -86,8 +88,48 @@ def collect(target, repo_root: Path) -> tuple[bool, str]:
     if missing_calls:
         return False, "coordinator.py missing calls to: " + ", ".join(missing_calls)
 
-    return True, (
+    structure = (
         "Multi-agent evidence: multi-agent-server/ contains planner_agent.py, worker_agent.py, "
         "reviewer_agent.py, coordinator.py, and app.py; coordinator wires plan_workflow, "
         "generate_output, and review_output into a single workflow."
+    )
+    return True, structure + " " + _workflow_evidence(target, multi_agent_server_dir)
+
+
+def _read_jsonl(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    records = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            records.append(json.loads(line))
+        except ValueError:
+            continue  # a half-written line is skipped, not fatal
+    return records
+
+
+def _workflow_evidence(target, server_dir: Path) -> str:
+    """This student's runs (workflow_history.jsonl) and human decisions (coordination_audit.jsonl)."""
+    runs = [r for r in _read_jsonl(server_dir / "workflow_history.jsonl")
+            if r.get("caller") == target.key]
+    decisions = [r for r in _read_jsonl(server_dir / "coordination_audit.jsonl")
+                 if r.get("event") == "human_decision" and r.get("caller") == target.key]
+
+    if not runs:
+        return (f"No workflow runs from {target.key} in workflow_history.jsonl: "
+                "the Planner -> Worker -> Reviewer -> Human Review flow has not been exercised from this feature.")
+
+    statuses = Counter(r.get("status", "?") for r in runs)
+    with_evidence = sum(1 for r in runs if (r.get("worker_result") or {}).get("evidence_count", 0) > 0)
+    latest = runs[-1]
+    decided = Counter(d.get("decision", "?") for d in decisions)
+    return (
+        f"{target.key} workflow history: {len(runs)} runs "
+        f"({', '.join(f'{n} {s}' for s, n in statuses.items())}); "
+        f"{with_evidence}/{len(runs)} had Worker database evidence. "
+        f"Latest run {latest.get('workflow_id', '?')[:8]} for \"{latest.get('user_request', '')}\" "
+        f"took {latest.get('duration_ms', '?')} ms. "
+        f"Human decisions recorded in coordination_audit.jsonl: {len(decisions)}"
+        + (f" ({', '.join(f'{n} {d}' for d, n in decided.items())})" if decisions else "")
+        + f"; {max(len(runs) - len(decisions), 0)} runs still awaiting human review."
     )
