@@ -25,6 +25,9 @@ MENU = {
     "5": "mcp",
     "6": "rag",
     "8": "multi_agent",
+    "9": "pre_test",
+    "10": "deployment",
+    "11": "cicd",
 }
 
 
@@ -58,6 +61,9 @@ def _print_mode_mapping(app_dir: Path) -> None:
         "MCP":          str(app_dir / "prompts" / "mcp" / "review" / "tool_review_prompt.txt"),
         "RAG":          str(app_dir / "prompts" / "rag" / "review" / "integration_review_prompt.txt"),
         "Multi-Agent":  str(app_dir / "prompts" / "multi-agent" / "review" / "multi_agent_review_prompt.txt"),
+        "Pre-test":     str(app_dir / "prompts" / "pre_test" / "review" / "pre_test_implementation.txt"),
+        "Deployment":   str(app_dir / "prompts" / "deployment" / "review" / "deployment_review.txt"),
+        "CICD":         str(app_dir / "prompts" / "cicd" / "review" / "cicd_implementation_prompt.txt"),
     })
 
 
@@ -97,15 +103,11 @@ def main() -> None:
 
         keys = list(MENU.values()) if choice == "7" else [MENU.get(choice)]
         if keys == [None]:
-            print("Invalid choice. Select 0 to 8.")
+            print("Invalid choice. Select 0 to 11.")
             continue
 
         for key in keys:
             print()
-
-            #error here with the mcp (and im guessing rag as well) key
-            # i dont really get where this error is coming from
-
             result = run_mode(mode_config[key], target, repo_root, prompts, ai)
             print_result(mode_config[key].label, result)
             transcript.append((mode_config[key].label, result))

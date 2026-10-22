@@ -19,6 +19,9 @@ from collectors import (
     mcp_collector,
     multi_agent_collector,
     rag_collector,
+    pre_test_collector,
+    deployment_collector,
+    cicd_test_collector,
 )
 from config.review_config import ModeConfig
 from core.ai_runner import AIRunner
@@ -31,6 +34,9 @@ from pipelines import (
     mcp_pipeline,
     multi_agent_pipeline,
     rag_pipeline,
+    pre_test_pipeline,
+    deployment_pipeline,
+    cicd_test_pipeline,
 )
 
 COLLECTORS = {
@@ -41,6 +47,9 @@ COLLECTORS = {
     "mcp": mcp_collector.collect,
     "rag": rag_collector.collect,
     "multi_agent": multi_agent_collector.collect,
+    "pre_test": pre_test_collector.collect,
+    "cicd_test": cicd_test_collector.collect,
+    "deployment": deployment_collector.collect,
 }
 
 DUAL_MODEL_MODES = {"architecture", "devops"}
@@ -105,8 +114,7 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
         _stage(mode.label, "PLAN", "Failed")
         return f"PLAN FAILED: {exc}"
 
-
-    # ---------------------------------------------------------------- ACT
+# ---------------------------------------------------------------- ACT
     _stage(mode.label, "ACT", "Gathering evidence from the running system")
     collector = COLLECTORS[mode.key]
     
@@ -116,7 +124,7 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
         _stage(mode.label, "ACT", "Failed")
         return f"ACT FAILED: {evidence}"
 
-        # --------------------------------------------------------- MCP ACT
+    # --------------------------------------------------------- MCP ACT
     if mode.key == "mcp":
         implementation_user_prompt = mcp_pipeline.build_implementation_prompt(task_prompt, evidence)
         _stage(mode.label, "PROMPTS", "Loaded MCP implementation prompt")
@@ -128,7 +136,7 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
             return f"MODEL FAILED: {err}"
         _stage(mode.label, "LLM", "MCP implementation model complete")
 
-        # ------------------------------------------------------------- RAG ACT
+    # ------------------------------------------------------------- RAG ACT
     if mode.key == 'rag':
         implementation_user_prompt = rag_pipeline.build_implementation_prompt(task_prompt, evidence)
         _stage(mode.label, "PROMPTS", "Loaded RAG implementation prompt")
@@ -157,6 +165,67 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
                 _stage(mode.label, "LLM", "Failed")
                 return f"MODEL FAILED: {err}"
             _stage(mode.label, "LLM", "Multi-agent implementation model complete")
+
+    # ------------------------------------------------------------ Pre-test ACT
+
+    if mode.key == "pre_test":
+        _stage(mode.label, "PROMPTS", f"Loading prompt family: {mode.prompt_family}")
+        task_prompt = prompts.read(mode.prompt_family, mode.implementation_prompts[0])
+        system_prompt = (
+            "You are a precise pre-commit test reviewer. "
+            "Use only supplied evidence and reply in at most 60 words."
+        )
+        implementation_user_prompt = pre_test_pipeline.build_implementation_prompt(task_prompt, evidence)
+        _stage(mode.label, "PROMPTS", "Loaded pre-test implementation prompt")
+
+        _stage(mode.label, "LLM", "Running pre-test implementation model")
+        implementation_output, err = ai.call(system_prompt, implementation_user_prompt, review=False)
+        if err:
+            _stage(mode.label, "LLM", "Failed")
+            return f"MODEL FAILED: {err}"
+        _stage(mode.label, "LLM", "Pre-test implementation model complete")
+
+    # ------------------------------------------------------------ Deployment ACT
+
+    if mode.key == "deployment":
+        _stage(mode.label, "PROMPTS", f"Loading prompt family: {mode.prompt_family}")
+        task_prompt = prompts.read(mode.prompt_family, mode.implementation_prompts[0])
+        system_prompt = (
+            "You are a precise pre-commit test reviewer. "
+            "Use only supplied evidence and reply in at most 60 words."
+        )
+        implementation_user_prompt = pre_test_pipeline.build_implementation_prompt(task_prompt, evidence)
+        _stage(mode.label, "PROMPTS", "Loaded pre-test implementation prompt")
+
+        _stage(mode.label, "LLM", "Running pre-test implementation model")
+        implementation_output, err = ai.call(system_prompt, implementation_user_prompt, review=False)
+        if err:
+            _stage(mode.label, "LLM", "Failed")
+            return f"MODEL FAILED: {err}"
+        _stage(mode.label, "LLM", "Pre-test implementation model complete")
+
+
+
+    # ------------------------------------------------------------ CICD ACT
+
+
+    if mode.key == "cicd":
+        _stage(mode.label, "PROMPTS", f"Loading prompt family: {mode.prompt_family}")
+        task_prompt = prompts.read(mode.prompt_family, mode.implementation_prompts[0])
+        system_prompt = (
+            "You are a precise pre-commit test reviewer. "
+            "Use only supplied evidence and reply in at most 60 words."
+        )
+        implementation_user_prompt = pre_test_pipeline.build_implementation_prompt(task_prompt, evidence)
+        _stage(mode.label, "PROMPTS", "Loaded pre-test implementation prompt")
+
+        _stage(mode.label, "LLM", "Running pre-test implementation model")
+        implementation_output, err = ai.call(system_prompt, implementation_user_prompt, review=False)
+        if err:
+            _stage(mode.label, "LLM", "Failed")
+            return f"MODEL FAILED: {err}"
+        _stage(mode.label, "LLM", "Pre-test implementation model complete")
+
 
 
     # ------------------------------------------------------------ OBSERVE
@@ -323,6 +392,9 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
             f"REVIEW: {review_output}"
         )
 
+
+    # ----------------------------- MULTI AGENT ADAPT
+
     if mode.key == "multi_agent":
         try:
             review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
@@ -347,6 +419,70 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
             f"IMPLEMENTATION: {implementation_output}\n"
             f"REVIEW: {review_output}"
         )
-    
 
+    # ---------------------------------------------------------- Pre-test ADAPT
+    if mode.key == "9":
+        review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
+        review_user_prompt = pre_test_pipeline.build_review_prompt(implementation_output, evidence)
+        _stage(mode.label, "PROMPTS", "Loaded pre-test review prompt")
+        _stage(mode.label, "LLM", "Running pre-test review model")
+        review_output, review_err = ai.call(review_prompt_text, review_user_prompt, review=True)
+        if review_err:
+            review_output = review_err
+            _stage(mode.label, "LLM", "Review model failed")
+        else:
+            _stage(mode.label, "LLM", "Review model complete")
+
+        _stage(mode.label, "DONE", "Review complete")
+
+        return (
+            f"OBSERVE: {evidence}\n\n"
+            f"IMPLEMENTATION: {implementation_output}\n"
+            f"REVIEW: {review_output}"
+        )
+
+    # ---------------------------------------------------------- Deployment ADAPT
+
+    if mode.key == "10":
+        review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
+        review_user_prompt = pre_test_pipeline.build_review_prompt(implementation_output, evidence)
+        _stage(mode.label, "PROMPTS", "Loaded deployment review prompt")
+        _stage(mode.label, "LLM", "Running deployment review model")
+        review_output, review_err = ai.call(review_prompt_text, review_user_prompt, review=True)
+        if review_err:
+            review_output = review_err
+            _stage(mode.label, "LLM", "Review model failed")
+        else:
+            _stage(mode.label, "LLM", "Review model complete")
+
+        _stage(mode.label, "DONE", "Review complete")
+
+        return (
+            f"OBSERVE: {evidence}\n\n"
+            f"IMPLEMENTATION: {implementation_output}\n"
+            f"REVIEW: {review_output}"
+        )
+
+    
+    # ---------------------------------------------------------- CICD ADAPT
+    
+    if mode.key == "11":
+        review_prompt_text = prompts.read(mode.prompt_family, mode.review_prompts[0])
+        review_user_prompt = pre_test_pipeline.build_review_prompt(implementation_output, evidence)
+        _stage(mode.label, "PROMPTS", "Loaded CICD-test review prompt")
+        _stage(mode.label, "LLM", "Running CICD-test review model")
+        review_output, review_err = ai.call(review_prompt_text, review_user_prompt, review=True)
+        if review_err:
+            review_output = review_err
+            _stage(mode.label, "LLM", "Review model failed")
+        else:
+            _stage(mode.label, "LLM", "Review model complete")
+
+        _stage(mode.label, "DONE", "Review complete")
+
+        return (
+            f"OBSERVE: {evidence}\n\n"
+            f"IMPLEMENTATION: {implementation_output}\n"
+            f"REVIEW: {review_output}"
+        )
     return "Unknown mode."
