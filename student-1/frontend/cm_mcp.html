@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCP</title>
 
-    <link rel="stylesheet" href="http://localhost:8080/styles.css" />
+    <link rel="stylesheet" href="/theme.css" />
     <!-- <link rel="stylesheet" href="shared/styles.css" /> -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.12/htmx.min.js"></script>
@@ -30,7 +30,7 @@
           <!-- <button
             type="button"
             class="mcp-action"
-            hx-get="http://localhost:8201/mcp/card-count"
+            hx-get="/mcp/card-count"
             hx-target="#mcp-result"
             hx-swap="innerHTML"
           >
@@ -42,7 +42,7 @@
           <button
             type="button"
             class="mcp-action"
-            hx-get="http://localhost:8201/mcp/card-count"
+            hx-get="/mcp/card-count"
             hx-target="#mcp-result"
             hx-swap="innerHTML"
             hx-indicator="#mcp-result"
@@ -56,7 +56,7 @@
         <form
           id="mcp-card-per-user-form"
           class="feature-form mcp-action"
-          hx-post="http://localhost:8201/mcp/card-per-user"
+          hx-post="/mcp/card-per-user"
           hx-target="#mcp-result"
           hx-swap="innerHTML"
           hx-indicator="#mcp-result"

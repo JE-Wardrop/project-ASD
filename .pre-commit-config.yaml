@@ -1,107 +1,62 @@
-# Once pre commit is ready run these commands:
-# pre-commit install
-# pre-commit run --all-files
-
-
-# Run your manual tests before committing
-# .venv/bin/python -m pytest student-1/tests/pre_commit/ -v
-
+# Pre-commit security scans (Release 2, criterion 3).
+#
+#   pre-commit install            # once per clone: adds the git hook
+#   pre-commit run --all-files    # run every scan now
+#
+# Each student has three hooks. A hook runs that student's pytest file in
+# student-N/tests/pre_commit/ through scripts/pre_commit_pytest.py, so the
+# commit is blocked when Ruff (S rules), detect-secrets or pip-audit fails.
+# Hook ids contain ruff-scan / detect-secrets-scan / pip-audit-scan so the
+# agentic loop Pre-Test Review can find them.
+#
+# To add a student: copy a block below, change the number, and make sure
+# student-N/tests/pre_commit/ and student-N/pyproject.toml exist.
 
 repos:
   - repo: local
     hooks:
-    # Student 1 Hooks
+      # ---- student-1 ----
       - id: student-1-ruff-scan
-        name: Ruff Scan
-        entry: python scripts/student-1/tests/pre_commit/test_ruff_scan.py -v
+        name: student-1 Ruff Scan
+        entry: python scripts/pre_commit_pytest.py student-1/tests/pre_commit/test_ruff_scan.py -v
         language: python
         additional_dependencies: ["pytest==9.1.1", "ruff==0.16.8"]
         pass_filenames: false
         stages: [pre-commit]
-
       - id: student-1-detect-secrets-scan
-        name: detect-secrets Scan
-        entry: python scripts/student-1/tests/pre_commit/test_secrets_scan.py -v
+        name: student-1 detect-secrets Scan
+        entry: python scripts/pre_commit_pytest.py student-1/tests/pre_commit/test_secrets_scan.py -v
         language: python
         additional_dependencies: ["pytest==9.1.1", "detect-secrets==1.5.0"]
         pass_filenames: false
         stages: [pre-commit]
-
       - id: student-1-pip-audit-scan
-        name: pip-audit Scan
-        entry: python scripts/student-1/tests/pre_commit/test_dependency_audit.py -v
+        name: student-1 pip-audit Scan
+        entry: python scripts/pre_commit_pytest.py student-1/tests/pre_commit/test_dependency_audit.py -v
         language: python
         additional_dependencies: ["pytest==9.1.1", "pip-audit==2.10.1"]
         pass_filenames: false
         stages: [pre-commit]
 
-
-  # #Student-2 Hooks
-  #       - id: student-2-ruff-scan
-  #       name: Ruff Scan
-  #       entry: python scripts/lab11/pre_commit_pytest.py tests/lab11/pre_commit/test_ruff_scan.py -v
-  #       language: python
-  #       additional_dependencies: ["pytest==9.1.1", "ruff==0.16.8"]
-  #       pass_filenames: false
-  #       stages: [pre-commit]
-  #     - id: student-2-detect-secrets-scan
-  #       name: detect-secrets Scan
-  #       entry: python scripts/lab11/pre_commit_pytest.py tests/lab11/pre_commit/test_secrets_scan.py -v
-  #       language: python
-  #       additional_dependencies: ["pytest==9.1.1", "detect-secrets==1.5.0"]
-  #       pass_filenames: false
-  #       stages: [pre-commit]
-  #     - id: student-2-pip-audit-scan
-  #       name: pip-audit Scan
-  #       entry: python scripts/lab11/pre_commit_pytest.py tests/lab11/pre_commit/test_dependency_audit.py -v
-  #       language: python
-  #       additional_dependencies: ["pytest==9.1.1", "pip-audit==2.10.1"]
-  #       pass_filenames: false
-  #       stages: [pre-commit]
-
-
-  # #Student-4 Hooks
-  #       - id: student-4-ruff-scan
-  #       name: Ruff Scan
-  #       entry: python scripts/lab11/pre_commit_pytest.py tests/lab11/pre_commit/test_ruff_scan.py -v
-  #       language: python
-  #       additional_dependencies: ["pytest==9.1.1", "ruff==0.16.8"]
-  #       pass_filenames: false
-  #       stages: [pre-commit]
-  #     - id: student-4-detect-secrets-scan
-  #       name: detect-secrets Scan
-  #       entry: python scripts/lab11/pre_commit_pytest.py tests/lab11/pre_commit/test_secrets_scan.py -v
-  #       language: python
-  #       additional_dependencies: ["pytest==9.1.1", "detect-secrets==1.5.0"]
-  #       pass_filenames: false
-  #       stages: [pre-commit]
-  #     - id: student-4-pip-audit-scan
-  #       name: pip-audit Scan
-  #       entry: python scripts/lab11/pre_commit_pytest.py tests/lab11/pre_commit/test_dependency_audit.py -v
-  #       language: python
-  #       additional_dependencies: ["pytest==9.1.1", "pip-audit==2.10.1"]
-  #       pass_filenames: false
-  #       stages: [pre-commit]
-  
-  # #Student-5 Hooks
-  #       - id: student-5-ruff-scan
-  #       name: Ruff Scan
-  #       entry: python scripts/lab11/pre_commit_pytest.py tests/lab11/pre_commit/test_ruff_scan.py -v
-  #       language: python
-  #       additional_dependencies: ["pytest==9.1.1", "ruff==0.16.8"]
-  #       pass_filenames: false
-  #       stages: [pre-commit]
-  #     - id: student-5-detect-secrets-scan
-  #       name: detect-secrets Scan
-  #       entry: python scripts/lab11/pre_commit_pytest.py tests/lab11/pre_commit/test_secrets_scan.py -v
-  #       language: python
-  #       additional_dependencies: ["pytest==9.1.1", "detect-secrets==1.5.0"]
-  #       pass_filenames: false
-  #       stages: [pre-commit]
-  #     - id: student-5-pip-audit-scan
-  #       name: pip-audit Scan
-  #       entry: python scripts/lab11/pre_commit_pytest.py tests/lab11/pre_commit/test_dependency_audit.py -v
-  #       language: python
-  #       additional_dependencies: ["pytest==9.1.1", "pip-audit==2.10.1"]
-  #       pass_filenames: false
-  #       stages: [pre-commit]
+      # ---- student-5 ----
+      - id: student-5-ruff-scan
+        name: student-5 Ruff Scan
+        entry: python scripts/pre_commit_pytest.py student-5/tests/pre_commit/test_ruff_scan.py -v
+        language: python
+        additional_dependencies: ["pytest==9.1.1", "ruff==0.16.8"]
+        pass_filenames: false
+        stages: [pre-commit]
+      - id: student-5-detect-secrets-scan
+        name: student-5 detect-secrets Scan
+        entry: python scripts/pre_commit_pytest.py student-5/tests/pre_commit/test_secrets_scan.py -v
+        language: python
+        additional_dependencies: ["pytest==9.1.1", "detect-secrets==1.5.0"]
+        pass_filenames: false
+        stages: [pre-commit]
+      - id: student-5-pip-audit-scan
+        name: student-5 pip-audit Scan
+        entry: python scripts/pre_commit_pytest.py student-5/tests/pre_commit/test_dependency_audit.py -v
+        language: python
+        additional_dependencies: ["pytest==9.1.1", "pip-audit==2.10.1"]
+        pass_filenames: false
+        stages: [pre-commit]

@@ -7,7 +7,7 @@ __pycache__/
 .env
 .DS_Store
 .coverage
-.pytest_cache/\
+.pytest_cache/
 
 ai-services/rag-server/chroma/
 ai-services/rag-server/corpus/
