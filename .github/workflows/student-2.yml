@@ -45,6 +45,7 @@ jobs:
       # (:5500) and RAG (:5003) servers run on a developer's host, not here.
       MCP_ENABLED: "false"
       RAG_ENABLED: "false"
+      MULTI_AGENT_ENABLED: "false"
 
     steps:
       - uses: actions/checkout@v4
@@ -110,6 +111,31 @@ jobs:
             exit 1
           fi
           echo "PASS - RAG correctly disabled in CI"
+
+      # Release 2 post-commit endpoint tests: student-2 backend /auth/token and
+      # /auth/verify (port 8202) plus the accounts API, against the running services.
+      - name: Run post-commit endpoint tests
+        shell: bash
+        run: |
+          mkdir -p student-2/tests/reports
+          set +e
+          python -m pytest student-2/tests/post_commit -v \
+            --junitxml=student-2/tests/reports/post-commit-junit.xml \
+            | tee student-2/tests/reports/post-commit-report.md
+          status=${PIPESTATUS[0]}
+          set -e
+          printf '{"status": "%s", "timestamp": "%s", "run_id": "%s", "commit_sha": "%s"}\n' \
+            "$([ "$status" -eq 0 ] && echo PASS || echo FAIL)" \
+            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${{ github.run_id }}" "${{ github.sha }}" \
+            >> student-2/tests/reports/test-audit.jsonl
+          exit "$status"
+
+      - name: Upload post-commit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: student-2-post-commit-reports
+          path: student-2/tests/reports
 
       - name: Stop services
         if: always()

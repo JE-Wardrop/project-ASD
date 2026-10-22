@@ -43,6 +43,24 @@
             <button type="submit" class="rag-action">Run Workflow</button>
         </form>
 
+        <form id="decision-form" class="stack-form">
+            <h3>Human Review</h3>
+            <p class="rag-helper">Read the Worker and Reviewer output, then record the final decision.</p>
+            <label for="decision-id">Workflow ID</label>
+            <input id="decision-id" name="workflow_id" required placeholder="Filled in after Run Workflow">
+            <label for="decision-value">Decision</label>
+            <select id="decision-value" name="decision">
+                <option>Accept</option>
+                <option>Partially Accept</option>
+                <option>Reject</option>
+            </select>
+            <label for="decision-reason">Reason (required)</label>
+            <input id="decision-reason" name="reason" required placeholder="Why this decision?">
+            <label for="decision-correction">Correction (required for Partially Accept)</label>
+            <input id="decision-correction" name="correction" placeholder="What should change?">
+            <button type="submit" class="rag-action">Submit Decision</button>
+        </form>
+
         <form id="status-form" class="stack-form">
             <button type="submit" class="rag-action">Get Workflow Status</button>
         </form>
@@ -161,10 +179,37 @@ document.getElementById("workflow-form").addEventListener("submit", async (e) =>
 
     try {
         const user_request = workflowRequestInput.value.trim();
+        output.innerHTML = "<p>Running Planner, Worker and Reviewer... this can take a minute.</p>";
         const payload = await postJson("/multi-agent/workflow", { user_request });
         renderJson("Multi-Agent API: /multi-agent/workflow", payload);
+        if (payload.workflow_id) {
+            document.getElementById("decision-id").value = payload.workflow_id;
+        }
     } catch (error) {
         renderError("Multi-Agent API Error: /multi-agent/workflow", error);
+    }
+});
+
+document.getElementById("decision-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (!isEnabled()) {
+        renderDisabledMessage();
+        return;
+    }
+
+    const workflowId = document.getElementById("decision-id").value.trim();
+    const path = `/multi-agent/workflow/${encodeURIComponent(workflowId)}/decision`;
+    try {
+        const payload = await postJson(path, {
+            decision: document.getElementById("decision-value").value,
+            reason: document.getElementById("decision-reason").value.trim(),
+            correction: document.getElementById("decision-correction").value.trim(),
+            reviewer: "student-2",
+        });
+        renderJson(`Multi-Agent API: ${path}`, payload);
+    } catch (error) {
+        renderError(`Multi-Agent API Error: ${path}`, error);
     }
 });
 

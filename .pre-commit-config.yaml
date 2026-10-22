@@ -38,6 +38,29 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
+      # ---- student-2 ----
+      - id: student-2-ruff-scan
+        name: student-2 Ruff Scan
+        entry: python scripts/pre_commit_pytest.py student-2/tests/pre_commit/test_ruff_scan.py -v
+        language: python
+        additional_dependencies: ["pytest==9.1.1", "ruff==0.16.8"]
+        pass_filenames: false
+        stages: [pre-commit]
+      - id: student-2-detect-secrets-scan
+        name: student-2 detect-secrets Scan
+        entry: python scripts/pre_commit_pytest.py student-2/tests/pre_commit/test_secrets_scan.py -v
+        language: python
+        additional_dependencies: ["pytest==9.1.1", "detect-secrets==1.5.0"]
+        pass_filenames: false
+        stages: [pre-commit]
+      - id: student-2-pip-audit-scan
+        name: student-2 pip-audit Scan
+        entry: python scripts/pre_commit_pytest.py student-2/tests/pre_commit/test_dependency_audit.py -v
+        language: python
+        additional_dependencies: ["pytest==9.1.1", "pip-audit==2.10.1"]
+        pass_filenames: false
+        stages: [pre-commit]
+
       # ---- student-5 ----
       - id: student-5-ruff-scan
         name: student-5 Ruff Scan
