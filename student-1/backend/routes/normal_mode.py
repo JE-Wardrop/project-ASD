@@ -24,8 +24,8 @@ def health():
 def get_cards_route():
     try:
 
-        response = get_cards()
-        return format_card_html(response.json()), response.status_code
+        # get_cards() already raises on HTTP errors and returns the parsed list
+        return format_cards_html(get_cards()), 200
     
     except requests.RequestException as exc:
         return (
