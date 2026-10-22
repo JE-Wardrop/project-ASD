@@ -4,6 +4,7 @@ from flask import Flask
 from flask_cors import CORS
 from routes.ai_mode import ai_mode_bp
 from routes.mcp_mode import mcp_mode_bp
+from routes.multi_agent_mode import multi_agent_mode_bp
 from routes.normal_ui import bp as normal_ui_bp
 from routes.rag_mode import rag_mode_bp
 from services import database_api as db
@@ -16,11 +17,12 @@ def create_app():
     app.register_blueprint(ai_mode_bp)
     app.register_blueprint(mcp_mode_bp)
     app.register_blueprint(rag_mode_bp)
+    app.register_blueprint(multi_agent_mode_bp)
     @app.get("/health")
     def health():
         try:
             db_ok = db.health().status_code == 200
-        except Exception:
+        except Exception:  # noqa: BLE001 - any failure means the DB is unreachable
             db_ok = False
         return ({"status": "ok" if db_ok else "degraded",
                  "service": SERVICE_NAME,
@@ -36,4 +38,4 @@ def create_app():
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8000)), debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "8000")), debug=True)

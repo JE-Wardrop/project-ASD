@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="http://localhost:8080/styles.css" />
+    <link rel="stylesheet" href="/theme.css" />
     <link rel="stylesheet" href="../css/styles.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.12/htmx.min.js"></script>
   </head>
@@ -12,7 +12,7 @@
       <p class="muted">Tool: <code>transactions_list</code></p>
       <form
         class="filter-bar"
-        hx-get="http://localhost:8205/mcp/transactions"
+        hx-get="/mcp/transactions"
         hx-target="#mcp-list-output"
         hx-swap="innerHTML"
         hx-indicator="#mcp-list-spinner"
@@ -86,7 +86,7 @@
       function mcpGetTransaction(event) {
         event.preventDefault();
         var id = document.getElementById("mcp-txn-id").value;
-        htmx.ajax("GET", "http://localhost:8205/mcp/transactions/" + id, {
+        htmx.ajax("GET", "/mcp/transactions/" + id, {
           target: "#mcp-detail-output",
           swap: "innerHTML",
         });
@@ -98,7 +98,7 @@
         var id = document.getElementById("mcp-summary-account-id").value;
         htmx.ajax(
           "GET",
-          "http://localhost:8205/mcp/accounts/" + id + "/summary",
+          "/mcp/accounts/" + id + "/summary",
           { target: "#mcp-summary-output", swap: "innerHTML" }
         );
         return false;

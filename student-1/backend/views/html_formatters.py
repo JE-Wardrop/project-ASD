@@ -5,7 +5,8 @@ def format_cards_html(cards):
     html = "<ul>"
     for card in cards:
         html += (
-            f"<li>#{card['card_id']} - {card['card_name']} - "
+            f"<li>#{card['card_id']} - {card['card_number']} - "
+            f"{card['card_type']} - {card['status']} (user {card['user_id']})</li>"
         )
     html += "</ul>"
     return html

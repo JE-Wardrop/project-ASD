@@ -7,6 +7,7 @@ read-only; account changes stay in the Normal UI.
 import os
 
 from flask import Blueprint, jsonify, request
+
 from services.mcp_client import call_mcp_tool
 
 mcp_mode_bp = Blueprint("mcp_mode", __name__)

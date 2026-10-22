@@ -126,7 +126,7 @@ def explain_transaction(txn_id):
             _format_transaction(transaction),
             max_tokens=300
         )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - show any LLM failure to the user
         return _alert(f"AI explanation failed: {e!s}", "error"), 500
     return _panel(answer), 200
 
@@ -160,7 +160,7 @@ def analyse_transactions():
             _summarise(transactions, account_id),
             max_tokens=400,
         )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - show any LLM failure to the user
         return _alert(f"AI-Mode is not available. Check Ollama is running. ({exc})"), 503
 
     return _panel(answer), 200  

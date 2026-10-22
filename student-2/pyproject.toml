@@ -1,0 +1,17 @@
+[tool.ruff]
+# Lab 11: never lint the local virtual environment
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+# Lab 11: static code security scan - only flag flake8-bandit (S) security rules
+select = ["S"]
+
+# Security Exclusions & Justifications --------
+# S101: pytest requires `assert` - not a real security finding in test files.
+# S603: the pre-commit scans call fixed tool commands (ruff, detect-secrets, pip-audit)
+#       through subprocess with sys.executable, never untrusted input.
+# S104 is NOT ignored globally: each 0.0.0.0 bind carries its own `# noqa: S104` comment.
+# -------------------------------------------------
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S603"]

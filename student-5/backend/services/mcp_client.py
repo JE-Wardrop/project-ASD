@@ -10,25 +10,27 @@ MCP_SERVER_URL = os.getenv("MCP_SERVER_URL", "http://host.docker.internal:5500/m
 
 
 async def _call_tool(name: str, arguments: dict) -> dict:
-    async with streamable_http_client(MCP_SERVER_URL) as (read, write, _get_session_id):
-        async with ClientSession(read, write) as session:
-            await session.initialize()  # required handshake before any call_tool()
-            result = await session.call_tool(name, arguments)
+    async with (
+        streamable_http_client(MCP_SERVER_URL) as (read, write, _get_session_id),
+        ClientSession(read, write) as session,
+    ):
+        await session.initialize()  # required handshake before any call_tool()
+        result = await session.call_tool(name, arguments)
 
-            if result.isError:
-                text = " ".join(c.text for c in result.content if hasattr(c, "text"))
-                return {"error": text or "MCP tool call failed"}
+        if result.isError:
+            text = " ".join(c.text for c in result.content if hasattr(c, "text"))
+            return {"error": text or "MCP tool call failed"}
 
-            if result.structuredContent is not None:
-                return result.structuredContent
-            return {"result": [c.text for c in result.content if hasattr(c, "text")]}
+        if result.structuredContent is not None:
+            return result.structuredContent
+        return {"result": [c.text for c in result.content if hasattr(c, "text")]}
 
 
 def call_mcp_tool(name: str, arguments: dict | None = None) -> dict:
     """Synchronous entry point for Flask routes."""
     try:
         return asyncio.run(_call_tool(name, arguments or {}))
-    except BaseException as exc:
+    except BaseException as exc:  # noqa: BLE001 - anyio raises BaseExceptionGroup
         import traceback
         print(f"[mcp_client] Top-level exception calling '{name}': {type(exc).__name__}: {exc}")
         sub = getattr(exc, "exceptions", None)
