@@ -1,11 +1,10 @@
-from flask import Flask, render_template, request, jsonify
 import os
 from pathlib import Path
-from dotenv import load_dotenv
-from openai import OpenAI
-from flask_cors import CORS
-import requests
 
+import requests
+from flask import Flask, jsonify, render_template, request
+from flask_cors import CORS
+from openai import OpenAI
 
 app = Flask(__name__, template_folder="../frontend/templates")
 CORS(app)

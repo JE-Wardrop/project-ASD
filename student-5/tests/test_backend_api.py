@@ -9,6 +9,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+
 # monkeypatch.setattr(1,2,3)
 # 1. The module or object to patch.
 # 2. The attribute/function name to patch.
@@ -249,7 +250,7 @@ def test_transfer_fails_when_debit_fails(client, services, monkeypatch, FakeResp
 
 def test_transfer_rolls_back_when_credit_fails(client, services, monkeypatch, FakeResp):
     adjust = MagicMock(side_effect=[True, False, True])    # debit ok, credit fails, rollback
-    update, notify = _wire_transfer(services, monkeypatch, FakeResp, adjust)
+    update, _notify = _wire_transfer(services, monkeypatch, FakeResp, adjust)
 
     resp = client.post("/transactions/transfer",
                        json={"sender_account_id": 1, "receiver_account_id": 2, "amount": 100})

@@ -82,5 +82,17 @@ def run_workflow(user_request: str) -> dict:
     )
 
 
+def record_decision(workflow_id: str, decision: str, reason: str,
+                    correction: str = "", reviewer: str = "") -> dict:
+    # Human Review: the final Accept / Partially Accept / Reject call, stored once
+    # in the server's workflow_history.jsonl and coordination_audit.jsonl.
+    return _request(
+        "POST",
+        f"/workflow/{workflow_id}/decision",
+        json={"decision": decision, "reason": reason,
+              "correction": correction, "reviewer": reviewer},
+    )
+
+
 def workflow_status() -> dict:
     return _request("GET", "/workflow/status", params={"feature": FEATURE})

@@ -11,8 +11,8 @@ Observed Evidence:
 Validate that:
 1. Planner, Worker, and Reviewer agents are each implemented with their required entry function
 2. The Coordinator wires all three agents into a single workflow
-3. The Multi-Agent API and the feature backend route are present for UI integration
-4. The latest workflow used real feature evidence and has a human decision
+3. The feature's backend Multi-Agent route is present for UI integration
+4. Workflows have run with Worker database evidence and received a Human Review decision
 
 Reply in at most 40 words and stay evidence-based.
 """.strip()

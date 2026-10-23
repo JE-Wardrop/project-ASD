@@ -17,9 +17,9 @@ on:
         default: "student-1 student-2 student-4 student-5"
 
 permissions:
-  id-token: write   # Azure login with OIDC
+  id-token: write # Azure login with OIDC
   contents: read
-  actions: read     # read the student workflow results in the CI gate
+  actions: read # read the student workflow results in the CI gate
 
 env:
   RESOURCE_GROUP: clouddeployment-rg

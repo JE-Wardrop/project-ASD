@@ -1,4 +1,5 @@
 import os
+
 import requests
 
 ACCOUNTS_URL = os.environ.get("ACCOUNTS_URL", "http://localhost:8302")

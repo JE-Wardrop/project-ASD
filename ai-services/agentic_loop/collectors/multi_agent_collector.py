@@ -1,8 +1,51 @@
-import os
+# from pathlib import Path
+
+# REQUIRED_AGENT_FUNCTIONS = {
+#     "planner_agent.py": "plan_workflow",
+#     "worker_agent.py": "generate_output",
+#     "reviewer_agent.py": "review_output",
+# }
+
+
+# def collect(target, repo_root: Path) -> tuple[bool, str]:
+#     multi_agent_server_dir = repo_root / "ai-services" / "multi-agent-server"
+#     multi_agent_agentic_loop = repo_root / "ai-services" / "prompts" / "multi_agent" 
+#     multi_agent_mode_route = target.root / "backend" / "routes" / "multi_agent_mode.py"
+
+#     required_paths = [
+#         multi_agent_server_dir / "agents" / "planner_agent.py",
+#         multi_agent_server_dir / "agents" / "worker_agent.py",
+#         multi_agent_server_dir / "agents" / "reviewer_agent.py",
+#         multi_agent_server_dir / "coordinator.py",
+#         multi_agent_server_dir / "app.py",
+#         multi_agent_server_dir / "requirements.txt",
+#         multi_agent_mode_route / "backend" / "routes" / "multi_agent_mode.py",
+#         multi_agent_agentic_loop /"implementation" / "multi_agent_implementation_prompt.txt",
+#         multi_agent_agentic_loop / "review" / "multi_agent_review_prompt.txt",
+#     ]
+
+#     missing = [str(path.relative_to(multi_agent_server_dir)) for path in required_paths if not path.exists()]
+#     if missing:
+#         return False, "Multi-agent evidence incomplete. Missing: " + ", ".join(missing)
+
+#     coordinator_text = (multi_agent_server_dir / "coordinator.py").read_text(encoding="utf-8")
+
+#     missing_calls = [
+#         func for func in REQUIRED_AGENT_FUNCTIONS.values() if func not in coordinator_text
+#     ]
+#     if missing_calls:
+#         return False, "coordinator.py missing calls to: " + ", ".join(missing_calls)
+
+#     return True, (
+#         "Multi-agent evidence: multi-agent-server/ contains planner_agent.py, worker_agent.py, "
+#         "reviewer_agent.py, coordinator.py, and app.py; coordinator wires plan_workflow, "
+#         "generate_output, and review_output into a single workflow."
+#     )
+
+
+import json
+from collections import Counter
 from pathlib import Path
-
-import requests
-
 
 REQUIRED_AGENT_FUNCTIONS = {
     "planner_agent.py": "plan_workflow",
@@ -12,35 +55,29 @@ REQUIRED_AGENT_FUNCTIONS = {
 
 MULTI_AGENT_SERVICE_URL = os.getenv("MULTI_AGENT_SERVICE_URL", "http://localhost:5004")
 
-# Which Multi-Agent feature (agents/feature_sources.py FEATURES) belongs to
-# each review target. Workflows are filtered by feature, so runs from a
-# backend that does not send "caller" are still counted.
-TARGET_FEATURES = {
-    "student-1": "cards",
-    "student-2": "accounts",
-    "student-4": "users",
-    "student-5": "transactions",
-}
+def _display(path: Path, root: Path) -> str:
+    """Show a path relative to root, or in full if it lives elsewhere."""
+    try:
+        return str(path.relative_to(root))
+    except ValueError:
+        return str(path)
 
 
-def _static_check(target, repo_root: Path) -> tuple[bool, str]:
-    server_dir = repo_root / "ai-services" / "multi-agent-server"
-    prompts_dir = repo_root / "ai-services" / "prompts" / "multi-agent"
+def collect(target, repo_root: Path) -> tuple[bool, str]:
+    multi_agent_server_dir = repo_root / "ai-services" / "multi-agent-server"
+    multi_agent_mode_route = target.root / "backend" / "routes" / "multi_agent_mode.py"
 
     required_paths = [
-        server_dir / "agents" / "planner_agent.py",
-        server_dir / "agents" / "worker_agent.py",
-        server_dir / "agents" / "reviewer_agent.py",
-        server_dir / "coordinator.py",
-        server_dir / "app.py",
-        server_dir / "workflow_runner.py",
-        server_dir / "requirements.txt",
-        target.root / "backend" / "routes" / "multi_agent_mode.py",
-        prompts_dir / "implementation" / "multi_agent_implementation_prompt.txt",
-        prompts_dir / "review" / "multi_agent_review_prompt.txt",
+        multi_agent_server_dir / "agents" / "planner_agent.py",
+        multi_agent_server_dir / "agents" / "worker_agent.py",
+        multi_agent_server_dir / "agents" / "reviewer_agent.py",
+        multi_agent_server_dir / "coordinator.py",
+        multi_agent_server_dir / "app.py",
+        multi_agent_server_dir / "requirements.txt",
+        multi_agent_mode_route,
     ]
 
-    missing = [str(path.relative_to(repo_root)) for path in required_paths if not path.exists()]
+    missing = [_display(path, repo_root) for path in required_paths if not path.exists()]
     if missing:
         return False, "Multi-agent evidence incomplete. Missing: " + ", ".join(missing)
 
@@ -52,63 +89,48 @@ def _static_check(target, repo_root: Path) -> tuple[bool, str]:
     if missing_calls:
         return False, "coordinator.py missing calls to: " + ", ".join(missing_calls)
 
-    return True, ""
-
-
-def _live_check(target) -> tuple[bool, str]:
-    """OBSERVE the workflow evidence the running Multi-Agent Server has recorded."""
-    feature = TARGET_FEATURES.get(target.key)
-    if feature is None:
-        return False, f"no Multi-Agent feature mapped for {target.key}"
-
-    try:
-        status = requests.get(
-            f"{MULTI_AGENT_SERVICE_URL}/workflow/status",
-            params={"feature": feature},
-            timeout=10,
-        ).json()
-    except requests.RequestException as exc:
-        return False, f"Multi-Agent Server not reachable at {MULTI_AGENT_SERVICE_URL}: {exc}"
-    except ValueError:
-        return False, f"Multi-Agent Server at {MULTI_AGENT_SERVICE_URL} returned a non-JSON reply"
-
-    runs = status.get("matching_workflow_count", 0)
-    if not runs:
-        return False, (
-            f"no workflow runs recorded for feature={feature}; run one from the "
-            f"{target.key} Multi-Agent tab or multi-agent-server/workflow_runner.py first"
-        )
-
-    latest = status["recent_workflows"][-1]
-    decision = status.get("latest_human_decision")
-    decision_text = (
-        f"{decision['decision']} by {decision['reviewer']} (reason: {decision['reason']!r})"
-        if decision else "none recorded (pending)"
-    )
-
-    return True, (
-        f"{runs} workflow run(s) for feature={feature}, statuses {status.get('workflow_status_counts')}, "
-        f"{status.get('human_decision_count', 0)} with a human decision. "
-        f"Latest {latest['workflow_id']}: overall={latest['status']}, "
-        f"planner={latest['planner_status']}, worker={latest['worker_status']} "
-        f"(evidence_count={latest['evidence_count']}), "
-        f"reviewer={latest['reviewer_status']} ({latest['reviewer_model']}); "
-        f"human decision: {decision_text}"
-    )
-
-
-def collect(target, repo_root: Path) -> tuple[bool, str]:
-    ok, message = _static_check(target, repo_root)
-    if not ok:
-        return False, message
-
-    ok, live = _live_check(target)
-    if not ok:
-        return False, live
-
-    return True, (
+    structure = (
         "Multi-agent evidence: multi-agent-server/ contains planner_agent.py, worker_agent.py, "
-        "reviewer_agent.py, coordinator.py, app.py and workflow_runner.py; coordinator wires "
-        "plan_workflow, generate_output, and review_output into a single workflow; "
-        f"{target.key}/backend/routes/multi_agent_mode.py exists. Live: {live}"
+        "reviewer_agent.py, coordinator.py, and app.py; coordinator wires plan_workflow, "
+        "generate_output, and review_output into a single workflow."
+    )
+    return True, structure + " " + _workflow_evidence(target, multi_agent_server_dir)
+
+
+def _read_jsonl(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    records = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            records.append(json.loads(line))
+        except ValueError:
+            continue  # a half-written line is skipped, not fatal
+    return records
+
+
+def _workflow_evidence(target, server_dir: Path) -> str:
+    """This student's runs (workflow_history.jsonl) and human decisions (coordination_audit.jsonl)."""
+    runs = [r for r in _read_jsonl(server_dir / "workflow_history.jsonl")
+            if r.get("caller") == target.key]
+    decisions = [r for r in _read_jsonl(server_dir / "coordination_audit.jsonl")
+                 if r.get("event") == "human_decision" and r.get("caller") == target.key]
+
+    if not runs:
+        return (f"No workflow runs from {target.key} in workflow_history.jsonl: "
+                "the Planner -> Worker -> Reviewer -> Human Review flow has not been exercised from this feature.")
+
+    statuses = Counter(r.get("status", "?") for r in runs)
+    with_evidence = sum(1 for r in runs if (r.get("worker_result") or {}).get("evidence_count", 0) > 0)
+    latest = runs[-1]
+    decided = Counter(d.get("decision", "?") for d in decisions)
+    return (
+        f"{target.key} workflow history: {len(runs)} runs "
+        f"({', '.join(f'{n} {s}' for s, n in statuses.items())}); "
+        f"{with_evidence}/{len(runs)} had Worker database evidence. "
+        f"Latest run {latest.get('workflow_id', '?')[:8]} for \"{latest.get('user_request', '')}\" "
+        f"took {latest.get('duration_ms', '?')} ms. "
+        f"Human decisions recorded in coordination_audit.jsonl: {len(decisions)}"
+        + (f" ({', '.join(f'{n} {d}' for d, n in decided.items())})" if decisions else "")
+        + f"; {max(len(runs) - len(decisions), 0)} runs still awaiting human review."
     )

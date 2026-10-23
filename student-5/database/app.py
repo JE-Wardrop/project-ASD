@@ -1,7 +1,7 @@
 import os
-import sqlite3  
-from flask import Flask, request, jsonify
+import sqlite3
 
+from flask import Flask, jsonify, request
 
 # .../student-5/database
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -66,7 +66,7 @@ def health():
         count = con.execute("SELECT COUNT(*) FROM transactions").fetchone()[0]
         con.close()
         return {"status": "ok", "service": SERVICE_NAME, "records": count}, 200
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - health check reports any failure
         return {"status": "error", "service": SERVICE_NAME, "detail": str(exc)}, 500
 
 # READ
@@ -214,9 +214,10 @@ def update_transaction(txn_id):
 
     params.append(txn_id)
     con.execute(
-        f"UPDATE transactions SET {', '.join(fields)} WHERE transaction_id = ?",
+        # Column names come only from the two fixed strings above; every value is a ? parameter.
+        f"UPDATE transactions SET {', '.join(fields)} WHERE transaction_id = ?",  # noqa: S608
         params,
-    )
+    ) 
     con.commit()
     row = con.execute(
         "SELECT * FROM transactions WHERE transaction_id = ?", (txn_id,)
@@ -268,4 +269,6 @@ if __name__ == "__main__":
     init_db()
     # Port 8000 is the team's shared convention: EVERY container listens
     # on 8000 inside the network. This container is mapped to host port 8305.
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8000)), debug=True) 
+        # Debug mode exposes the Werkzeug debugger, so it is off unless FLASK_DEBUG=true.
+    debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8000)), debug=debug_mode)

@@ -7,10 +7,7 @@ Choose whose microservices to review with an environment variable:
 If it is not set, the loop asks at startup.
 """
 
-import os
 from pathlib import Path
-
-from dotenv import load_dotenv
 
 from config.review_config import build_mode_config
 from config.targets import available_targets, resolve_target
@@ -18,7 +15,7 @@ from core.ai_runner import AIRunner
 from core.orchestrator import run_mode
 from core.prompt_registry import PromptRegistry
 from core.reporter import print_menu, print_prompt_map, print_result, save_log
-
+from dotenv import load_dotenv
 
 MENU = {
     "1": "db",
@@ -28,6 +25,9 @@ MENU = {
     "5": "mcp",
     "6": "rag",
     "8": "multi_agent",
+    "9": "pre_test",
+    "10": "deployment",
+    "11": "cicd",
 }
 
 # Option 7 runs the Release 0/1 modes together, as it did before Multi-Agent was added.
@@ -63,7 +63,10 @@ def _print_mode_mapping(app_dir: Path) -> None:
         "DevOps":       str(app_dir / "prompts" / "devops" / "implementation" / "devops_task_prompt.txt"),
         "MCP":          str(app_dir / "prompts" / "mcp" / "review" / "tool_review_prompt.txt"),
         "RAG":          str(app_dir / "prompts" / "rag" / "review" / "integration_review_prompt.txt"),
-        "Multi-Agent":  str(app_dir / "prompts" / "multi-agent" / "implementation" / "multi_agent_implementation_prompt.txt"),
+        "Multi-Agent":  str(app_dir / "prompts" / "multi-agent" / "review" / "multi_agent_review_prompt.txt"),
+        "Pre-test":     str(app_dir / "prompts" / "pre_test" / "review" / "pre_test_implementation.txt"),
+        "Deployment":   str(app_dir / "prompts" / "deployment" / "review" / "deployment_review.txt"),
+        "CICD":         str(app_dir / "prompts" / "cicd" / "review" / "cicd_implementation_prompt.txt"),
     })
 
 
@@ -103,15 +106,11 @@ def main() -> None:
 
         keys = RUN_ALL if choice == "7" else [MENU.get(choice)]
         if keys == [None]:
-            print("Invalid choice. Select 0 to 8.")
+            print("Invalid choice. Select 0 to 11.")
             continue
 
         for key in keys:
             print()
-
-            #error here with the mcp (and im guessing rag as well) key
-            # i dont really get where this error is coming from
-
             result = run_mode(mode_config[key], target, repo_root, prompts, ai)
             print_result(mode_config[key].label, result)
             transcript.append((mode_config[key].label, result))

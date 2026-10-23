@@ -9,7 +9,6 @@ from unittest.mock import MagicMock
 
 import pytest
 import requests
-
 from routes import normal_ui as nu
 from services import accounts_api as acc
 

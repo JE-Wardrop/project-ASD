@@ -1,0 +1,12 @@
+# Ruff configuration for student-5's pre-commit security scan.
+# Run from student-5/ by tests/pre_commit/test_ruff_scan.py.
+
+[tool.ruff.lint]
+# Security scan only: flake8-bandit (S) rules, not style rules.
+select = ["S"]
+# S104: containers must bind 0.0.0.0, otherwise Docker/Azure cannot reach the service.
+ignore = ["S104"]
+
+[tool.ruff.lint.per-file-ignores]
+# S101: pytest needs assert. S603: the scan tests run fixed tool commands, not user input.
+"tests/**" = ["S101", "S603"]

@@ -1,0 +1,14 @@
+[tool.ruff]
+select = ["S"]
+
+# Security Exclusions & Justifications --------
+# S101: assertion needed in post_commit testing.
+# S603: Causing issues with post_commit testing and api calls.
+# S104: Didn't allow to bind onto the correct port for any kind of local hosting or deployment with docker.
+# -------------------------------------------------
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S603"]
+
+[tool.ruff.lint]
+ignore = ["S104"]

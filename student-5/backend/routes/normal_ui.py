@@ -1,10 +1,9 @@
-from flask import Blueprint, request, jsonify
-
-from services import database_api as db
+from flask import Blueprint, jsonify, request
 from services import accounts_api as accounts
+from services import database_api as db
 from services import notifications_api as notify
-
 from views import html_formatters as fmt
+
 bp = Blueprint("normal_ui", __name__)
 
 def payload():

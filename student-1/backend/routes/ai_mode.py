@@ -1,12 +1,6 @@
 from flask import Blueprint, request
 
-
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import requests
-
 # from services.llm_client import OLLAMA_MODEL, create_chat_completion, call_architecture_agent
-
 from services.llm_client import OLLAMA_MODEL, create_chat_completion
 from services.prompt_loader import load_prompt
 

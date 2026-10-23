@@ -1,20 +1,14 @@
-from urllib import response
-
-from flask import Blueprint, jsonify, request
-import requests 
-from flask_cors import CORS
-import random
-
-
+import requests
+from flask import Blueprint, request
 from services.database_api import (
     create_card_response,
     delete_card_response,
-    get_cards,
-    update_card_response,
-    get_card_by_id_response,
-    get_cards_by_type_response,
     freeze_card_response,
+    get_card_by_id_response,
+    get_cards,
+    get_cards_by_type_response,
     unfreeze_card_response,
+    update_card_response,
 )
 from views.html_formatters import format_card_html, format_cards_html
 
@@ -30,8 +24,8 @@ def health():
 def get_cards_route():
     try:
 
-        response = get_cards()
-        return format_card_html(response.json()), response.status_code
+        # get_cards() already raises on HTTP errors and returns the parsed list
+        return format_cards_html(get_cards()), 200
     
     except requests.RequestException as exc:
         return (

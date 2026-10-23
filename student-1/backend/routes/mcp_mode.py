@@ -1,8 +1,7 @@
 import json
-from flask import Blueprint, jsonify, request
 
+from flask import Blueprint, request
 from services.mcp_client import call_mcp_tool
-from services.database_api import get_cards
 
 mcp_mode_bp = Blueprint("mcp_mode", __name__)
 

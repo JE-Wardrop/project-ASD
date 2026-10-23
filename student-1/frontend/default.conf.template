@@ -1,0 +1,27 @@
+# Same-origin proxy: the browser only talks to this frontend, and nginx
+# forwards API paths to the student-1 backend. BACKEND_URL is filled in when the
+# container starts (the nginx image runs envsubst on /etc/nginx/templates/*):
+#   local (Compose): the ENV default in this folder's Dockerfile
+#   cloud (Azure):   https://<backend internal FQDN>, set by scripts/clouddeployment/deploy-azure.sh
+server {
+    listen 80;
+
+    # API routes proxied to the student-1 backend
+    location ~ ^/(cards|ask|ask-with-context|pattern-selection|architecture-review|adr-review|students|auth|mcp|rag|multi-agent)(/|$) {
+        proxy_pass ${BACKEND_URL};
+        proxy_ssl_server_name on;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # A multi-agent workflow can take several minutes (Ollama on CPU).
+        proxy_read_timeout 900s;
+    }
+
+    # Everything else is a static file (pages, tabs, css, js)
+    location / {
+        root /usr/share/nginx/html;
+        index index.html;
+        try_files $uri $uri/ /index.html;
+    }
+}

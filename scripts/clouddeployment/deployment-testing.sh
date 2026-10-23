@@ -18,7 +18,7 @@ REPORT_FILE="$REPORT_DIR/deployment-results.md"
 # One read-only API path per student, served by that student's backend.
 api_path() {
     case "$1" in
-        student-1) echo "/cards" ;;
+        student-1) echo "/cards/by-id?card_id=1" ;;
         student-2) echo "/accounts" ;;
         student-4) echo "/users" ;;
         student-5) echo "/transactions?limit=5" ;;
