@@ -108,16 +108,6 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
             system_prompt = IMPLEMENT_THEN_REVIEW[mode.key][1]
             review_prompt_texts = [prompts.read(mode.prompt_family, p) for p in mode.review_prompts]
 
-        # Multi-Agent Plan code -------------------------------
-
-        elif mode.key == "multi_agent":
-            _stage(mode.label, "PROMPTS", f"Loading prompt family: {mode.prompt_family}")
-            task_prompt = prompts.read(mode.prompt_family, mode.implementation_prompts[0])
-            system_prompt = (
-                "You are a precise multi-agent workflow validator. "
-                "Use only supplied evidence and reply in at most 40 words."
-            )
-
         # Code for other loops ----------------------------------------
 
         else:
@@ -151,18 +141,6 @@ def run_mode(mode: ModeConfig, target, repo_root: Path,
             _stage(mode.label, "LLM", "Failed")
             return f"MODEL FAILED: {err}"
         _stage(mode.label, "LLM", f"{mode.label} implementation model complete")
-
-        # ----------------------------------------------------- Multi-Agent ACT
-    if mode.key == "multi_agent":
-        implementation_user_prompt = multi_agent_pipeline.build_implementation_prompt(task_prompt, evidence)
-        _stage(mode.label, "PROMPTS", "Loaded multi-agent implementation prompt")
-
-        _stage(mode.label, "LLM", "Running multi-agent implementation model")
-        implementation_output, err = ai.call(system_prompt, implementation_user_prompt, review=False)
-        if err:
-            _stage(mode.label, "LLM", "Failed")
-            return f"MODEL FAILED: {err}"
-        _stage(mode.label, "LLM", "Multi-agent implementation model complete")
 
     # ------------------------------------------------------------ OBSERVE
     _stage(mode.label, "OBSERVE", evidence)

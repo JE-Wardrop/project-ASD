@@ -53,7 +53,6 @@ REQUIRED_AGENT_FUNCTIONS = {
     "reviewer_agent.py": "review_output",
 }
 
-MULTI_AGENT_SERVICE_URL = os.getenv("MULTI_AGENT_SERVICE_URL", "http://localhost:5004")
 
 def _display(path: Path, root: Path) -> str:
     """Show a path relative to root, or in full if it lives elsewhere."""
@@ -81,7 +80,7 @@ def collect(target, repo_root: Path) -> tuple[bool, str]:
     if missing:
         return False, "Multi-agent evidence incomplete. Missing: " + ", ".join(missing)
 
-    coordinator_text = (server_dir / "coordinator.py").read_text(encoding="utf-8")
+    coordinator_text = (multi_agent_server_dir / "coordinator.py").read_text(encoding="utf-8")
 
     missing_calls = [
         func for func in REQUIRED_AGENT_FUNCTIONS.values() if func not in coordinator_text

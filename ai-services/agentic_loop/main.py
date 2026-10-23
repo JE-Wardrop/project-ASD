@@ -30,9 +30,6 @@ MENU = {
     "11": "cicd",
 }
 
-# Option 7 runs the Release 0/1 modes together, as it did before Multi-Agent was added.
-RUN_ALL = ["db", "endpoints", "architecture", "devops", "mcp", "rag"]
-
 
 def _resolve_roots() -> tuple[Path, Path]:
     module_dir = Path(__file__).resolve().parent    # ai-services/agentic_loop
@@ -104,7 +101,7 @@ def main() -> None:
             print("Loop closed.")
             break
 
-        keys = RUN_ALL if choice == "7" else [MENU.get(choice)]
+        keys = list(MENU.values()) if choice == "7" else [MENU.get(choice)]
         if keys == [None]:
             print("Invalid choice. Select 0 to 11.")
             continue

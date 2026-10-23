@@ -15,25 +15,10 @@ class AIRunner:
         self.base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
         self.implementation_model = os.getenv("OLLAMA_MODEL", "qwen2.5:0.5b")
         self.review_model = os.getenv("OLLAMA_REVIEW_MODEL", "llama3.1:8b")
-        # Used when the review model cannot run (e.g. llama3.1:8b out of memory),
-        # same rule as multi-agent-server/agents/reviewer_agent.py.
-        self.review_fallback_model = os.getenv("OLLAMA_REVIEW_FALLBACK_MODEL", self.implementation_model)
         self.client = OpenAI(base_url=self.base_url, api_key="ollama", timeout=180.0)
 
     def call(self, system_prompt: str, user_prompt: str, *, review: bool = False, max_tokens: int = 180) -> tuple[str | None, str | None]:
-        if not review:
-            return self._call(self.implementation_model, system_prompt, user_prompt, max_tokens)
-
-        output, err = self._call(self.review_model, system_prompt, user_prompt, max_tokens)
-        if err is None or self.review_fallback_model == self.review_model:
-            return output, err
-
-        output, fallback_err = self._call(self.review_fallback_model, system_prompt, user_prompt, max_tokens)
-        if fallback_err:
-            return None, f"{err}; fallback also failed: {fallback_err}"
-        return f"[reviewed by {self.review_fallback_model}: {self.review_model} unavailable] {output}", None
-
-    def _call(self, model_name: str, system_prompt: str, user_prompt: str, max_tokens: int) -> tuple[str | None, str | None]:
+        model_name = self.review_model if review else self.implementation_model
         try:
             response = self.client.chat.completions.create(
                 model=model_name,
